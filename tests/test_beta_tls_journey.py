@@ -5,6 +5,7 @@ import socket
 import ssl
 import urllib.request
 import sqlite3
+from contextlib import closing
 import tempfile
 import threading
 import time
@@ -133,7 +134,7 @@ class BetaTLSJourney(unittest.TestCase):
              "available": "1.1", "repository": "core"}], "error": None}
         result = send_report(self.identity, token, report, **args)
         self.assertEqual(result["status"], "recorded")
-        with sqlite3.connect(self.db) as db:
+        with closing(sqlite3.connect(self.db)) as db:
             row = db.execute(
                 "SELECT count, packages_json FROM scan_reports WHERE agent_id = ?",
                 (self.identity["agent_id"],)).fetchone()
