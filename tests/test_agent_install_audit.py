@@ -107,6 +107,60 @@ class AgentInstallAuditTests(unittest.TestCase):
         (cache / "config.cpython-314.pyc").write_bytes(b"test bytecode")
         self.assertTrue(self._source_integrity_ok())
 
+    def _install_full_test_root(self):
+        import os
+        import subprocess
+        shell = ROOT / "installer/install-agent.sh"
+        # Use existing isolated shell installer to exercise CA and unit creation.
+        # The script owns and removes its temporary root; for file-level tests
+        # create only the audited files inside this test's disposable root.
+        self._installed_release()
+        state = self.root / "var/lib/arby-patch-agent"
+        config_dir = self.root / "etc/arby-patch-agent"
+        config_dir.mkdir(parents=True, exist_ok=True)
+        (config_dir / "config.json").write_text('{"server":"https://example.test"}')
+        (config_dir / "ca.crt").write_text("-----BEGIN CERTIFICATE-----\\nTEST\\n")
+        units_dir = self.root / "etc/systemd/system"
+        units_dir.mkdir(parents=True, exist_ok=True)
+        for name in ("arby-patch-agent.service", "arby-patch-agent.timer"):
+            (units_dir / name).write_text("[Unit]\\nDescription=Test\\n")
+            (units_dir / name).chmod(0o644)
+        return config_dir, units_dir
+
+    def test_symlinked_config_rejected(self):
+        config_dir, _ = self._install_full_test_root()
+        config = config_dir / "config.json"
+        original = self.root / "config-copy.json"
+        original.write_bytes(config.read_bytes())
+        config.unlink()
+        config.symlink_to(original)
+        checks = {item["name"]: item["ok"] for item in audit.audit(self.root, PACKAGE)["checks"]}
+        self.assertFalse(checks["agent_config"])
+
+    def test_hardlinked_ca_rejected(self):
+        import os
+        config_dir, _ = self._install_full_test_root()
+        os.link(config_dir / "ca.crt", self.root / "ca-hardlink.crt")
+        checks = {item["name"]: item["ok"] for item in audit.audit(self.root, PACKAGE)["checks"]}
+        self.assertFalse(checks["trusted_ca"])
+
+    def test_symlinked_systemd_unit_rejected(self):
+        _, units = self._install_full_test_root()
+        service = units / "arby-patch-agent.service"
+        original = self.root / "service-copy"
+        original.write_bytes(service.read_bytes())
+        service.unlink()
+        service.symlink_to(original)
+        checks = {item["name"]: item["ok"] for item in audit.audit(self.root, PACKAGE)["checks"]}
+        self.assertFalse(checks["arby-patch-agent.service"])
+
+    def test_hardlinked_systemd_unit_rejected(self):
+        import os
+        _, units = self._install_full_test_root()
+        os.link(units / "arby-patch-agent.timer", self.root / "timer-hardlink")
+        checks = {item["name"]: item["ok"] for item in audit.audit(self.root, PACKAGE)["checks"]}
+        self.assertFalse(checks["arby-patch-agent.timer"])
+
     def test_cli_failure_json(self):
         process = subprocess.run([sys.executable, str(SCRIPT), "--root", str(self.root),
                                   "--package", str(PACKAGE)], capture_output=True,
