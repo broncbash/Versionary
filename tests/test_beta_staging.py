@@ -91,6 +91,22 @@ class BetaStagingTests(unittest.TestCase):
                      (config, installed_ca, service, timer)))
             self.assertEqual(second["status"], "staged")
             self.assertEqual(before, after)
+            verified = beta.stage(root=test_root, server="https://patch.example.test",
+                                  ca_cert=ca, package=package, verify_only=True)
+            self.assertEqual(verified["status"], "verified")
+            self.assertFalse(verified["changes_made"])
+            self.assertEqual(
+                (os.readlink(active), *(p.read_bytes() for p in
+                 (config, installed_ca, service, timer))), before)
+            with self.assertRaisesRegex(ValueError, "configuration"):
+                beta.stage(root=test_root, server="https://other.example.test",
+                           ca_cert=ca, package=package, verify_only=True)
+            self.assertEqual(config.read_bytes(), before[1])
+            installed_ca.write_text("TAMPERED")
+            with self.assertRaisesRegex(ValueError, "integrity audit"):
+                beta.stage(root=test_root, server="https://patch.example.test",
+                           ca_cert=ca, package=package, verify_only=True)
+            self.assertEqual(installed_ca.read_text(), "TAMPERED")
 
     def test_cli_failure_returns_nonzero(self):
         with tempfile.TemporaryDirectory() as tmp:
