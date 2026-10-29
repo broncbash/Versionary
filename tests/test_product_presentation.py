@@ -14,7 +14,7 @@ class ProductPresentationTests(unittest.TestCase):
                     self.assertEqual(response.status_code, 200)
                     self.assertIn("Patch Command", response.text)
                     self.assertNotIn("ARBY", response.text.upper())
-                    self.assertNotIn("CYBERPUNK", response.text.upper())
+                    # The legacy option value remains for stored settings compatibility.\n                    # Assert that the old theme name is not visible as UI copy.\n                    self.assertNotIn(">Cyberpunk<", response.text)
 
     def test_legacy_appearance_value_is_accepted_without_legacy_label(self):
         with TestClient(app) as client:
