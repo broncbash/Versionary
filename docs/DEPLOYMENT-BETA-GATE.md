@@ -61,3 +61,16 @@ certificate before staging, then performs a read-only installation audit.
 files. If a later step fails, the test root may contain partial changes;
 do not reuse a failed root as if it were a verified deployment. This is
 an offline staging milestone, not a production deployment authorization.
+
+## Integration validation checkpoint
+
+The beta staging regression suite now includes a real package-to-filesystem
+integration test. In a disposable root, it generates a test-only CA, stages
+the validated distribution, verifies the agent release, config, CA and
+systemd unit files, then stages the same package again and checks that all
+those bytes and the active release target are unchanged.
+
+This test does **not** start systemd, enroll an agent, or validate live
+server communication. The complete end-to-end enrollment and reporting
+trial remains a separate, explicitly approved beta milestone. CI runs
+only at deliberate checkpoints to minimize GitHub Actions usage.
