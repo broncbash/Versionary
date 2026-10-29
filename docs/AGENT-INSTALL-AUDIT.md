@@ -29,3 +29,13 @@ real filesystem root `/`, does not contact remote servers, and does not
 enable or start systemd units. It is a post-install integrity *smoke test*,
 not a full filesystem adversarial security audit or an end-to-end TLS test.
 The production `--install` path remains disabled.
+
+## Additional filesystem tampering checks
+
+The audit rejects symlinked or hardlinked installed source files, configuration,
+CA certificates, and systemd units. It verifies file ownership and rejects
+unsafe group/other-writable files. Python's normal `__pycache__` directory
+is permitted, but unexpected entries, non-regular bytecode files, symlinks,
+and hardlinks in that directory are rejected. These checks are regression
+coverage for isolated test roots, **not** a guarantee against concurrent
+filesystem races or a substitute for production deployment security review.
