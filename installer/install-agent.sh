@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ARBY PATCH AGENT installer
+# Patch Command agent installer
 # Initial version: dry-run only.
 
 MODE="dry-run"
@@ -260,7 +260,7 @@ fi
 
 cat <<EOF
 ========================================
- ARBY PATCH AGENT — INSTALLER DRY RUN
+ PATCH COMMAND AGENT — INSTALLER DRY RUN
 ========================================
 
 Detected OS:       ${PRETTY_NAME:-unknown}
