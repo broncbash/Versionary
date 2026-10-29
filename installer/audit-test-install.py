@@ -73,8 +73,12 @@ def audit(root, package):
         release = app / "releases" / identifier / "agent"
         actual = {p.name: p.read_bytes() for p in release.iterdir()
                   if p.is_file() and not p.is_symlink()}
+        entries = list(release.iterdir())
+        cache = release / "__pycache__"
+        cache_ok = not cache.exists() or (cache.is_dir() and not cache.is_symlink())
+        expected_entries = set(modules) | ({"__pycache__"} if cache.exists() else set())
         check("release_contents_match_archive", actual == modules and bool(modules) and
-              set(p.name for p in release.iterdir()) == set(modules))
+              set(p.name for p in entries) == expected_entries and cache_ok)
     except (OSError, TypeError):
         check("release_contents_match_archive", False)
 
