@@ -117,14 +117,17 @@ def audit(root, package):
     for name, path in (("agent_config", config), ("trusted_ca", ca)):
         try:
             info = path.lstat()
-            check(name, stat.S_ISREG(info.st_mode) and info.st_size > 0)
+            check(name, stat.S_ISREG(info.st_mode) and info.st_size > 0 and
+                  info.st_nlink == 1 and info.st_uid == os.geteuid() and
+                  not info.st_mode & 0o022)
         except OSError:
             check(name, False)
     for unit in units:
         try:
             info = unit.lstat()
             check(unit.name, stat.S_ISREG(info.st_mode) and
-                  stat.S_IMODE(info.st_mode) == 0o644)
+                  stat.S_IMODE(info.st_mode) == 0o644 and
+                  info.st_nlink == 1 and info.st_uid == os.geteuid())
         except OSError:
             check(unit.name, False)
     return {"ready": all(c["ok"] for c in checks), "changes_made": False, "checks": checks}
