@@ -21,3 +21,19 @@ A complete production-safe workflow still requires durable rollback metadata, cr
 The release trial now writes a private, fsynced `.release-recovery.json` marker **before** activating the candidate release. The marker records the previous and candidate code-release hashes. Restoration validates the previous release contents, switches the active symlink back, and removes the marker only after successful restoration. A failed restoration leaves the marker in place for investigation.
 
 `installer/release-recovery.py` provides `read`, `write`, `clear`, and `recover` functions for isolated testing. Recovery must be called while holding the existing installer lock; there is **not yet a supported operator-facing crash-recovery command**. No production rollback, power-loss durability guarantee, service rollback, or recovery of configuration, CA, and credentials is claimed. A crash after restoration but before marker cleanup may leave a marker requiring review.
+
+## Inspect and recover an interrupted isolated trial
+
+For a **pre-existing disposable test root only**, inspect the persistent marker without changing the active release:
+
+```bash
+python installer/recover-isolated-release.py --root /path/to/disposable-test-root
+```
+
+After reviewing the recorded previous and candidate releases, explicitly restore the prior validated code release:
+
+```bash
+python installer/recover-isolated-release.py --root /path/to/disposable-test-root --recover
+```
+
+The command takes the installer lock, refuses the live root `/`, rejects unexpected active release targets, and preserves the marker on restoration failure. It requires an existing valid recovery marker. It does **not** restore configuration, CA trust, credentials, systemd units, or service state, and is **not** a production recovery command. Read-only inspection may create the installer lock file if absent.
