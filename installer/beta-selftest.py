@@ -8,6 +8,8 @@ removed when the command exits. No server connections or systemd actions.
 import argparse
 import importlib.util
 import json
+import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -21,7 +23,7 @@ def load(name, alias):
     return module
 
 
-def run(*, smoke_scan=False):
+def run(*, smoke_scan=False, protocol_check=False):
     builder = load("build-agent-package.py", "beta_selftest_builder")
     certs = load("generate-certificates.py", "beta_selftest_certs")
     staging = load("stage-beta.py", "beta_selftest_staging")
@@ -46,6 +48,21 @@ def run(*, smoke_scan=False):
             raise RuntimeError("Beta self-test violated isolation guarantees")
         if verified["changes_made"]:
             raise RuntimeError("Read-only verification modified staged files")
+        protocol_status = "not-requested"
+        if protocol_check:
+            # Run the real HTTPS integration suite in a separate process. It
+            # creates its own loopback-only TLS server and disposable database.
+            result = subprocess.run(
+                [sys.executable, "-B", "-m", "unittest",
+                 "tests.test_beta_tls_journey", "-q"],
+                cwd=str(HERE.parent), capture_output=True, text=True,
+                timeout=120, check=False,
+            )
+            if result.returncode:
+                raise RuntimeError(
+                    "Real TLS protocol check failed: " +
+                    (result.stderr or result.stdout)[-2000:])
+            protocol_status = "passed"
         return {
             "status": "passed",
             "mode": "disposable-isolated-beta",
@@ -55,6 +72,7 @@ def run(*, smoke_scan=False):
             "repeat_stage": second["status"],
             "integrity_audit": verified["status"],
             "scan_status": verified["scan_status"],
+            "tls_protocol_check": protocol_status,
             "production_installed": False,
             "systemd_started": False,
             "agent_enrolled": False,
@@ -67,10 +85,13 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--smoke-scan", action="store_true",
                         help="Opt in to a read-only local package-manager scan")
+    parser.add_argument("--protocol-check", action="store_true",
+                        help="Run disposable real-HTTPS enrollment/reporting tests")
     args = parser.parse_args(argv)
     try:
-        result = run(smoke_scan=args.smoke_scan)
-    except (OSError, ValueError, RuntimeError) as exc:
+        result = run(smoke_scan=args.smoke_scan,
+                     protocol_check=args.protocol_check)
+    except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired) as exc:
         parser.exit(1, f"Beta self-test failed: {exc}\n")
     print(json.dumps(result, indent=2))
     return 0
