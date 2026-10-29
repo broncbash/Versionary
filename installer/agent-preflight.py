@@ -15,7 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from agent.config import validate_config
+from agent.config import ConfigurationError, validate_config
 
 VALIDATOR = ROOT / "installer" / "validate-package.py"
 spec = importlib.util.spec_from_file_location("agent_package_validator_preflight", VALIDATOR)
@@ -48,7 +48,7 @@ def inspect(*, server=None, ca_cert=None, package=None, os_release="/etc/os-rele
         try:
             validate_config({"server": server, "ca_cert": "/etc/arby-patch-agent/ca.crt"})
             valid_server = True
-        except (ValueError, TypeError, KeyError):
+        except (ConfigurationError, ValueError, TypeError, KeyError):
             pass
     check("https_server", valid_server, "Valid HTTPS server origin provided")
 
