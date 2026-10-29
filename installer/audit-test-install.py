@@ -9,6 +9,7 @@ import importlib.util
 import json
 import os
 import stat
+import tarfile
 import sys
 from pathlib import Path
 
@@ -54,7 +55,7 @@ def audit(root, package):
             digest.update(data)
         identifier = digest.hexdigest()
         check("validated_archive", True)
-    except (OSError, ValueError, Exception):
+    except (OSError, ValueError, tarfile.TarError):
         identifier = None
         modules = {}
         check("validated_archive", False)
