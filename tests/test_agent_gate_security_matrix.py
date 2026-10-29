@@ -109,8 +109,16 @@ class AgentGateSecurityMatrixTests(unittest.TestCase):
                "ARBY_AGENT_REPORTING_ENABLED": ""}
         self.assert_both_disabled(env)
 
-    def test_runtime_gate_rejected_if_false(self):
-        self.assert_both_disabled({**self.env, "ARBY_SETTINGS_RUNTIME_ENABLED": "false"})
+    def test_runtime_gate_off_preserves_legacy_environment_behavior(self):
+        with patch.dict(os.environ, {**self.env,
+            "ARBY_SETTINGS_RUNTIME_ENABLED": "false"}, clear=True):
+            flags = effective_flags()
+            self.assertFalse(flags["registration_enabled"])
+            self.assertFalse(flags["reporting_enabled"])
+            # Existing legacy routes are deliberately unchanged without opt-in.
+            from agent_feature_flags import registration_enabled, reporting_enabled
+            self.assertTrue(registration_enabled())
+            self.assertTrue(reporting_enabled())
 
     def test_valid_settings_only_allow_individually_enabled_features(self):
         with patch.dict(os.environ, {**self.env,
