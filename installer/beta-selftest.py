@@ -76,7 +76,8 @@ def run(*, smoke_scan=False, protocol_check=False):
             "production_installed": False,
             "systemd_started": False,
             "agent_enrolled": False,
-            "network_requests_made": False,
+            "network_requests_made": bool(protocol_check),
+            "external_network_requests_made": False,
             "artifacts_retained": False,
         }
 
