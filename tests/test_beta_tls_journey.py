@@ -38,7 +38,11 @@ class BetaTLSJourney(unittest.TestCase):
         db_patch = patch.object(agent_registry, "DB_PATH", self.db)
         db_patch.start()
         self.addCleanup(db_patch.stop)
-        env_patch = patch.dict(os.environ, {"ARBY_ENROLLMENT_V2_ENABLED": "true"})
+        env_patch = patch.dict(os.environ, {
+            "ARBY_ENROLLMENT_V2_ENABLED": "true",
+            "NO_PROXY": "localhost,127.0.0.1",
+            "no_proxy": "localhost,127.0.0.1",
+        })
         env_patch.start()
         self.addCleanup(env_patch.stop)
         agent_registry.initialize_database()
