@@ -65,7 +65,7 @@ class ScannerSSHConfigTests(unittest.TestCase):
                          {**self.settings, "username": "bad@host"},
                          {**self.settings, "identity_file": "../key"},
                          {**self.settings, "identity_file": "/tmp/../key"},
-                         {**self.settings, "known_hosts_file": "/tmp/key\n-oNo"}),
+                         {**self.settings, "known_hosts_file": "/tmp/key\n-oNo"},
                          {**self.settings, "username": "-oProxyCommand"}):
             with self.subTest(settings=settings):
                 self.path.write_text(json.dumps(settings))
