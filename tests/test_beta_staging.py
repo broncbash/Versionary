@@ -108,6 +108,58 @@ class BetaStagingTests(unittest.TestCase):
                            ca_cert=ca, package=package, verify_only=True)
             self.assertEqual(installed_ca.read_text(), "TAMPERED")
 
+    def test_smoke_scan_requires_verify_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaisesRegex(ValueError, "requires --verify-only"):
+                beta.stage(root=tmp, server="https://example.test",
+                           ca_cert="/missing", package="/missing",
+                           smoke_scan=True)
+
+    def test_smoke_scan_runs_staged_agent_and_checks_result(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ca = root / "trusted.crt"
+            ca.write_bytes(b"certificate-placeholder")
+            package = root / "package.tar.gz"
+            package.write_bytes(b"archive-placeholder")
+            config = root / "etc/arby-patch-agent/config.json"
+            config.parent.mkdir(parents=True)
+            config.write_text(json.dumps({
+                "server": "https://example.test",
+                "ca_cert": "/etc/arby-patch-agent/ca.crt",
+            }))
+            installed_ca = root / "etc/arby-patch-agent/ca.crt"
+            installed_ca.write_bytes(ca.read_bytes())
+            class Module:
+                pass
+            config_module = Module()
+            config_module.validate_config = lambda data: data
+            ca_module = Module()
+            ca_module.validate_ca = lambda data: "fingerprint"
+            package_module = Module()
+            package_module.validate = lambda path: 13
+            audit_module = Module()
+            audit_module.audit = lambda root, package: {"ready": True}
+            mapping = {"setup-config.py": config_module,
+                       "install-ca.py": ca_module,
+                       "validate-package.py": package_module,
+                       "audit-test-install.py": audit_module}
+            completed = subprocess.CompletedProcess(
+                ["agent", "scan"], 0,
+                stdout=json.dumps({"status": "success", "packages": [], "error": None}),
+                stderr="")
+            with patch.object(beta, "module", side_effect=lambda name, alias: mapping[name]):
+                with patch.object(beta.subprocess, "run", return_value=completed) as run:
+                    result = beta.stage(root=root, server="https://example.test",
+                                        ca_cert=ca, package=package,
+                                        verify_only=True, smoke_scan=True)
+            self.assertEqual(result["scan_status"], "success")
+            self.assertFalse(result["network_requests_made"])
+            self.assertEqual(run.call_count, 1)
+            self.assertEqual(run.call_args.kwargs["cwd"],
+                             str(root / "opt/arby-patch-agent"))
+            self.assertIn("-B", run.call_args.args[0])
+
     def test_cli_failure_returns_nonzero(self):
         with tempfile.TemporaryDirectory() as tmp:
             result = subprocess.run(
