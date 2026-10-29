@@ -20,7 +20,7 @@ input{min-width:180px;flex:1}select{font:inherit;border:1px solid #475569;border
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px}
 .agent h3{margin:0;font-size:1.2rem;overflow-wrap:anywhere}.agent p{color:#a9c0d0}.meta{display:grid;grid-template-columns:1fr auto;gap:8px;font-size:.9rem}
 .meta span:nth-child(2n){text-align:right;overflow-wrap:anywhere}.tag{display:inline-block;border:1px solid #458b9d;border-radius:20px;padding:4px 10px;margin-top:12px}
-.approved{color:#93c5fd}.pending{color:#fbbf24}.revoked{color:#fda4af}
+.approved,.online{color:#86efac}.pending,.stale,.no_contact,.unknown{color:#fbbf24}.revoked{color:#fda4af}.error{color:#fda4af}
 #message{min-height:24px;color:#ffcf91}#fleet:empty:after{content:'No agents to display.';color:#9db5c7}
 footer{margin-top:28px;color:#93aabd;font-size:.85rem}
 </style></head><body><main>
@@ -33,9 +33,9 @@ footer{margin-top:28px;color:#93aabd;font-size:.85rem}
 <div class="stat"><span>Registered</span><strong id="total">—</strong></div>
 <div class="stat"><span>Approved</span><strong id="approved">—</strong></div>
 <div class="stat"><span>Pending</span><strong id="pending">—</strong></div>
-<div class="stat"><span>Reported updates</span><strong id="updates">—</strong></div>
+<div class="stat"><span>Reported updates</span><strong id="updates">—</strong></div><div class="stat"><span>Online</span><strong id="online">—</strong></div><div class="stat"><span>Needs attention</span><strong id="attention">—</strong></div>
 </section><section class="panel"><h2>Registered agents</h2><div class="filters" aria-label="Fleet filters"><input id="search" type="search" aria-label="Search agents" placeholder="Search hostname or platform"><select id="status-filter" aria-label="Filter by approval status"><option value="all">All statuses</option><option value="approved">Approved</option><option value="pending">Pending</option><option value="revoked">Revoked</option></select><select id="sort" aria-label="Sort agents"><option value="name">Hostname</option><option value="updates">Most updates</option><option value="contact">Recent contact</option></select></div><p id="results" class="muted" role="status" aria-live="polite"></p><div class="grid" id="fleet" aria-live="polite"></div></section>
-<footer>Read-only dashboard. No scans, approvals, service changes, or deployments are initiated here. Update totals reflect latest successful reports, not live scans.</footer>
+<footer>Read-only dashboard. No scans, approvals, service changes, or deployments are initiated here. Online means an approved agent reported a heartbeat within 30 minutes. Update totals reflect latest successful reports, not live scans.</footer>
 </main><script>
 'use strict';
 const $=id=>document.getElementById(id);
@@ -43,7 +43,7 @@ let credential='';
 let inventory=[];
 function clear(){
   credential='';inventory=[];$('token').value='';$('fleet').replaceChildren();$('results').textContent='';
-  for(const id of ['total','approved','pending','updates']) $(id).textContent='—';
+  for(const id of ['total','approved','pending','updates','online','attention']) $(id).textContent='—';
 }
 function node(tag,text,className){
   const element=document.createElement(tag);
@@ -57,6 +57,8 @@ function render(agents){
   $('approved').textContent=agents.filter(a=>a.status==='approved').length;
   $('pending').textContent=agents.filter(a=>a.status==='pending').length;
   $('updates').textContent=agents.reduce((sum,a)=>sum+(a.scan_status==='success'&&Number.isInteger(a.updates)?a.updates:0),0);
+  $('online').textContent=agents.filter(a=>a.health==='online').length;
+  $('attention').textContent=agents.filter(a=>['stale','no_contact','unknown'].includes(a.health)||a.scan_status==='error').length;
   const query=$('search').value.trim().toLocaleLowerCase();
   const status=$('status-filter').value;
   const selected=agents.filter(a=>(status==='all'||a.status===status)&&
@@ -72,12 +74,14 @@ function render(agents){
     card.append(node('h3',a.hostname),node('p',a.platform));
     const meta=node('div','', 'meta');
     for(const [key,value] of [
+      ['Connection',a.health==='online'?'Online':a.health==='stale'?'Stale (>30 min)':a.health==='no_contact'?'No heartbeat':a.health==='unknown'?'Unknown':a.health],
       ['Last contact',a.last_seen||'Never'],
       ['Last scan',a.scan_at||'Never'],
       ['Scan status',a.scan_status||'No report'],
       ['Updates',a.scan_status==='success'&&a.updates!==null?String(a.updates):'Unknown']
     ]){meta.append(node('span',key),node('span',value));}
     card.append(meta,node('span',a.status,'tag '+a.status));
+    if(a.scan_status==='error') card.append(node('p','Latest scan failed','error'));
     $('fleet').append(card);
   }
 }
