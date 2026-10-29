@@ -108,14 +108,9 @@ class AgentInstallAuditTests(unittest.TestCase):
         self.assertTrue(self._source_integrity_ok())
 
     def _install_full_test_root(self):
-        import os
-        import subprocess
-        shell = ROOT / "installer/install-agent.sh"
-        # Use existing isolated shell installer to exercise CA and unit creation.
-        # The script owns and removes its temporary root; for file-level tests
-        # create only the audited files inside this test's disposable root.
+        # Build an isolated file layout for adversarial file-type checks.
+        # The full shell installer is covered separately by smoke tests.
         self._installed_release()
-        state = self.root / "var/lib/arby-patch-agent"
         config_dir = self.root / "etc/arby-patch-agent"
         config_dir.mkdir(parents=True, exist_ok=True)
         (config_dir / "config.json").write_text('{"server":"https://example.test"}')
