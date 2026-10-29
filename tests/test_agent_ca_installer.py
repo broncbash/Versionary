@@ -139,6 +139,35 @@ class TestAgentCAInstaller(unittest.TestCase):
             outside.read_text(), "DO NOT TOUCH"
         )
 
+    def test_conflicting_valid_ca_preserves_existing_trust(self):
+        installer.install_ca(self.trusted_ca, self.root)
+        destination = self.root / "etc/arby-patch-agent/ca.crt"
+        before = destination.read_bytes()
+        replacement = self.root / "replacement-ca.crt"
+        replacement.write_bytes(create_untrusted_ca())
+        with self.assertRaises(ValueError):
+            installer.install_ca(replacement, self.root)
+        self.assertEqual(destination.read_bytes(), before)
+
+    def test_mismatched_expected_fingerprint_preserves_existing_trust(self):
+        installer.install_ca(self.trusted_ca, self.root)
+        destination = self.root / "etc/arby-patch-agent/ca.crt"
+        before = destination.read_bytes()
+        with self.assertRaises(ValueError):
+            installer.install_ca(self.trusted_ca, self.root,
+                                 expected_sha256="0" * 64)
+        self.assertEqual(destination.read_bytes(), before)
+
+    def test_hardlinked_ca_destination_rejected_without_mutation(self):
+        import os
+        installer.install_ca(self.trusted_ca, self.root)
+        destination = self.root / "etc/arby-patch-agent/ca.crt"
+        before = destination.read_bytes()
+        os.link(destination, self.root / "linked-ca.crt")
+        with self.assertRaises(ValueError):
+            installer.install_ca(self.trusted_ca, self.root)
+        self.assertEqual(destination.read_bytes(), before)
+
     def test_private_key_material_rejected(self):
         data = (
             self.trusted_ca.read_bytes()
