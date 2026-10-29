@@ -1,19 +1,9 @@
 name: Python tests
 
-# Cost control: feature-branch commits and draft PR updates do not
-# automatically consume hosted runner minutes. Run manually at checkpoints,
-# or automatically when a PR is marked ready for review.
+# Cost control: hosted tests are opt-in only. Routine pushes, merges,
+# and pull-request status changes must not start paid runner jobs.
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - develop
-  pull_request:
-    types:
-      - ready_for_review
-    branches:
-      - develop
-      - main
 
 permissions:
   contents: read
