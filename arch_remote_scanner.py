@@ -14,7 +14,7 @@ def scan_arch_updates(node, host):
 
     try:
         result = subprocess.run(
-            ["/usr/bin/ssh", *command_options(host),
+            ["/usr/bin/ssh", *command_options(host)],
             capture_output=True,
             text=True,
             timeout=30,
