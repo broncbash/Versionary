@@ -103,7 +103,7 @@ class BetaStagingTests(unittest.TestCase):
                            ca_cert=ca, package=package, verify_only=True)
             self.assertEqual(config.read_bytes(), before[1])
             installed_ca.write_text("TAMPERED")
-            with self.assertRaisesRegex(ValueError, "integrity audit"):
+            with self.assertRaisesRegex(ValueError, "beta CA"):
                 beta.stage(root=test_root, server="https://patch.example.test",
                            ca_cert=ca, package=package, verify_only=True)
             self.assertEqual(installed_ca.read_text(), "TAMPERED")
