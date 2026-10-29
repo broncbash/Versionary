@@ -71,12 +71,37 @@ def audit(root, package):
 
     try:
         release = app / "releases" / identifier / "agent"
-        actual = {p.name: p.read_bytes() for p in release.iterdir()
-                  if p.is_file() and not p.is_symlink()}
         entries = list(release.iterdir())
-        cache = release / "__pycache__"
-        cache_ok = not cache.exists() or (cache.is_dir() and not cache.is_symlink())
-        expected_entries = set(modules) | ({"__pycache__"} if cache.exists() else set())
+        actual = {}
+        cache_ok = True
+        for entry in entries:
+            info = entry.lstat()
+            if entry.name == "__pycache__":
+                cache_ok = (stat.S_ISDIR(info.st_mode) and
+                            info.st_uid == os.geteuid() and
+                            not info.st_mode & 0o022)
+                if cache_ok:
+                    for bytecode in entry.iterdir():
+                        bytecode_info = bytecode.lstat()
+                        if (not stat.S_ISREG(bytecode_info.st_mode) or
+                                bytecode_info.st_nlink != 1 or
+                                bytecode_info.st_uid != os.geteuid() or
+                                bytecode_info.st_mode & 0o022 or
+                                bytecode.suffix != ".pyc"):
+                            cache_ok = False
+                            break
+                continue
+            if (entry.name not in modules or
+                    not stat.S_ISREG(info.st_mode) or
+                    info.st_nlink != 1 or
+                    info.st_uid != os.geteuid() or
+                    info.st_mode & 0o022):
+                cache_ok = False
+                continue
+            actual[entry.name] = entry.read_bytes()
+        expected_entries = set(modules) | ({"__pycache__"} if
+                                            any(e.name == "__pycache__" for e in entries)
+                                            else set())
         check("release_contents_match_archive", actual == modules and bool(modules) and
               set(p.name for p in entries) == expected_entries and cache_ok)
     except (OSError, TypeError):
