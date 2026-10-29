@@ -28,7 +28,8 @@ class BetaSelftestTests(unittest.TestCase):
         result = beta.run(protocol_check=True)
         self.assertEqual(result["status"], "passed")
         self.assertEqual(result["tls_protocol_check"], "passed")
-        self.assertFalse(result["network_requests_made"])
+        self.assertTrue(result["network_requests_made"])
+        self.assertFalse(result["external_network_requests_made"])
 
     def test_protocol_failure_fails_closed(self):
         import subprocess
