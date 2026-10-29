@@ -112,3 +112,37 @@ The JSON output includes `scan_status`; a scan error fails the command.
 This does **not** establish end-to-end server communication or authorize
 production deployment. The test container must provide the appropriate
 `checkupdates` or `apt` package scanner.
+
+## Disposable end-to-end server/agent contract (in-process)
+
+`tests/test_beta_agent_server_journey.py` now exercises the real v2
+agent enrollment client against the real FastAPI enrollment router through
+an in-process TestClient adapter, using a temporary SQLite database and
+private agent state. It covers pending registration, explicit approval,
+Ed25519 challenge signing, credential provisioning, authenticated heartbeat,
+package report persistence, revocation, disabled feature gates, and
+recovery after a lost enrollment completion response.
+
+This is a **functional protocol integration test**, not a live HTTPS test:
+the HTTP adapter does not open sockets, exercise certificate validation,
+start a systemd unit, or alter any homelab container. The v2 router remains
+isolated from the production application and gated off by default.
+
+To run only the disposable protocol integration tests locally:
+
+```sh
+python3 -m unittest tests.test_beta_agent_server_journey -v
+```
+
+To run the full checkpoint suite, use the existing GitHub Actions workflow
+at an intentional checkpoint or run locally:
+
+```sh
+python3 installer/build-agent-package.py
+python3 -m unittest discover -s tests -p 'test_*.py' -q
+```
+
+**Remaining deployment blockers:** verified HTTPS transport to a disposable
+test server, reviewed production installer and systemd lifecycle, explicit
+agent enrollment approval in the real dashboard, and a clean Arch/Debian
+container trial. None of these are authorized against CT104/CT102.
