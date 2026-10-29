@@ -27,3 +27,18 @@ still enforces `StrictHostKeyChecking=yes`, `BatchMode=yes`, and
 This is transport *configuration*, not credential creation or host-key
 enrollment. Operators must provision their SSH keys and known-hosts trust
 separately. No live service or production configuration has been changed.
+
+## Read-only preflight CLI
+
+Use `python3 installer/scanner-preflight.py` to inspect effective scanner
+configuration **without connecting to any host**. It reads and validates the
+inventory and SSH configuration, prints JSON, and returns exit code 0 when
+both configurations validate or 1 when either fails. The output includes
+configured target labels, hostnames, platform types, and the SSH username,
+but never reveals identity-file or known-hosts file paths.
+
+For isolated tests, pass `--inventory-path /path/to/inventory.json` and
+`--ssh-path /path/to/ssh.json`. Those explicit paths override the corresponding
+environment variables. A valid preflight means the configuration format is
+valid; it does **not** establish that an SSH key exists, that host trust is
+provisioned, or that any remote machine is reachable.
