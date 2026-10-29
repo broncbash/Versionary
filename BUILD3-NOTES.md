@@ -15,3 +15,16 @@ Certificate import example (after creating a private destination directory):
 Security limitations: the import workflow currently supports unencrypted PEM private keys only; no chain-of-trust validation, key rotation, CA distribution, TLS proxy reload, or GUI. Do not use as a live deployment. Keep private keys out of Git.
 
 Offline validation: 440 tests passed with Python 3.11 and locally installed dependencies. Desktop Python 3.14 verification remains required.
+
+## Certificate inspection checkpoint
+
+Added read-only `inspect` command to `installer/manage-certificates.py`,
+including expiry warnings, SAN hostname comparison, SHA-256 fingerprint,
+and private-key-free status checks. This does not install, rotate, or reload
+certificates. Example:
+
+```bash
+python installer/manage-certificates.py inspect --cert /path/to/server.crt --hostname patch.example.org --warning-days 30
+```
+
+The `check` and `import` commands still require `--key` and `--hostname`.

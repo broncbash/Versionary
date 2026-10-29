@@ -119,3 +119,48 @@ def install_pair(cert_file: str | Path, key_file: str | Path, hostname: str, des
             path.unlink(missing_ok=True)
         raise
     return info
+
+
+def inspect_certificate(cert_file: str | Path, hostname: str | None = None,
+                        warning_days: int = 30) -> dict:
+    """Read-only expiry/SAN report; does not need or expose a private key."""
+    if type(warning_days) is not int or not 0 <= warning_days <= 3650:
+        raise CertificateError('warning_days must be 0..3650')
+    try:
+        cert = x509.load_pem_x509_certificate(_read_regular(Path(cert_file)))
+    except ValueError as exc:
+        raise CertificateError('Invalid PEM certificate') from exc
+    now = datetime.now(timezone.utc)
+    remaining = (cert.not_valid_after_utc - now).total_seconds() / 86400
+    if cert.not_valid_before_utc > now:
+        status = 'not_yet_valid'
+    elif remaining <= 0:
+        status = 'expired'
+    elif remaining <= warning_days:
+        status = 'expiring_soon'
+    else:
+        status = 'valid'
+    try:
+        san = cert.extensions.get_extension_for_class(x509.SubjectAlternativeName).value
+        dns = san.get_values_for_type(x509.DNSName)
+        ips = [str(ip) for ip in san.get_values_for_type(x509.IPAddress)]
+    except x509.ExtensionNotFound:
+        dns, ips = [], []
+    hostname_matches = None
+    if hostname is not None:
+        if not hostname or not isinstance(hostname, str):
+            raise CertificateError('Hostname must be nonempty')
+        try:
+            hostname_matches = str(ipaddress.ip_address(hostname)) in ips
+        except ValueError:
+            hostname_matches = hostname.lower().rstrip('.') in [name.lower().rstrip('.') for name in dns]
+    return {
+        'status': status,
+        'not_before': cert.not_valid_before_utc.isoformat(),
+        'not_after': cert.not_valid_after_utc.isoformat(),
+        'days_remaining': max(0, int(remaining)),
+        'sha256': cert.fingerprint(hashes.SHA256()).hex(),
+        'dns_names': dns, 'ip_addresses': ips,
+        'hostname_matches': hostname_matches,
+        'warning_days': warning_days,
+    }
