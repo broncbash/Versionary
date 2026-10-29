@@ -14,6 +14,7 @@ from unittest.mock import patch
 from uuid import uuid4
 
 import uvicorn
+from cryptography import x509
 from fastapi import FastAPI
 
 import agent_registry
@@ -34,6 +35,13 @@ class BetaTLSJourney(unittest.TestCase):
         spec.loader.exec_module(cert_gen)
         self.certs = self.root / "certs"
         cert_gen.generate("127.0.0.1", self.certs)
+        ca = x509.load_pem_x509_certificate((self.certs / "ca.crt").read_bytes())
+        leaf = x509.load_pem_x509_certificate((self.certs / "server.crt").read_bytes())
+        ca_ski = ca.extensions.get_extension_for_class(x509.SubjectKeyIdentifier).value
+        ca_aki = ca.extensions.get_extension_for_class(x509.AuthorityKeyIdentifier).value
+        leaf_aki = leaf.extensions.get_extension_for_class(x509.AuthorityKeyIdentifier).value
+        self.assertEqual(ca_aki.key_identifier, ca_ski.digest)
+        self.assertEqual(leaf_aki.key_identifier, ca_ski.digest)
         self.state = self.root / "agent-state"
         self.state.mkdir(mode=0o700)
         self.db = self.root / "agents.db"
