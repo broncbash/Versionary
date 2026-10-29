@@ -1,5 +1,6 @@
 import re
 import subprocess
+from scanner_ssh_config import command_options, SSHConfigError
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -18,17 +19,7 @@ def scan_apt_updates(node="PVE CORE", host="192.168.86.5"):
 
     try:
         result = subprocess.run(
-            [
-                "/usr/bin/ssh",
-                "-T",
-                "-i", str(SSH_KEY),
-                "-o", "StrictHostKeyChecking=yes",
-                "-o", "UserKnownHostsFile=/opt/arby-patch-command/keys/known_hosts",
-                "-o", "BatchMode=yes",
-                "-o", "ConnectTimeout=5",
-                "-o", "IdentitiesOnly=yes",
-                f"arby-scanner@{host}",
-            ],
+            ["/usr/bin/ssh", *command_options(host),
             capture_output=True,
             text=True,
             timeout=30,
@@ -65,7 +56,7 @@ def scan_apt_updates(node="PVE CORE", host="192.168.86.5"):
             "error": None,
         }
 
-    except (OSError, RuntimeError, subprocess.TimeoutExpired) as exc:
+    except (OSError, RuntimeError, SSHConfigError, subprocess.TimeoutExpired) as exc:
         return {
             "node": node,
             "status": "error",
