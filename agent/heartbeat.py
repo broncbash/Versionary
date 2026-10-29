@@ -4,6 +4,7 @@ import json
 import ssl
 import urllib.error
 import urllib.request
+import urllib.parse
 import uuid
 
 from agent.credentials import validate_token
@@ -56,9 +57,15 @@ def send_heartbeat(
             method="POST",
         )
 
-        with urllib.request.urlopen(
+        # Never forward bearer credentials through HTTP redirects.
+        class NoRedirect(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self, req, fp, code, msg, headers, newurl):
+                return None
+
+        opener = urllib.request.build_opener(
+            urllib.request.HTTPSHandler(context=context), NoRedirect())
+        with opener.open(
             request,
-            context=context,
             timeout=15,
         ) as response:
             if response.status != 200:
