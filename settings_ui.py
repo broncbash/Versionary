@@ -61,7 +61,7 @@ $('runtime').addEventListener('click',async()=>{
   try{
     const result=await request('GET',undefined,'/api/v1/admin/settings/runtime-status');
     const gates=result.runtime;
-    $('runtime-result').textContent='Runtime gate: '+(gates.runtime_enabled?'ON':'OFF')+'\\nConfiguration valid: '+(gates.configuration_valid?'YES':'NO')+'\\nAgent registration: '+(gates.registration_enabled?'ON':'OFF')+'\\nAgent reporting: '+(gates.reporting_enabled?'ON':'OFF');
+    $('runtime-result').textContent='Runtime gate: '+(gates.runtime_enabled?'ON':'OFF')+'\nConfiguration valid: '+(gates.configuration_valid?'YES':'NO')+'\nAgent registration: '+(gates.registration_enabled?'ON':'OFF')+'\nAgent reporting: '+(gates.reporting_enabled?'ON':'OFF');
     status('Read-only runtime status loaded. No changes applied.');
   }catch(error){status(error.message);}
 });
