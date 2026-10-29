@@ -122,6 +122,41 @@ class BetaAgentServerJourney(unittest.TestCase):
                 (self.identity["agent_id"],)
             ).fetchone())
 
+    def test_lost_completion_response_recovers_without_duplicate_token(self):
+        register_v2(self.identity, key_path=self.key, post=self.post)
+        self.assertTrue(agent_registry.approve_agent(self.identity["agent_id"]))
+        def lost_reply(path, payload):
+            response = self.post(path, payload)
+            if path.endswith("/complete"):
+                raise ConnectionError("simulated dropped completion response")
+            return response
+        with self.assertRaisesRegex(ConnectionError, "dropped"):
+            complete_v2(
+                self.identity, key_path=self.key, journal_path=self.journal,
+                credential_path=self.credential, post=lost_reply)
+        self.assertIsNotNone(load_journal(self.journal))
+        recovered = complete_v2(
+            self.identity, key_path=self.key, journal_path=self.journal,
+            credential_path=self.credential, post=self.post)
+        self.assertTrue(recovered["recovered"])
+        self.assertIsNone(load_journal(self.journal))
+        token = load_credential(self.credential)
+        self.assertTrue(agent_registry.authenticate_agent(self.identity["agent_id"], token))
+        self.assertEqual(self.report(token).status_code, 201)
+        with sqlite3.connect(self.db) as db:
+            count = db.execute("SELECT COUNT(*) FROM agent_credentials WHERE agent_id = ?",
+                               (self.identity["agent_id"],)).fetchone()[0]
+        self.assertEqual(count, 1)
+
+    def test_rejected_unapproved_completion_does_not_create_credential(self):
+        register_v2(self.identity, key_path=self.key, post=self.post)
+        with self.assertRaisesRegex(RuntimeError, "409"):
+            complete_v2(
+                self.identity, key_path=self.key, journal_path=self.journal,
+                credential_path=self.credential, post=self.post)
+        self.assertFalse(self.credential.exists())
+        self.assertIsNone(load_journal(self.journal))
+
     def test_disabled_reporting_rejects_enrolled_agent(self):
         token = self.enroll()
         with patch.dict(os.environ, {"ARBY_AGENT_REPORTING_ENABLED": "false"}):
