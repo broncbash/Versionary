@@ -88,3 +88,7 @@ app.include_router(settings_ui_router)
 # Authenticated, read-only beta agent inventory (no feature gates changed).
 from admin_agents_api import router as admin_agents_router
 app.include_router(admin_agents_router)
+
+# Read-only cyberpunk agent fleet dashboard.
+from dashboard_ui import router as dashboard_router
+app.include_router(dashboard_router)
