@@ -6,17 +6,21 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from server_settings import DEFAULT_PATH, SettingsError, load, save
+from runtime_configuration import effective_flags
 
 parser = argparse.ArgumentParser(description='ARBY server settings (staged, not applied to running services)')
 parser.add_argument('--path', default=str(DEFAULT_PATH))
 sub = parser.add_subparsers(dest='action', required=True)
 sub.add_parser('show')
+sub.add_parser('runtime-status', help='Show effective runtime gates without changing services')
 change = sub.add_parser('set')
 change.add_argument('key', choices=['public_url', 'enrollment_enabled', 'reporting_enabled', 'scan_interval_minutes', 'appearance', 'tls_mode'])
 change.add_argument('value')
 args = parser.parse_args()
 try:
-    if args.action == 'show':
+    if args.action == 'runtime-status':
+        result = {'runtime': effective_flags(args.path), 'applied': False}
+    elif args.action == 'show':
         result = load(args.path)
     else:
         value = args.value
