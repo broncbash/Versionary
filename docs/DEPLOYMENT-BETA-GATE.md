@@ -146,3 +146,19 @@ python3 -m unittest discover -s tests -p 'test_*.py' -q
 test server, reviewed production installer and systemd lifecycle, explicit
 agent enrollment approval in the real dashboard, and a clean Arch/Debian
 container trial. None of these are authorized against CT104/CT102.
+
+## Real HTTPS loopback integration
+
+`tests/test_beta_tls_journey.py` runs a **real TLS server bound to
+127.0.0.1 on an ephemeral port**, with an isolated FastAPI enrollment
+router and disposable SQLite database. It generates a throwaway CA and
+server certificate for `localhost`, then uses the agent's production
+HTTPS transport to register, approve, and complete Ed25519 enrollment.
+Additional tests reject an untrusted CA and verify that disabled
+enrollment remains disabled even over a trusted HTTPS connection.
+
+Unlike the in-process TestClient integration suite, this test exercises
+real sockets, TLS certificate verification, and HTTP response handling.
+It does not bind a LAN address, use a production database, start systemd,
+or contact the homelab. Live TLS reporting and clean-container lifecycle
+validation remain separate deployment gates.
