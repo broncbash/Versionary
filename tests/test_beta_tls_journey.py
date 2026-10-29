@@ -2,6 +2,8 @@
 import importlib.util
 import os
 import socket
+import ssl
+import urllib.request
 import sqlite3
 import tempfile
 import threading
@@ -77,11 +79,18 @@ class BetaTLSJourney(unittest.TestCase):
         self.server.should_exit = True
         self.thread.join(timeout=5)
 
+    def assert_tls_ready(self):
+        context = ssl.create_default_context(cafile=str(self.certs / "ca.crt"))
+        with socket.create_connection(("127.0.0.1", self.port), timeout=3) as raw:
+            with context.wrap_socket(raw, server_hostname="127.0.0.1") as conn:
+                self.assertEqual(conn.version()[:3], "TLS")
+
     def post(self, path, payload):
         return post_json(path, payload, server=self.server_url,
                          ca_cert=self.certs / "ca.crt")
 
     def test_real_tls_register_approve_and_complete(self):
+        self.assert_tls_ready()
         registered = register_v2(self.identity, key_path=self.state / "key.json",
                                  post=self.post)
         self.assertEqual(registered["status"], "pending")
@@ -108,6 +117,7 @@ class BetaTLSJourney(unittest.TestCase):
             self.assertEqual(db.execute("SELECT COUNT(*) FROM agents").fetchone()[0], 0)
 
     def test_disabled_enrollment_rejects_verified_https(self):
+        self.assert_tls_ready()
         with patch.dict(os.environ, {"ARBY_ENROLLMENT_V2_ENABLED": "false"}):
             with self.assertRaisesRegex(EnrollmentHTTPError, "disabled"):
                 register_v2(self.identity, key_path=self.state / "key.json",
