@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict
 from admin_auth import require_admin
 from server_settings import DEFAULT_PATH, SettingsError, load, save
+from runtime_configuration import effective_flags
 
 router = APIRouter(prefix='/api/v1/admin/settings', tags=['admin-settings'], dependencies=[Depends(require_admin)])
 
@@ -33,3 +34,10 @@ def patch_settings(patch: SettingsPatch):
         return {'settings': save(changes, path()), 'applied': False}
     except SettingsError as exc:
         raise HTTPException(422, str(exc)) from exc
+
+
+@router.get('/runtime-status')
+def get_runtime_status():
+    """Read-only effective gate status; never changes live routing."""
+    flags = effective_flags(path())
+    return {'runtime': flags, 'applied': False}
