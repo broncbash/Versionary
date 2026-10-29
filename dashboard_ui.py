@@ -1,30 +1,30 @@
-"""Read-only cyberpunk beta dashboard. No production actions or persistent credentials."""
+"""Read-only administrative beta dashboard. No production actions or persistent credentials."""
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
 
 router = APIRouter()
 PAGE = r'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ARBY PATCH COMMAND // Agent Fleet</title>
+<title>Patch Command | Agent Fleet</title>
 <style>
-:root{color-scheme:dark;font:16px system-ui,sans-serif;background:#070d17;color:#d9f7ff}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 10% 0%,#133c4a 0%,transparent 42%),radial-gradient(ellipse at 95% 70%,#241b46 0%,transparent 45%),#070d17}
+:root{color-scheme:dark;font:16px system-ui,sans-serif;background:#0f172a;color:#e2e8f0}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#0f172a}
 main{max-width:1180px;margin:auto;padding:36px 22px}header{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
-h1{margin:0;color:#4af5d6;letter-spacing:.1em;font-size:clamp(1.5rem,4vw,2.5rem)}h2{font-size:1.1rem;margin:0 0 14px;color:#76c9ff}
+h1{margin:0;color:#93c5fd;letter-spacing:.1em;font-size:clamp(1.5rem,4vw,2.5rem)}h2{font-size:1.1rem;margin:0 0 14px;color:#76c9ff}
 .sub{color:#9db5c7}.eyebrow{letter-spacing:.2em;color:#8e9fb6;font-size:.75rem}
-a{color:#67c9ff}.panel,.stat,.agent{border:1px solid #24596c;background:#0d1a2bdf;border-radius:14px;padding:20px;box-shadow:0 0 24px #00e7df0a}
-.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:24px 0}input,button{font:inherit;border:1px solid #3e8799;border-radius:8px;background:#102338;color:#ecfbff;padding:12px}
-input{min-width:240px;flex:1}button{cursor:pointer;border-color:#4af5d6}button:hover,button:focus-visible,a:focus-visible{outline:2px solid #4af5d6;outline-offset:3px}
+a{color:#67c9ff}.panel,.stat,.agent{border:1px solid #334155;background:#172338;border-radius:14px;padding:20px;box-shadow:0 0 24px #00000010}
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:24px 0}input,button{font:inherit;border:1px solid #475569;border-radius:8px;background:#1e293b;color:#f8fafc;padding:12px}
+input{min-width:240px;flex:1}button{cursor:pointer;border-color:#93c5fd}button:hover,button:focus-visible,a:focus-visible{outline:2px solid #93c5fd;outline-offset:3px}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:24px}
-.stat strong{display:block;font-size:2rem;color:#4af5d6;margin-top:5px}.stat span{color:#a4b8c9}
+.stat strong{display:block;font-size:2rem;color:#93c5fd;margin-top:5px}.stat span{color:#a4b8c9}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px}
 .agent h3{margin:0;font-size:1.2rem;overflow-wrap:anywhere}.agent p{color:#a9c0d0}.meta{display:grid;grid-template-columns:1fr auto;gap:8px;font-size:.9rem}
 .meta span:nth-child(2n){text-align:right;overflow-wrap:anywhere}.tag{display:inline-block;border:1px solid #458b9d;border-radius:20px;padding:4px 10px;margin-top:12px}
-.approved{color:#4af5d6}.pending{color:#ffd28b}.revoked{color:#ff879d}
+.approved{color:#93c5fd}.pending{color:#fbbf24}.revoked{color:#fda4af}
 #message{min-height:24px;color:#ffcf91}#fleet:empty:after{content:'No agents to display.';color:#9db5c7}
 footer{margin-top:28px;color:#93aabd;font-size:.85rem}
 </style></head><body><main>
-<header><div><div class="eyebrow">ARBY // COMMAND CENTER</div><h1>PATCH COMMAND</h1><p class="sub">AGENT FLEET / OBSERVER MODE</p></div><a href="/admin/settings">Settings</a></header>
+<header><div><div class="eyebrow">PATCH COMMAND</div><h1>Agent Fleet</h1><p class="sub">Infrastructure monitoring · Observer mode</p></div><a href="/admin/settings">Settings</a></header>
 <section class="controls" aria-label="Administrator controls">
 <input id="token" type="password" autocomplete="off" spellcheck="false" aria-label="Admin bearer token" placeholder="Admin bearer token (memory only)">
 <button id="refresh" type="button">Refresh fleet</button><button id="clear" type="button">Clear access</button>
