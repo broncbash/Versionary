@@ -12,8 +12,8 @@ class DashboardUITests(unittest.TestCase):
     def test_dashboard_available(self):
         response = self.client.get("/admin/dashboard")
         self.assertEqual(response.status_code, 200)
-        self.assertIn("ARBY // COMMAND CENTER", response.text)
-        self.assertIn("AGENT FLEET / OBSERVER MODE", response.text)
+        self.assertIn("PATCH COMMAND", response.text)
+        self.assertIn("Infrastructure monitoring · Observer mode", response.text)
 
     def test_dashboard_uses_authenticated_read_only_inventory(self):
         page = self.client.get("/admin/dashboard").text
