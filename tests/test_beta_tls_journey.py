@@ -21,6 +21,9 @@ import agent_registry
 from agent.enrollment_client import register_v2, complete_v2
 from agent.enrollment_http import post_json, EnrollmentHTTPError
 from agent.credentials import load_credential
+from agent.heartbeat import send_heartbeat, HeartbeatError
+from agent.reporting import send_report, ReportingError
+from agent_reporting_api import router as reporting_router
 from enrollment_v2_api import router as enrollment_router
 
 
@@ -50,6 +53,8 @@ class BetaTLSJourney(unittest.TestCase):
         self.addCleanup(db_patch.stop)
         env_patch = patch.dict(os.environ, {
             "ARBY_ENROLLMENT_V2_ENABLED": "true",
+            "ARBY_AGENT_REPORTING_ENABLED": "true",
+            "ARBY_SETTINGS_RUNTIME_ENABLED": "false",
             "NO_PROXY": "localhost,127.0.0.1",
             "no_proxy": "localhost,127.0.0.1",
         })
@@ -58,6 +63,7 @@ class BetaTLSJourney(unittest.TestCase):
         agent_registry.initialize_database()
         app = FastAPI()
         app.include_router(enrollment_router)
+        app.include_router(reporting_router)
         # Socket is bound to loopback by the OS before starting the server.
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.bind(("127.0.0.1", 0))
@@ -110,6 +116,50 @@ class BetaTLSJourney(unittest.TestCase):
         self.assertEqual(result["status"], "enrolled")
         token = load_credential(self.state / "credential.json")
         self.assertTrue(agent_registry.authenticate_agent(self.identity["agent_id"], token))
+
+    def test_authenticated_heartbeat_report_and_revocation_over_tls(self):
+        register_v2(self.identity, key_path=self.state / "key.json", post=self.post)
+        self.assertTrue(agent_registry.approve_agent(self.identity["agent_id"]))
+        complete_v2(
+            self.identity, key_path=self.state / "key.json",
+            journal_path=self.state / "journal.json",
+            credential_path=self.state / "credential.json", post=self.post)
+        token = load_credential(self.state / "credential.json")
+        args = {"server": self.server_url, "ca_cert": self.certs / "ca.crt"}
+        heartbeat = send_heartbeat(self.identity, token, **args)
+        self.assertEqual(heartbeat["status"], "ok")
+        report = {"status": "success", "packages": [
+            {"name": "tls-package", "installed": "1.0",
+             "available": "1.1", "repository": "core"}], "error": None}
+        result = send_report(self.identity, token, report, **args)
+        self.assertEqual(result["status"], "recorded")
+        with sqlite3.connect(self.db) as db:
+            row = db.execute(
+                "SELECT count, packages_json FROM scan_reports WHERE agent_id = ?",
+                (self.identity["agent_id"],)).fetchone()
+        self.assertEqual(row[0], 1)
+        self.assertEqual(__import__("json").loads(row[1])[0]["name"], "tls-package")
+        self.assertTrue(agent_registry.revoke_agent(self.identity["agent_id"]))
+        with self.assertRaisesRegex(HeartbeatError, "authentication rejected"):
+            send_heartbeat(self.identity, token, **args)
+        with self.assertRaisesRegex(ReportingError, "authentication rejected"):
+            send_report(self.identity, token, report, **args)
+
+    def test_reporting_gate_blocks_tls_requests(self):
+        register_v2(self.identity, key_path=self.state / "key.json", post=self.post)
+        self.assertTrue(agent_registry.approve_agent(self.identity["agent_id"]))
+        complete_v2(
+            self.identity, key_path=self.state / "key.json",
+            journal_path=self.state / "journal.json",
+            credential_path=self.state / "credential.json", post=self.post)
+        token = load_credential(self.state / "credential.json")
+        args = {"server": self.server_url, "ca_cert": self.certs / "ca.crt"}
+        with patch.dict(os.environ, {"ARBY_AGENT_REPORTING_ENABLED": "false"}):
+            with self.assertRaisesRegex(HeartbeatError, "disabled"):
+                send_heartbeat(self.identity, token, **args)
+            with self.assertRaisesRegex(ReportingError, "disabled"):
+                send_report(self.identity, token,
+                    {"status": "success", "packages": [], "error": None}, **args)
 
     def test_untrusted_ca_is_rejected_before_registration(self):
         other = self.root / "other"
