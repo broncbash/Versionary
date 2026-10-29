@@ -31,6 +31,8 @@ def stage(*, root, server, ca_cert, package=DEFAULT_PACKAGE, verify_only=False, 
     if (not stat.S_ISDIR(info.st_mode) or info.st_uid != os.geteuid()
             or info.st_mode & 0o022):
         raise ValueError("Test root has unsafe ownership or permissions")
+    if smoke_scan and not verify_only:
+        raise ValueError("--smoke-scan requires --verify-only")
     # Validate all external inputs before any installer changes the test root.
     config = module("setup-config.py", "arby_beta_config")
     config.validate_config({"server": server, "ca_cert": "/etc/arby-patch-agent/ca.crt"})
@@ -45,8 +47,6 @@ def stage(*, root, server, ca_cert, package=DEFAULT_PACKAGE, verify_only=False, 
         raise ValueError("Agent package must be a regular file")
     validator.validate(package)
 
-    if smoke_scan and not verify_only:
-        raise ValueError("--smoke-scan requires --verify-only")
     if verify_only:
         audit = module("audit-test-install.py", "arby_beta_audit")
         result = audit.audit(root, package)
