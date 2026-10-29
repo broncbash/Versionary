@@ -1,5 +1,6 @@
 """Read-only administrator inventory for beta dashboard; no agent activation."""
 import sqlite3
+from datetime import datetime, timedelta, timezone
 from contextlib import closing
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -7,6 +8,29 @@ from admin_auth import require_admin
 import agent_registry
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
+
+HEARTBEAT_STALE_AFTER = timedelta(minutes=30)
+
+
+def agent_health(status: str, last_seen: str | None, now: datetime) -> str:
+    """Conservative state classification; unknown timestamps are never healthy."""
+    if status == "revoked":
+        return "revoked"
+    if status == "pending":
+        return "pending"
+    if status != "approved" or not last_seen:
+        return "no_contact"
+    try:
+        seen = datetime.fromisoformat(last_seen.replace("Z", "+00:00"))
+        if seen.tzinfo is None:
+            return "unknown"
+        age = now - seen.astimezone(timezone.utc)
+        if age < timedelta(0):
+            return "unknown"
+        return "online" if age <= HEARTBEAT_STALE_AFTER else "stale"
+    except (ValueError, TypeError, OverflowError):
+        return "unknown"
+
 
 @router.get("/agents")
 def list_agents(_: None = Depends(require_admin)):
@@ -34,5 +58,8 @@ def list_agents(_: None = Depends(require_admin)):
             """).fetchall()
     except (sqlite3.DatabaseError, OSError):
         raise HTTPException(status_code=503, detail="Agent inventory unavailable") from None
+    now = datetime.now(timezone.utc)
     agents = [dict(row) for row in rows]
+    for agent in agents:
+        agent['health'] = agent_health(agent['status'], agent['last_seen'], now)
     return {"agents": agents, "count": len(agents)}
