@@ -31,7 +31,7 @@ class BetaTLSJourney(unittest.TestCase):
         cert_gen = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(cert_gen)
         self.certs = self.root / "certs"
-        cert_gen.generate("localhost", self.certs)
+        cert_gen.generate("127.0.0.1", self.certs)
         self.state = self.root / "agent-state"
         self.state.mkdir(mode=0o700)
         self.db = self.root / "agents.db"
@@ -69,7 +69,7 @@ class BetaTLSJourney(unittest.TestCase):
                 self.fail("Loopback TLS server exited unexpectedly")
             time.sleep(0.02)
         self.assertTrue(self.server.started)
-        self.server_url = f"https://localhost:{self.port}"
+        self.server_url = f"https://127.0.0.1:{self.port}"
         self.identity = {"agent_id": str(uuid4()), "hostname": "beta-loopback",
                          "platform": "arch"}
 
@@ -100,7 +100,7 @@ class BetaTLSJourney(unittest.TestCase):
         spec = importlib.util.spec_from_file_location("other_beta_cert_gen", cert_path)
         cert_gen = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(cert_gen)
-        cert_gen.generate("localhost", other)
+        cert_gen.generate("127.0.0.1", other)
         with self.assertRaises(EnrollmentHTTPError):
             post_json("/api/v2/agents/register", {}, server=self.server_url,
                       ca_cert=other / "ca.crt")
