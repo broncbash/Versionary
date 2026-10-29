@@ -1,0 +1,47 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# Secrets and credentials
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*secret*
+*token*
+*credential.json
+keys/
+certs/
+
+# Runtime data
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+*.log
+
+# Local configuration
+config.local.*
+settings.local.*
+*.bak
+
+# Editor and OS
+.idea/
+.vscode/
+.DS_Store
+*~
+*.swp
+*.swo
+
+# Build artifacts
+dist/
+build/
