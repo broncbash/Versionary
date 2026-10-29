@@ -9,7 +9,7 @@ class SettingsUITests(unittest.TestCase):
     def test_page_served(self):
         response = self.client.get('/admin/settings')
         self.assertEqual(response.status_code, 200)
-        self.assertIn('ARBY // SETTINGS', response.text)
+        self.assertIn('Patch Command | Settings', response.text)
         self.assertIn('STAGING MODE', response.text)
 
     def test_no_cache_and_frame_protection(self):
