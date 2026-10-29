@@ -127,6 +127,11 @@ if [[ "$MODE" == "test-install" ]]; then
     )
 
     echo "[OK] Installed agent executed successfully"
+
+    echo
+    echo "=== READ-ONLY INSTALLATION AUDIT ==="
+    python3 "${SCRIPT_DIR}/audit-test-install.py" --root "$TEST_ROOT" --package "$PACKAGE"
+    echo "[OK] Isolated installation integrity verified"
     echo "[OK] Test root will be removed automatically"
     exit 0
 fi
