@@ -22,7 +22,7 @@
 The operator reported the following from their Arch Linux desktop on 2026-10-29:
 
 ```
-Ran 622 tests in 7.759s
+Ran 655 tests in 7.690s
 OK
 [Patch Command] PASS
 [Patch Command] Running isolated beta HTTPS acceptance...
@@ -34,7 +34,7 @@ OK
 "external_network_requests_made": false
 ```
 
-This verified the code through commit `3d9dc53` on `feature/runtime-visibility`, **not** later documentation or code changes. The isolated shell installer smoke test was changed to invoke the installed agent CLI help rather than depend on live Arch package mirrors. The optional real scan remains separately testable.
+This verified the code through commit `0cc1f8f` on `feature/runtime-visibility`, including isolated asset snapshots; later commits require separate verification. The isolated shell installer smoke test was changed to invoke the installed agent CLI help rather than depend on live Arch package mirrors. The optional real scan remains separately testable.
 
 **Local verification command:**
 
@@ -87,10 +87,25 @@ The repository must **clearly disclose AI authorship**. The README includes the 
 - Package builder and archive validation, private-state-safe installer components, atomic release handling and filesystem hardening tests.
 - Isolated beta staging, repeated-installation integrity audit, and disposable loopback TLS enrollment/reporting acceptance.
 - Authenticated read-only agent inventory and professional fleet dashboard, including search/filter/sort and conservative health indicators.
-- Offline beta evaluation wrapper and user-reported 622-test checkpoint.
+- Offline beta evaluation wrapper and user-reported 655-test checkpoint.
 - Fixed flaky shell-installation regression that depended on external package repository availability.
 
 Historical docs such as `BUILD3-NOTES.md` describe earlier milestones; **do not treat their old branch names or outstanding-task lists as current**.
+
+## Latest verified installation-safety checkpoint
+
+On 2026-10-29 the operator confirmed **655 regression tests passed** and isolated HTTPS acceptance passed (TLS, package integrity). No production installation, systemd start, agent enrollment, or external network requests occurred. Last source commit included in this verification: `0cc1f8f`.
+
+Recent verified features:
+- Read-only beta installation planning: `installer/beta-install-plan.py`.
+- Disposable install trial: `installer/disposable-install-trial.py`.
+- Isolated code-release switch, durable recovery marker, and operator-controlled recovery: `installer/release-switch-trial.py`, `installer/release-recovery.py`, `installer/recover-isolated-release.py`.
+- Read-only asset inventory: `installer/installation-inventory.py`.
+- Private snapshot creation and verification: `installer/installation-snapshot.py`; configuration, public CA, and inactive systemd unit files only. **No snapshot restoration yet.** Private credentials and state are excluded.
+- Tests: `tests/test_release_recovery.py`, `tests/test_recover_isolated_release.py`, `tests/test_installation_inventory.py`, `tests/test_installation_snapshot.py`.
+- Docs: `docs/BETA-INSTALL-PLAN.md`, `docs/DISPOSABLE-INSTALL-TRIAL.md`, `docs/RELEASE-SWITCH-TRIAL.md`, `docs/INSTALLATION-INVENTORY.md`, `docs/INSTALLATION-SNAPSHOT.md`.
+
+**Next batch:** implement *isolated* snapshot restoration with permission preservation, refusal of unsafe replacements, and interrupted/failing restoration tests. Then design coordinated release/configuration/CA/systemd rollback. Do not deploy, merge, or touch CT104/CT102 without explicit permission. Snapshots do not constitute complete backups or authenticated trust anchors.
 
 ## Outstanding work — prioritized
 
@@ -104,7 +119,7 @@ Historical docs such as `BUILD3-NOTES.md` describe earlier milestones; **do not 
 
 ## Next development session
 
-Inspect `feature/runtime-visibility` first. The next intended engineering milestone is a **usable beta installation workflow** with preflight and rollback safeguards, developed and tested **without** touching live systems. Work in substantial batches; provide one local regression command. Do not assume passing disposable tests means the operator approved deployment.
+Inspect `feature/runtime-visibility` first. The next intended milestone is **isolated snapshot restoration** and failure testing, then coordinated code/config/CA/systemd rollback. Work without touching live systems. Work in substantial batches; provide one local regression command. Do not assume passing disposable tests means the operator approved deployment.
 
 ## Reference index
 
