@@ -34,3 +34,30 @@ isolated test are met; it is **not** permission to deploy.
 Feature-branch and draft PR pushes do not trigger hosted CI. Group work into
 large development batches and schedule full Python 3.13/3.14 CI at intentional
 integration checkpoints. Account billing caps must be configured by the owner.
+
+## Persistent isolated beta staging (new)
+
+The `installer/stage-beta.py` command creates an **inert installation**
+inside an already-existing, administrator-selected test directory. It is
+not a production installer and does not enable services, contact the
+server, or enroll agents. The directory is retained after staging.
+
+Example (only in a disposable test environment, with an explicit CA):
+
+```sh
+python3 installer/build-agent-package.py
+mkdir -m 700 /tmp/arby-beta-root
+python3 installer/stage-beta.py \
+  --root /tmp/arby-beta-root \
+  --server https://patch.example.test \
+  --ca-cert /path/to/trusted-ca.crt
+```
+
+The command rejects `/`, missing roots, symlinked roots, and unsafe
+ownership/permissions. It validates the package, HTTPS origin, and CA
+certificate before staging, then performs a read-only installation audit.
+
+**Important limitation:** staging is not an atomic transaction across all
+files. If a later step fails, the test root may contain partial changes;
+do not reuse a failed root as if it were a verified deployment. This is
+an offline staging milestone, not a production deployment authorization.
