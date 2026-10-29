@@ -19,7 +19,9 @@ input:not([type=checkbox]),select{width:100%}input[type=checkbox]{width:1.1rem;h
 <p class="warn">STAGING MODE — changes are saved but not applied to running services.</p>
 <main class="panel"><h2>Administrator access</h2>
 <label for="token">Admin bearer token (kept in this tab's memory only)</label><input id="token" type="password" autocomplete="off" spellcheck="false">
-<button id="load" type="button">Load settings</button>\n<button id="runtime" type="button">Check runtime gates</button>\n<pre id="runtime-result" role="status" aria-live="polite"></pre>
+<button id="load" type="button">Load settings</button>
+<button id="runtime" type="button">Check runtime gates</button>
+<pre id="runtime-result" role="status" aria-live="polite"></pre>
 <form id="settings" hidden><h2>Server configuration</h2>
 <label for="public_url">Public HTTPS origin</label><input id="public_url" placeholder="https://patch.example.org" autocomplete="off">
 <label for="scan_interval_minutes">Scan interval (minutes)</label><input id="scan_interval_minutes" type="number" min="5" max="10080" required>
