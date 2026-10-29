@@ -59,6 +59,54 @@ class AgentInstallAuditTests(unittest.TestCase):
         self.assertFalse(checks["release_contents_match_archive"])
         self.assertFalse(result["ready"])
 
+    def _installed_release(self):
+        process = subprocess.run([sys.executable, str(INSTALL), str(PACKAGE),
+                                  "--root", str(self.root)], capture_output=True,
+                                 text=True, check=False)
+        self.assertEqual(process.returncode, 0, process.stderr)
+        return self.root / "opt/arby-patch-agent/agent"
+
+    def _source_integrity_ok(self):
+        result = audit.audit(self.root, PACKAGE)
+        return {item["name"]: item["ok"] for item in result["checks"]}[
+            "release_contents_match_archive"]
+
+    def test_symlinked_source_rejected(self):
+        release = self._installed_release()
+        source = release / "config.py"
+        copy = self.root / "config-copy.py"
+        copy.write_bytes(source.read_bytes())
+        source.unlink()
+        source.symlink_to(copy)
+        self.assertFalse(self._source_integrity_ok())
+
+    def test_hardlinked_source_rejected(self):
+        import os
+        release = self._installed_release()
+        source = release / "config.py"
+        os.link(source, self.root / "hardlink.py")
+        self.assertFalse(self._source_integrity_ok())
+
+    def test_symlinked_bytecode_cache_rejected(self):
+        release = self._installed_release()
+        cache = release / "__pycache__"
+        cache.symlink_to(self.root)
+        self.assertFalse(self._source_integrity_ok())
+
+    def test_unexpected_cache_entry_rejected(self):
+        release = self._installed_release()
+        cache = release / "__pycache__"
+        cache.mkdir()
+        (cache / "unexpected.txt").write_text("not bytecode")
+        self.assertFalse(self._source_integrity_ok())
+
+    def test_regular_bytecode_cache_accepted(self):
+        release = self._installed_release()
+        cache = release / "__pycache__"
+        cache.mkdir()
+        (cache / "config.cpython-314.pyc").write_bytes(b"test bytecode")
+        self.assertTrue(self._source_integrity_ok())
+
     def test_cli_failure_json(self):
         process = subprocess.run([sys.executable, str(SCRIPT), "--root", str(self.root),
                                   "--package", str(PACKAGE)], capture_output=True,
