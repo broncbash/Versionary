@@ -74,3 +74,20 @@ This test does **not** start systemd, enroll an agent, or validate live
 server communication. The complete end-to-end enrollment and reporting
 trial remains a separate, explicitly approved beta milestone. CI runs
 only at deliberate checkpoints to minimize GitHub Actions usage.
+
+## Recheck a staged beta without modifying it
+
+After staging, run the same command with `--verify-only`. This validates
+the package and supplied CA, runs the read-only installation integrity audit,
+and compares the persisted server configuration and installed CA against the
+explicit inputs. It returns `status: verified` and `changes_made: false` on
+success; any drift fails closed rather than repairing or replacing files.
+
+```sh
+python3 installer/stage-beta.py --verify-only \
+  --root /tmp/arby-beta-root \
+  --server https://patch.example.test \
+  --ca-cert /path/to/trusted-ca.crt
+```
+
+This is still offline verification, not a live TLS connection or enrollment.
