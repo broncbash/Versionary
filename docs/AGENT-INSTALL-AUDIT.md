@@ -39,3 +39,15 @@ is permitted, but unexpected entries, non-regular bytecode files, symlinks,
 and hardlinks in that directory are rejected. These checks are regression
 coverage for isolated test roots, **not** a guarantee against concurrent
 filesystem races or a substitute for production deployment security review.
+
+## Repeat installation smoke test
+
+The `--test-install` workflow now runs the isolated installation twice. Before
+its second pass, it records the active release target and SHA-256 hashes of
+the installed CA, configuration, service, and timer. It reruns the file, CA,
+configuration, and systemd installers and requires all recorded values to
+remain unchanged. A second read-only integrity audit must also pass.
+
+This verifies repeatability for an identical package and configuration. It
+does not test upgrades to a different package, CA rotation, enrollment,
+production installation, or the running systemd service.
