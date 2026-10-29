@@ -52,3 +52,13 @@ python installer/manage-certificates.py renew \
 configuration and reports readiness without changing services or files. Use
 `--require-network` to require an HTTPS origin. This is **not** a production
 installer and does not activate network features, manage trust, or reload TLS.
+
+## Runtime configuration bridge (staging)
+
+`runtime_configuration.py` computes fail-closed *effective* enrollment/reporting
+flags from validated settings plus explicit environment gates. The separate
+`installer/runtime-status.py` command reports effective status without modifying
+files or services. This bridge is not yet connected to the production routers;
+existing environment-only behavior is unchanged. Integration requires explicit
+review of V2 enrollment isolation before enabling. A settings file by itself
+never activates network features.
