@@ -28,3 +28,20 @@ python installer/manage-certificates.py inspect --cert /path/to/server.crt --hos
 ```
 
 The `check` and `import` commands still require `--key` and `--hostname`.
+
+## Offline certificate renewal checkpoint
+
+`certificate_renewal.py` and `installer/manage-certificates.py renew` issue a **new**
+server certificate/key signed by an existing local CA. Requires a private CA
+key (0600), a valid matching CA certificate, and an **existing empty/private**
+output directory (0700). Refuses overwrites. It does **not** change a TLS
+proxy, rotate CA trust, or restart any service. The caller must validate and
+approve deployment separately. Keep CA keys offline and out of Git.
+
+Example (output directory must already exist and be chmod 700):
+
+```bash
+python installer/manage-certificates.py renew \
+  --ca-cert /secure/ca.crt --ca-key /secure/ca.key \
+  --hostname patch.example.test --destination /secure/new-leaf
+```
