@@ -84,3 +84,7 @@ app.include_router(settings_router)
 # Self-contained staging UI; API access still requires an admin bearer token.
 from settings_ui import router as settings_ui_router
 app.include_router(settings_ui_router)
+
+# Authenticated, read-only beta agent inventory (no feature gates changed).
+from admin_agents_api import router as admin_agents_router
+app.include_router(admin_agents_router)
