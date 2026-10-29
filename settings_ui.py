@@ -6,16 +6,16 @@ router = APIRouter()
 
 PAGE = r'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ARBY PATCH COMMAND | Settings</title>
+<title>Patch Command | Settings</title>
 <style>
-:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#080d17;color:#d8f9ff}
-body{margin:0 auto;max-width:800px;padding:2rem 1rem;background:radial-gradient(circle at 95% 5%,#163449,transparent 45%)}
-h1{letter-spacing:.1em;color:#47f5dc}h2{font-size:1.1rem;color:#69bbff}
-.panel{border:1px solid #2b8098;border-radius:14px;padding:1.5rem;background:#0d1929e8;box-shadow:0 0 24px #08d4cf13}
-label{display:block;margin:1rem 0 .35rem}input,select,button{font:inherit;border-radius:7px;padding:.65rem;background:#101f31;color:#fff;border:1px solid #417c96;box-sizing:border-box}
-input:not([type=checkbox]),select{width:100%}input[type=checkbox]{width:1.1rem;height:1.1rem}button{cursor:pointer;border-color:#35e3cf;margin:.75rem .5rem .25rem 0}button:hover,button:focus-visible{outline:2px solid #45f3dc}
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#0f172a;color:#e2e8f0}
+body{margin:0 auto;max-width:800px;padding:2rem 1rem;background:#0f172a}
+h1{letter-spacing:.1em;color:#93c5fd}h2{font-size:1.1rem;color:#93c5fd}
+.panel{border:1px solid #334155;border-radius:14px;padding:1.5rem;background:#172338;box-shadow:0 0 24px #00000010}
+label{display:block;margin:1rem 0 .35rem}input,select,button{font:inherit;border-radius:7px;padding:.65rem;background:#1e293b;color:#fff;border:1px solid #475569;box-sizing:border-box}
+input:not([type=checkbox]),select{width:100%}input[type=checkbox]{width:1.1rem;height:1.1rem}button{cursor:pointer;border-color:#93c5fd;margin:.75rem .5rem .25rem 0}button:hover,button:focus-visible{outline:2px solid #93c5fd}
 .note{color:#a6b8c9;font-size:.9rem}#status{white-space:pre-wrap;min-height:2em} .warn{color:#ffce7d}
-</style></head><body><h1>ARBY // SETTINGS</h1>
+</style></head><body><h1>Patch Command | Settings</h1>
 <p class="warn">STAGING MODE — changes are saved but not applied to running services.</p>
 <main class="panel"><h2>Administrator access</h2>
 <label for="token">Admin bearer token (kept in this tab's memory only)</label><input id="token" type="password" autocomplete="off" spellcheck="false">
@@ -27,7 +27,7 @@ input:not([type=checkbox]),select{width:100%}input[type=checkbox]{width:1.1rem;h
 <form id="settings" hidden><h2>Server configuration</h2>
 <label for="public_url">Public HTTPS origin</label><input id="public_url" placeholder="https://patch.example.org" autocomplete="off">
 <label for="scan_interval_minutes">Scan interval (minutes)</label><input id="scan_interval_minutes" type="number" min="5" max="10080" required>
-<label for="appearance">Appearance</label><select id="appearance"><option value="cyberpunk">Cyberpunk</option><option value="dark">Dark</option><option value="light">Light</option></select>
+<label for="appearance">Appearance</label><select id="appearance"><option value="cyberpunk">Classic (legacy compatibility)</option><option value="dark">Dark</option><option value="light">Light</option></select>
 <label for="tls_mode">TLS mode</label><select id="tls_mode"><option value="external">External proxy</option><option value="local_ca">Local CA</option><option value="provided">Provided certificate</option></select>
 <label><input id="enrollment_enabled" type="checkbox"> Enable agent enrollment (staged)</label>
 <label><input id="reporting_enabled" type="checkbox"> Enable agent reporting (staged)</label>
