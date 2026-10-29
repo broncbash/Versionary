@@ -55,6 +55,43 @@ class BetaStagingTests(unittest.TestCase):
                                ca_cert="/missing", package="/missing")
                 run.assert_not_called()
 
+    def test_persistent_stage_and_repeat_preserve_files(self):
+        """Exercise the actual staging pipeline without touching live paths."""
+        root_dir = SCRIPT.parents[1]
+        package = root_dir / "installer/dist/arby-patch-agent.tar.gz"
+        if not package.is_file():
+            self.skipTest("Build agent package first (CI builds it before tests)")
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            test_root = base / "isolated-root"
+            test_root.mkdir(mode=0o700)
+            cert_dir = base / "certs"
+            subprocess.run(
+                [sys.executable, str(root_dir / "installer/generate-certificates.py"),
+                 "--hostname", "patch.example.test", "--output", str(cert_dir)],
+                check=True, capture_output=True, text=True, timeout=20)
+            ca = cert_dir / "ca.crt"
+            first = beta.stage(root=test_root, server="https://patch.example.test",
+                               ca_cert=ca, package=package)
+            self.assertEqual(first["status"], "staged")
+            self.assertFalse(first["production_installed"])
+            self.assertFalse(first["systemd_started"])
+            self.assertFalse(first["agent_enrolled"])
+            self.assertFalse(first["network_requests_made"])
+            active = test_root / "opt/arby-patch-agent/agent"
+            config = test_root / "etc/arby-patch-agent/config.json"
+            installed_ca = test_root / "etc/arby-patch-agent/ca.crt"
+            service = test_root / "etc/systemd/system/arby-patch-agent.service"
+            timer = test_root / "etc/systemd/system/arby-patch-agent.timer"
+            before = (os.readlink(active), *(p.read_bytes() for p in
+                      (config, installed_ca, service, timer)))
+            second = beta.stage(root=test_root, server="https://patch.example.test",
+                                ca_cert=ca, package=package)
+            after = (os.readlink(active), *(p.read_bytes() for p in
+                     (config, installed_ca, service, timer)))
+            self.assertEqual(second["status"], "staged")
+            self.assertEqual(before, after)
+
     def test_cli_failure_returns_nonzero(self):
         with tempfile.TemporaryDirectory() as tmp:
             result = subprocess.run(
