@@ -45,3 +45,10 @@ python installer/manage-certificates.py renew \
   --ca-cert /secure/ca.crt --ca-key /secure/ca.key \
   --hostname patch.example.test --destination /secure/new-leaf
 ```
+
+## Installer configuration preflight (read-only)
+
+`python installer/settings-preflight.py --path /path/to/settings.json` validates
+configuration and reports readiness without changing services or files. Use
+`--require-network` to require an HTTPS origin. This is **not** a production
+installer and does not activate network features, manage trust, or reload TLS.
