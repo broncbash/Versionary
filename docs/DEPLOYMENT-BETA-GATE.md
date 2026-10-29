@@ -171,3 +171,25 @@ and disabled reporting gate over actual HTTPS connections. The server remains
 isolated to a temporary directory and IPv4 loopback; these tests do **not**
 enable production agent endpoints or modify any Proxmox container. This is a
 test checkpoint, not authorization to deploy.
+
+## One-command disposable beta self-test
+
+Run from a checkout with Python and the test dependencies installed:
+
+```sh
+python3 installer/beta-selftest.py
+```
+
+This builds the agent archive into a temporary directory, generates a
+throwaway localhost CA, creates a private isolated root, stages the agent,
+repeats the installation, and performs a read-only integrity audit. The
+temporary files are deleted on exit. It does not connect to the server,
+start systemd, enroll an agent, or install anything on the host.
+
+An optional `--smoke-scan` invokes the **local host package scanner** in
+read-only mode after verification. This is off by default and requires the
+appropriate Arch/Debian scanner on the machine running the test.
+
+The JSON report includes `artifacts_retained: false` and
+`production_installed: false`. This does not replace a fresh-container
+beta trial or authorize deployment to CT104/CT102.
