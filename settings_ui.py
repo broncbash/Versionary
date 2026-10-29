@@ -21,6 +21,8 @@ input:not([type=checkbox]),select{width:100%}input[type=checkbox]{width:1.1rem;h
 <label for="token">Admin bearer token (kept in this tab's memory only)</label><input id="token" type="password" autocomplete="off" spellcheck="false">
 <button id="load" type="button">Load settings</button>
 <button id="runtime" type="button">Check runtime gates</button>
+<button id="agents" type="button">View agent inventory</button>
+<pre id="agents-result" role="status" aria-live="polite"></pre>
 <pre id="runtime-result" role="status" aria-live="polite"></pre>
 <form id="settings" hidden><h2>Server configuration</h2>
 <label for="public_url">Public HTTPS origin</label><input id="public_url" placeholder="https://patch.example.org" autocomplete="off">
@@ -64,6 +66,22 @@ $('runtime').addEventListener('click',async()=>{
     $('runtime-result').textContent='Runtime gate: '+(gates.runtime_enabled?'ON':'OFF')+'\nConfiguration valid: '+(gates.configuration_valid?'YES':'NO')+'\nAgent registration: '+(gates.registration_enabled?'ON':'OFF')+'\nAgent reporting: '+(gates.reporting_enabled?'ON':'OFF');
     status('Read-only runtime status loaded. No changes applied.');
   }catch(error){status(error.message);}
+});
+$('agents').addEventListener('click',async()=>{
+  token=$('token').value || token;
+  $('token').value='';
+  if(!token){status('Enter your admin token first.');return;}
+  try{
+    const result=await request('GET',undefined,'/api/v1/admin/agents');
+    const lines=result.agents.map(a=>[
+      a.hostname, a.platform, a.status,
+      a.updates === null ? 'no report' : a.updates+' updates',
+      a.scan_status || 'never scanned'
+    ].join(' | '));
+    $('agents-result').textContent='Registered agents: '+result.count+'\n'+
+      (lines.join('\n') || 'No agents registered');
+    status('Read-only agent inventory loaded.');
+  }catch(error){$('agents-result').textContent='';status(error.message);}
 });
 $('settings').addEventListener('submit',async event=>{
   event.preventDefault();
