@@ -19,7 +19,7 @@ input:not([type=checkbox]),select{width:100%}input[type=checkbox]{width:1.1rem;h
 <p class="warn">STAGING MODE — changes are saved but not applied to running services.</p>
 <main class="panel"><h2>Administrator access</h2>
 <label for="token">Admin bearer token (kept in this tab's memory only)</label><input id="token" type="password" autocomplete="off" spellcheck="false">
-<button id="load" type="button">Load settings</button>
+<button id="load" type="button">Load settings</button>\n<button id="runtime" type="button">Check runtime gates</button>\n<pre id="runtime-result" role="status" aria-live="polite"></pre>
 <form id="settings" hidden><h2>Server configuration</h2>
 <label for="public_url">Public HTTPS origin</label><input id="public_url" placeholder="https://patch.example.org" autocomplete="off">
 <label for="scan_interval_minutes">Scan interval (minutes)</label><input id="scan_interval_minutes" type="number" min="5" max="10080" required>
@@ -35,10 +35,10 @@ const $ = id => document.getElementById(id);
 const keys = ['public_url','scan_interval_minutes','appearance','tls_mode','enrollment_enabled','reporting_enabled'];
 let token = '';
 function status(message){ $('status').textContent = message; }
-async function request(method, data){
+async function request(method, data, endpoint='/api/v1/admin/settings'){
   const headers = {'Authorization':'Bearer '+token};
   if(data !== undefined) headers['Content-Type']='application/json';
-  const response = await fetch('/api/v1/admin/settings',{method,headers,cache:'no-store',credentials:'omit',body:data === undefined ? undefined : JSON.stringify(data)});
+  const response = await fetch(endpoint,{method,headers,cache:'no-store',credentials:'omit',body:data === undefined ? undefined : JSON.stringify(data)});
   const result = await response.json();
   if(!response.ok) throw Error('HTTP '+response.status+': '+(typeof result.detail === 'string' ? result.detail : 'Request rejected'));
   return result;
@@ -51,6 +51,17 @@ $('load').addEventListener('click',async()=>{
   if(!token){status('Enter your admin token.');return;}
   try{const result=await request('GET');populate(result.settings);$('settings').hidden=false;status('Settings loaded. Changes are staged only.');}
   catch(error){token='';status(error.message);}
+});
+$('runtime').addEventListener('click',async()=>{
+  token=$('token').value || token;
+  $('token').value='';
+  if(!token){status('Enter your admin token first.');return;}
+  try{
+    const result=await request('GET',undefined,'/api/v1/admin/settings/runtime-status');
+    const gates=result.runtime;
+    $('runtime-result').textContent='Runtime gate: '+(gates.runtime_enabled?'ON':'OFF')+'\\nConfiguration valid: '+(gates.configuration_valid?'YES':'NO')+'\\nAgent registration: '+(gates.registration_enabled?'ON':'OFF')+'\\nAgent reporting: '+(gates.reporting_enabled?'ON':'OFF');
+    status('Read-only runtime status loaded. No changes applied.');
+  }catch(error){status(error.message);}
 });
 $('settings').addEventListener('submit',async event=>{
   event.preventDefault();
