@@ -132,6 +132,27 @@ if [[ "$MODE" == "test-install" ]]; then
     echo "=== READ-ONLY INSTALLATION AUDIT ==="
     python3 "${SCRIPT_DIR}/audit-test-install.py" --root "$TEST_ROOT" --package "$PACKAGE"
     echo "[OK] Isolated installation integrity verified"
+
+    echo
+    echo "=== IDEMPOTENT REINSTALLATION CHECK ==="
+    BEFORE_RELEASE="$(readlink -- "$TEST_ROOT/opt/arby-patch-agent/agent")"
+    BEFORE_CONFIG="$(sha256sum -- "$TEST_ROOT/etc/arby-patch-agent/config.json" | cut -d ' ' -f 1)"
+    BEFORE_CA="$(sha256sum -- "$TEST_ROOT/etc/arby-patch-agent/ca.crt" | cut -d ' ' -f 1)"
+    BEFORE_SERVICE="$(sha256sum -- "$TEST_ROOT/etc/systemd/system/arby-patch-agent.service" | cut -d ' ' -f 1)"
+    BEFORE_TIMER="$(sha256sum -- "$TEST_ROOT/etc/systemd/system/arby-patch-agent.timer" | cut -d ' ' -f 1)"
+
+    python3 "$INSTALLER" "$PACKAGE" --root "$TEST_ROOT"
+    python3 "$CA_INSTALLER" "$CA_SOURCE" --root "$TEST_ROOT"
+    python3 "${SCRIPT_DIR}/setup-config.py" --root "$TEST_ROOT" --server "$SERVER"
+    python3 "$SYSTEMD_INSTALLER" --root "$TEST_ROOT"
+
+    test "$(readlink -- "$TEST_ROOT/opt/arby-patch-agent/agent")" = "$BEFORE_RELEASE"
+    test "$(sha256sum -- "$TEST_ROOT/etc/arby-patch-agent/config.json" | cut -d ' ' -f 1)" = "$BEFORE_CONFIG"
+    test "$(sha256sum -- "$TEST_ROOT/etc/arby-patch-agent/ca.crt" | cut -d ' ' -f 1)" = "$BEFORE_CA"
+    test "$(sha256sum -- "$TEST_ROOT/etc/systemd/system/arby-patch-agent.service" | cut -d ' ' -f 1)" = "$BEFORE_SERVICE"
+    test "$(sha256sum -- "$TEST_ROOT/etc/systemd/system/arby-patch-agent.timer" | cut -d ' ' -f 1)" = "$BEFORE_TIMER"
+    python3 "${SCRIPT_DIR}/audit-test-install.py" --root "$TEST_ROOT" --package "$PACKAGE"
+    echo "[OK] Identical reinstallation preserved release, CA, config and units"
     echo "[OK] Test root will be removed automatically"
     exit 0
 fi
