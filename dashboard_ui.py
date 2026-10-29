@@ -14,7 +14,7 @@ h1{margin:0;color:#93c5fd;letter-spacing:.1em;font-size:clamp(1.5rem,4vw,2.5rem)
 .sub{color:#9db5c7}.eyebrow{letter-spacing:.2em;color:#8e9fb6;font-size:.75rem}
 a{color:#67c9ff}.panel,.stat,.agent{border:1px solid #334155;background:#172338;border-radius:14px;padding:20px;box-shadow:0 0 24px #00000010}
 .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:24px 0}input,button{font:inherit;border:1px solid #475569;border-radius:8px;background:#1e293b;color:#f8fafc;padding:12px}
-input{min-width:240px;flex:1}button{cursor:pointer;border-color:#93c5fd}button:hover,button:focus-visible,a:focus-visible{outline:2px solid #93c5fd;outline-offset:3px}
+input{min-width:180px;flex:1}select{font:inherit;border:1px solid #475569;border-radius:8px;background:#1e293b;color:#f8fafc;padding:12px}.filters{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 20px}.filters input{max-width:360px}.filters select{min-width:150px}.muted{color:#94a3b8}button{cursor:pointer;border-color:#93c5fd}button:hover,button:focus-visible,a:focus-visible{outline:2px solid #93c5fd;outline-offset:3px}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:24px}
 .stat strong{display:block;font-size:2rem;color:#93c5fd;margin-top:5px}.stat span{color:#a4b8c9}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px}
@@ -34,14 +34,15 @@ footer{margin-top:28px;color:#93aabd;font-size:.85rem}
 <div class="stat"><span>Approved</span><strong id="approved">—</strong></div>
 <div class="stat"><span>Pending</span><strong id="pending">—</strong></div>
 <div class="stat"><span>Reported updates</span><strong id="updates">—</strong></div>
-</section><section class="panel"><h2>Registered agents</h2><div class="grid" id="fleet" aria-live="polite"></div></section>
+</section><section class="panel"><h2>Registered agents</h2><div class="filters" aria-label="Fleet filters"><input id="search" type="search" aria-label="Search agents" placeholder="Search hostname or platform"><select id="status-filter" aria-label="Filter by approval status"><option value="all">All statuses</option><option value="approved">Approved</option><option value="pending">Pending</option><option value="revoked">Revoked</option></select><select id="sort" aria-label="Sort agents"><option value="name">Hostname</option><option value="updates">Most updates</option><option value="contact">Recent contact</option></select></div><p id="results" class="muted" role="status" aria-live="polite"></p><div class="grid" id="fleet" aria-live="polite"></div></section>
 <footer>Read-only dashboard. No scans, approvals, service changes, or deployments are initiated here. Update totals reflect latest successful reports, not live scans.</footer>
 </main><script>
 'use strict';
 const $=id=>document.getElementById(id);
 let credential='';
+let inventory=[];
 function clear(){
-  credential='';$('token').value='';$('fleet').replaceChildren();
+  credential='';inventory=[];$('token').value='';$('fleet').replaceChildren();$('results').textContent='';
   for(const id of ['total','approved','pending','updates']) $(id).textContent='—';
 }
 function node(tag,text,className){
@@ -56,7 +57,17 @@ function render(agents){
   $('approved').textContent=agents.filter(a=>a.status==='approved').length;
   $('pending').textContent=agents.filter(a=>a.status==='pending').length;
   $('updates').textContent=agents.reduce((sum,a)=>sum+(a.scan_status==='success'&&Number.isInteger(a.updates)?a.updates:0),0);
-  for(const a of agents){
+  const query=$('search').value.trim().toLocaleLowerCase();
+  const status=$('status-filter').value;
+  const selected=agents.filter(a=>(status==='all'||a.status===status)&&
+    (String(a.hostname).toLocaleLowerCase().includes(query)||String(a.platform).toLocaleLowerCase().includes(query)));
+  const order=$('sort').value;
+  selected.sort((a,b)=>order==='updates' ?
+    ((b.scan_status==='success'?b.updates:-1)??-1)-((a.scan_status==='success'?a.updates:-1)??-1)||a.hostname.localeCompare(b.hostname) :
+    order==='contact' ? String(b.last_seen||'').localeCompare(String(a.last_seen||''))||a.hostname.localeCompare(b.hostname) :
+    a.hostname.localeCompare(b.hostname));
+  $('results').textContent='Showing '+selected.length+' of '+agents.length+' agents';
+  for(const a of selected){
     const card=node('article','', 'agent');
     card.append(node('h3',a.hostname),node('p',a.platform));
     const meta=node('div','', 'meta');
@@ -70,6 +81,9 @@ function render(agents){
     $('fleet').append(card);
   }
 }
+for(const id of ['search','status-filter','sort']){
+  $(id).addEventListener(id==='search'?'input':'change',()=>render(inventory));
+}
 $('clear').addEventListener('click',()=>{clear();$('message').textContent='Access cleared.';});
 $('refresh').addEventListener('click',async()=>{
   credential=$('token').value||credential;
@@ -82,7 +96,8 @@ $('refresh').addEventListener('click',async()=>{
     });
     if(!response.ok)throw Error('Inventory request failed (HTTP '+response.status+').');
     const data=await response.json();
-    render(data.agents);
+    inventory=data.agents;
+    render(inventory);
     $('message').textContent='Fleet loaded. Read-only snapshot.';
   }catch(error){clear();$('message').textContent=error.message;}
 });
