@@ -75,4 +75,6 @@ def scan_apt_updates(node="PVE CORE", host="192.168.86.5"):
             "error": str(exc),
         }
 def scan_proxmox_updates():
-    return scan_apt_updates("PVE CORE", "192.168.86.5")
+    from scanner_inventory import target
+    config = target("proxmox")
+    return scan_apt_updates(config["node"], config["host"])
