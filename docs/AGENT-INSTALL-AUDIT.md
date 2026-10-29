@@ -60,3 +60,12 @@ switch the active release symlink. This protects the currently selected
 release when staging or activation fails. A rejected reinstall can still
 leave pre-existing tampered files in place; these tests do **not** claim
 automatic repair or rollback of all installer side effects.
+
+## Configuration and CA conflict regression tests
+
+Additional tests exercise rejected server-origin changes, CA path changes,
+symlinked configuration files, replacement CA certificates, mismatched CA
+fingerprints, and hardlinked installed CA certificates. In each rejected
+case, the existing configuration or CA bytes must remain unchanged. This
+is not an automatic certificate rotation or migration workflow; intentional
+trust changes will require a separate administrator-approved procedure.
