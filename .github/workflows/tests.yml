@@ -1,11 +1,16 @@
 name: Python tests
 
+# Cost control: feature-branch commits and draft PR updates do not
+# automatically consume hosted runner minutes. Run manually at checkpoints,
+# or automatically when a PR is marked ready for review.
 on:
+  workflow_dispatch:
   push:
     branches:
       - develop
-      - 'feature/**'
   pull_request:
+    types:
+      - ready_for_review
     branches:
       - develop
       - main
@@ -13,10 +18,15 @@ on:
 permissions:
   contents: read
 
+# If a newer run supersedes an older one for the same ref, stop the older run.
+concurrency:
+  group: python-tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   unittest:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
