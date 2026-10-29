@@ -51,3 +51,12 @@ remain unchanged. A second read-only integrity audit must also pass.
 This verifies repeatability for an identical package and configuration. It
 does not test upgrades to a different package, CA rotation, enrollment,
 production installation, or the running systemd service.
+
+## Failed reinstall and activation regression coverage
+
+The release transaction tests also verify that rejected source tampering,
+unsafe Python bytecode caches, and simulated activation failures do not
+switch the active release symlink. This protects the currently selected
+release when staging or activation fails. A rejected reinstall can still
+leave pre-existing tampered files in place; these tests do **not** claim
+automatic repair or rollback of all installer side effects.
