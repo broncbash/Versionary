@@ -44,6 +44,7 @@ def switch_and_restore(*, root, package):
     root = require_test_root(root)
     app = root / "opt/arby-patch-agent"
     atomic = load("atomic-release.py", "patch_release_switch")
+    recovery = load("release-recovery.py", "patch_release_recovery")
     validator = load("validate-package.py", "patch_release_validator")
     modules = validator.load_modules(Path(package))
     # Existing root must already have a valid active release. The switch is
@@ -55,12 +56,13 @@ def switch_and_restore(*, root, package):
         # Verify the original release before allowing any switch.
         atomic.activate_release(app, previous)
         candidate = atomic.stage_release(app, modules)
+        recovery.write(root, previous=previous, candidate=candidate)
         try:
             atomic.activate_release(app, candidate)
             if active_identifier(app) != candidate:
                 raise RuntimeError("Candidate activation mismatch")
         finally:
-            atomic.activate_release(app, previous)
+            recovery.recover(root, atomic)
         if active_identifier(app) != previous:
             raise RuntimeError("Release restoration mismatch")
     return {
@@ -73,6 +75,7 @@ def switch_and_restore(*, root, package):
         "systemd_started": False,
         "agent_enrolled": False,
         "configuration_changed": False,
+        "recovery_marker_cleared": True,
     }
 
 
