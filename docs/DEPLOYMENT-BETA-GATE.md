@@ -91,3 +91,24 @@ python3 installer/stage-beta.py --verify-only \
 ```
 
 This is still offline verification, not a live TLS connection or enrollment.
+
+## Opt-in local smoke scan
+
+After verifying the staged beta, `--verify-only --smoke-scan` executes
+`python -B -m agent scan` from the staged release. This queries the **host's**
+local package manager in read-only mode; it does not enroll, send reports,
+start systemd, or contact PATCH COMMAND. The scan is explicitly optional
+because it invokes the host's package-query command, unlike a pure
+filesystem integrity check.
+
+```sh
+python3 installer/stage-beta.py --verify-only --smoke-scan \
+  --root /tmp/arby-beta-root \
+  --server https://patch.example.test \
+  --ca-cert /path/to/trusted-ca.crt
+```
+
+The JSON output includes `scan_status`; a scan error fails the command.
+This does **not** establish end-to-end server communication or authorize
+production deployment. The test container must provide the appropriate
+`checkupdates` or `apt` package scanner.
