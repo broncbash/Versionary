@@ -25,6 +25,8 @@ The user interface uses the name **Patch Command**. Some internal paths, identif
 - [Beta evaluation](BETA-EVALUATION.md) — isolated candidate evaluation.
 - [Deployment gate](docs/DEPLOYMENT-BETA-GATE.md) — conditions before any real deployment.
 - [Runtime visibility](docs/RUNTIME-VISIBILITY.md) — feature-gate behavior.
+- [Isolated release recovery](docs/RELEASE-SWITCH-TRIAL.md) — interrupted code-release trial inspection and explicit recovery.
+- [Installation snapshots](docs/INSTALLATION-SNAPSHOT.md) — experimental private asset snapshots, verification, and current restoration limitations.
 
 ## Local development verification
 
@@ -34,7 +36,7 @@ From a checkout with a working `.venv` and installed project dependencies:
 bash installer/local-check.sh --protocol-check
 ```
 
-This builds the agent package, runs the Python regression suite, and then runs disposable HTTPS acceptance. The latest **user-reported** checkpoint on 2026-10-29 was **622 tests passed**, plus passing isolated HTTPS acceptance. This result applies to that checkout, not automatically to future commits.
+This builds the agent package, runs the Python regression suite, and then runs disposable HTTPS acceptance. The latest **user-reported** checkpoint on 2026-10-29 was **655 tests passed**, plus passing isolated HTTPS acceptance. This result applies to that checkout, not automatically to future commits.
 
 To evaluate the beta candidate separately:
 
