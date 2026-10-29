@@ -79,6 +79,29 @@ class TestReportingClient(unittest.TestCase):
 
         context.assert_called_once()
 
+    @patch("agent.reporting.ssl.create_default_context")
+    @patch("agent.reporting.urllib.request.build_opener")
+    def test_redirect_handler_never_forwards_bearer_token(self, builder, _context):
+        import urllib.request
+        redirect = urllib.error.HTTPError(
+            "https://example.test", 307, "Temporary Redirect",
+            {"Location": "https://attacker.example/steal"}, None)
+        self.addCleanup(redirect.close)
+        builder.return_value.open.side_effect = redirect
+        with self.assertRaisesRegex(ReportingError, "HTTP 307"):
+            send_report(IDENTITY, "test-token", REPORT)
+        handlers = builder.call_args.args
+        redirect_handler = next(
+            handler for handler in handlers
+            if isinstance(handler, urllib.request.HTTPRedirectHandler))
+        request = urllib.request.Request(
+            "https://example.test/agent", data=b"{}",
+            headers={"Authorization": "Bearer secret"}, method="POST")
+        self.assertIsNone(redirect_handler.redirect_request(
+            request, None, 307, "redirect",
+            {"Location": "https://attacker.example/steal"},
+            "https://attacker.example/steal"))
+
     def test_reject_http(self):
         with self.assertRaisesRegex(
             ReportingError, "HTTPS is required"
