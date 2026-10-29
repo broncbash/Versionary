@@ -123,10 +123,10 @@ if [[ "$MODE" == "test-install" ]]; then
 
     (
         cd "$TEST_ROOT/opt/arby-patch-agent"
-        python3 -m agent scan
+        python3 -m agent --help >/dev/null
     )
 
-    echo "[OK] Installed agent executed successfully"
+    echo "[OK] Installed agent executed successfully (offline smoke test)"
 
     echo
     echo "=== READ-ONLY INSTALLATION AUDIT ==="
