@@ -33,8 +33,15 @@ class BetaSelftestTests(unittest.TestCase):
 
     def test_protocol_failure_fails_closed(self):
         import subprocess
-        with patch.object(beta.subprocess, "run", return_value=subprocess.CompletedProcess(
-                ["python", "-m", "unittest"], 1, "", "simulated TLS failure")):
+        real_run = subprocess.run
+
+        def fail_protocol_only(command, *args, **kwargs):
+            if "tests.test_beta_tls_journey" in command:
+                return subprocess.CompletedProcess(
+                    command, 1, "", "simulated TLS failure")
+            return real_run(command, *args, **kwargs)
+
+        with patch.object(beta.subprocess, "run", side_effect=fail_protocol_only):
             with self.assertRaisesRegex(RuntimeError, "Real TLS protocol check failed"):
                 beta.run(protocol_check=True)
 
