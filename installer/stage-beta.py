@@ -23,7 +23,7 @@ def module(filename, name):
     return result
 
 
-def stage(*, root, server, ca_cert, package=DEFAULT_PACKAGE, verify_only=False):
+def stage(*, root, server, ca_cert, package=DEFAULT_PACKAGE, verify_only=False, smoke_scan=False):
     root = Path(root).absolute()
     if root == Path("/") or root.is_symlink() or not root.is_dir():
         raise ValueError("A pre-existing non-root test directory is required")
@@ -45,6 +45,8 @@ def stage(*, root, server, ca_cert, package=DEFAULT_PACKAGE, verify_only=False):
         raise ValueError("Agent package must be a regular file")
     validator.validate(package)
 
+    if smoke_scan and not verify_only:
+        raise ValueError("--smoke-scan requires --verify-only")
     if verify_only:
         audit = module("audit-test-install.py", "arby_beta_audit")
         result = audit.audit(root, package)
@@ -57,10 +59,29 @@ def stage(*, root, server, ca_cert, package=DEFAULT_PACKAGE, verify_only=False):
             raise ValueError("Existing beta configuration does not match requested server")
         if installed_ca.read_bytes() != ca_source.read_bytes():
             raise ValueError("Existing beta CA does not match supplied certificate")
+        scan_status = "not-requested"
+        if smoke_scan:
+            result = subprocess.run(
+                [sys.executable, "-B", "-m", "agent", "scan"],
+                cwd=str(root / "opt/arby-patch-agent"),
+                env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+                capture_output=True, text=True, timeout=150, check=False,
+            )
+            try:
+                report = json.loads(result.stdout)
+            except (ValueError, TypeError):
+                raise ValueError("Staged agent returned invalid scan JSON") from None
+            if not isinstance(report, dict) or report.get("status") not in ("success", "error"):
+                raise ValueError("Staged agent returned an invalid scan report")
+            if result.returncode != (0 if report["status"] == "success" else 1):
+                raise ValueError("Staged agent scan exit status is inconsistent")
+            scan_status = report["status"]
+            if scan_status != "success":
+                raise ValueError("Staged agent scan reported an error")
         return {"status": "verified", "mode": "isolated-beta", "root": str(root),
                 "production_installed": False, "systemd_started": False,
                 "agent_enrolled": False, "network_requests_made": False,
-                "changes_made": False}
+                "changes_made": False, "scan_status": scan_status}
 
     for script, args in (
         ("install-files.py", [str(package), "--root", str(root)]),
@@ -88,13 +109,16 @@ def main(argv=None):
     parser.add_argument("--server", required=True)
     parser.add_argument("--ca-cert", required=True)
     parser.add_argument("--package", default=str(DEFAULT_PACKAGE))
+    parser.add_argument("--smoke-scan", action="store_true",
+                        help="With --verify-only, run a read-only local package scan")
     parser.add_argument("--verify-only", action="store_true",
                         help="Audit existing isolated staging without changes")
     args = parser.parse_args(argv)
     try:
         print(json.dumps(stage(root=args.root, server=args.server,
                                ca_cert=args.ca_cert, package=args.package,
-                               verify_only=args.verify_only), indent=2))
+                               verify_only=args.verify_only,
+                               smoke_scan=args.smoke_scan), indent=2))
         return 0
     except (OSError, ValueError, RuntimeError, subprocess.CalledProcessError) as exc:
         print(f"[ERROR] Beta staging failed: {exc}", file=sys.stderr)
