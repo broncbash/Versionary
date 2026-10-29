@@ -23,7 +23,7 @@ def module(filename, name):
     return result
 
 
-def stage(*, root, server, ca_cert, package=DEFAULT_PACKAGE):
+def stage(*, root, server, ca_cert, package=DEFAULT_PACKAGE, verify_only=False):
     root = Path(root).absolute()
     if root == Path("/") or root.is_symlink() or not root.is_dir():
         raise ValueError("A pre-existing non-root test directory is required")
@@ -44,6 +44,23 @@ def stage(*, root, server, ca_cert, package=DEFAULT_PACKAGE):
     if package.is_symlink() or not package.is_file():
         raise ValueError("Agent package must be a regular file")
     validator.validate(package)
+
+    if verify_only:
+        audit = module("audit-test-install.py", "arby_beta_audit")
+        result = audit.audit(root, package)
+        if not result["ready"]:
+            raise ValueError("Existing beta installation failed integrity audit")
+        installed_config = root / "etc/arby-patch-agent/config.json"
+        installed_ca = root / "etc/arby-patch-agent/ca.crt"
+        expected = {"server": server, "ca_cert": "/etc/arby-patch-agent/ca.crt"}
+        if json.loads(installed_config.read_text(encoding="utf-8")) != expected:
+            raise ValueError("Existing beta configuration does not match requested server")
+        if installed_ca.read_bytes() != ca_source.read_bytes():
+            raise ValueError("Existing beta CA does not match supplied certificate")
+        return {"status": "verified", "mode": "isolated-beta", "root": str(root),
+                "production_installed": False, "systemd_started": False,
+                "agent_enrolled": False, "network_requests_made": False,
+                "changes_made": False}
 
     for script, args in (
         ("install-files.py", [str(package), "--root", str(root)]),
@@ -71,10 +88,13 @@ def main(argv=None):
     parser.add_argument("--server", required=True)
     parser.add_argument("--ca-cert", required=True)
     parser.add_argument("--package", default=str(DEFAULT_PACKAGE))
+    parser.add_argument("--verify-only", action="store_true",
+                        help="Audit existing isolated staging without changes")
     args = parser.parse_args(argv)
     try:
         print(json.dumps(stage(root=args.root, server=args.server,
-                               ca_cert=args.ca_cert, package=args.package), indent=2))
+                               ca_cert=args.ca_cert, package=args.package,
+                               verify_only=args.verify_only), indent=2))
         return 0
     except (OSError, ValueError, RuntimeError, subprocess.CalledProcessError) as exc:
         print(f"[ERROR] Beta staging failed: {exc}", file=sys.stderr)
