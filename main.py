@@ -71,3 +71,7 @@ app.include_router(reporting_router)
 # Admin-only staging endpoints; settings are not automatically applied.
 from server_settings_api import router as settings_router
 app.include_router(settings_router)
+
+# Self-contained staging UI; API access still requires an admin bearer token.
+from settings_ui import router as settings_ui_router
+app.include_router(settings_ui_router)
