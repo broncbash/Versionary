@@ -4,6 +4,7 @@ A settings file alone cannot activate network features. Activation additionally
 requires the existing per-feature environment gate and an explicit runtime gate.
 """
 import os
+from pathlib import Path
 from server_settings import DEFAULT_PATH, SettingsError, load
 
 
@@ -19,7 +20,11 @@ def effective_flags(settings_path=None):
     if not result['runtime_enabled']:
         return result
     try:
-        settings = load(settings_path or os.environ.get('ARBY_SETTINGS_PATH', str(DEFAULT_PATH)))
+        selected_path = Path(settings_path or os.environ.get('ARBY_SETTINGS_PATH', str(DEFAULT_PATH)))
+        # Defaults are safe, but an absent file is not a valid activation config.
+        if not selected_path.is_file() or selected_path.is_symlink():
+            return result
+        settings = load(selected_path)
     except (SettingsError, OSError, ValueError):
         return result
     result['configuration_valid'] = True
