@@ -162,3 +162,12 @@ real sockets, TLS certificate verification, and HTTP response handling.
 It does not bind a LAN address, use a production database, start systemd,
 or contact the homelab. Live TLS reporting and clean-container lifecycle
 validation remain separate deployment gates.
+
+## Real TLS reporting checkpoint
+
+The loopback TLS suite now also exercises an enrolled agent's authenticated
+heartbeat, update-report submission, SQLite persistence, credential revocation,
+and disabled reporting gate over actual HTTPS connections. The server remains
+isolated to a temporary directory and IPv4 loopback; these tests do **not**
+enable production agent endpoints or modify any Proxmox container. This is a
+test checkpoint, not authorization to deploy.
