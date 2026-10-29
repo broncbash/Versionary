@@ -193,3 +193,22 @@ appropriate Arch/Debian scanner on the machine running the test.
 The JSON report includes `artifacts_retained: false` and
 `production_installed: false`. This does not replace a fresh-container
 beta trial or authorize deployment to CT104/CT102.
+
+## Optional real-TLS protocol acceptance
+
+The disposable self-test also supports:
+
+```sh
+python3 installer/beta-selftest.py --protocol-check
+```
+
+After staging and auditing, this runs the loopback-only real HTTPS
+integration suite in a separate Python process. It tests enrollment,
+approval, credentials, heartbeat, report persistence, revocation, and
+disabled gates using disposable TLS certificates and SQLite storage.
+No production server is contacted. The JSON distinguishes loopback
+network traffic (`network_requests_made: true`) from external network
+traffic (`external_network_requests_made: false`); the latter is a
+property of the test design, not a network sandbox guarantee. Failure
+of the TLS suite fails the entire self-test. This option requires the
+repository test dependencies (including FastAPI, Uvicorn, cryptography).
