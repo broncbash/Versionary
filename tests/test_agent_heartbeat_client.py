@@ -38,9 +38,9 @@ class TestHeartbeatClient(unittest.TestCase):
 
 
     @patch("agent.heartbeat.ssl.create_default_context")
-    @patch("agent.heartbeat.urllib.request.urlopen")
-    def test_success(self, urlopen, context):
-        urlopen.return_value = FakeResponse(
+    @patch("agent.heartbeat.urllib.request.build_opener")
+    def test_success(self, builder, context):
+        builder.return_value.open.return_value = FakeResponse(
             json.dumps({
                 "status": "ok",
             }).encode()
@@ -53,7 +53,7 @@ class TestHeartbeatClient(unittest.TestCase):
 
         self.assertEqual(result["status"], "ok")
 
-        request = urlopen.call_args.args[0]
+        request = builder.return_value.open.call_args.args[0]
 
         self.assertEqual(
             request.get_header("Authorization"),
@@ -71,8 +71,8 @@ class TestHeartbeatClient(unittest.TestCase):
             )
 
     @patch("agent.heartbeat.ssl.create_default_context")
-    @patch("agent.heartbeat.urllib.request.urlopen")
-    def test_unauthorized(self, urlopen, _context):
+    @patch("agent.heartbeat.urllib.request.build_opener")
+    def test_unauthorized(self, builder, _context):
         error = urllib.error.HTTPError(
             "https://example.test",
             401,
@@ -81,7 +81,7 @@ class TestHeartbeatClient(unittest.TestCase):
             None,
         )
         self.addCleanup(error.close)
-        urlopen.side_effect = error
+        builder.return_value.open.side_effect = error
 
         with self.assertRaisesRegex(
             HeartbeatError, "authentication rejected"
@@ -89,8 +89,8 @@ class TestHeartbeatClient(unittest.TestCase):
             send_heartbeat(IDENTITY, "test-token")
 
     @patch("agent.heartbeat.ssl.create_default_context")
-    @patch("agent.heartbeat.urllib.request.urlopen")
-    def test_reporting_disabled(self, urlopen, _context):
+    @patch("agent.heartbeat.urllib.request.build_opener")
+    def test_reporting_disabled(self, builder, _context):
         error = urllib.error.HTTPError(
             "https://example.test",
             503,
@@ -99,7 +99,7 @@ class TestHeartbeatClient(unittest.TestCase):
             None,
         )
         self.addCleanup(error.close)
-        urlopen.side_effect = error
+        builder.return_value.open.side_effect = error
 
         with self.assertRaisesRegex(
             HeartbeatError, "reporting is disabled"
@@ -107,9 +107,9 @@ class TestHeartbeatClient(unittest.TestCase):
             send_heartbeat(IDENTITY, "test-token")
 
     @patch("agent.heartbeat.ssl.create_default_context")
-    @patch("agent.heartbeat.urllib.request.urlopen")
-    def test_invalid_response(self, urlopen, _context):
-        urlopen.return_value = FakeResponse(
+    @patch("agent.heartbeat.urllib.request.build_opener")
+    def test_invalid_response(self, builder, _context):
+        builder.return_value.open.return_value = FakeResponse(
             json.dumps(["unexpected"]).encode()
         )
 
