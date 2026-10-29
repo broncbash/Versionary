@@ -7,13 +7,11 @@ server, or changes the host. Production installation remains disabled.
 import argparse
 import importlib.util
 import json
-import os
-import platform
 import shutil
 import stat
+import tarfile
 import sys
 from pathlib import Path
-from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -70,7 +68,7 @@ def inspect(*, server=None, ca_cert=None, package=None, os_release="/etc/os-rele
     valid_package = False
     try:
         valid_package = pkg.is_file() and not pkg.is_symlink() and validator.validate(pkg) > 0
-    except (OSError, ValueError, Exception) as exc:
+    except (OSError, ValueError, tarfile.TarError):
         # Validator may raise tarfile.TarError for malformed archives.
         valid_package = False
     check("agent_package", valid_package, "Validated agent distribution archive available")
