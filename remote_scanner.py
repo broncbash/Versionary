@@ -19,7 +19,7 @@ def scan_apt_updates(node="PVE CORE", host="192.168.86.5"):
 
     try:
         result = subprocess.run(
-            ["/usr/bin/ssh", *command_options(host),
+            ["/usr/bin/ssh", *command_options(host)],
             capture_output=True,
             text=True,
             timeout=30,
