@@ -1,80 +1,120 @@
-# ARBY PATCH COMMAND — Project status and handoff
+# Patch Command — Comprehensive Project Handoff
 
-**Updated:** 2026-10-29  
+**Checkpoint date:** 2026-10-29  
 **Repository:** `broncbash/arby-patch-command` (private)  
-**Active branch:** `feature/settings-certificates`  
-**Verified remote head at time of writing:** `bac34fcacc1987ff86a6f7ad41564ca70932f75c`  
-**Status:** Development only; **not approved for production deployment**.
+**Development branch:** `feature/runtime-visibility`  
+**Integration target:** `develop` (draft PR #1); `main` remains baseline  
+**Deployment status:** experimental development; **no production rollout authorized**
 
-## Read this first
+> **Provenance:** This is a total AI slop project: predominantly AI-generated code, tests and documentation, directed and checked by a human operator. Passing automated tests does not constitute an independent security audit or production endorsement.
 
-This document is the durable handoff for future development sessions. **Inspect the repository and branch head before modifying code.** Treat the code and current test results as authoritative over older chat summaries or checkpoint archives. Do not assume unpushed work exists in GitHub.
+## Mandatory handoff procedure
 
-The user prefers **substantial coordinated batches**, few interruptions, direct GitHub updates, and clear short reports. Do not ask the user to say “go” after every checkpoint. Make safe development changes on a feature branch, run tests, and prepare a pull request. Ask before any production deployment or destructive action. The user prefers **Arch Linux**, **nvim** when editing manually, and complete copy/paste commands rather than piecemeal edits when terminal action is necessary.
+1. Inspect the **actual remote branch head, tree, and relevant source** before editing. This document is a snapshot, not authority over later commits.
+2. Read `README.md`, `docs/USER-MANUAL.md`, and the relevant technical docs.
+3. Develop substantial coordinated batches directly on the feature branch; avoid excessive interactive checkpoints.
+4. Commit changes to the feature branch; **do not merge, deploy, restart services, or enable network gates without approval**.
+5. Give one local copy/paste verification command and wait for the operator's actual results. Do not claim tests passed if only code was committed.
+6. Update this handoff and manual when behavior changes.
 
-## Environment and workflow
+## Current verified checkpoint
 
-- Development workstation: Arch Linux desktop; user previously verified Python **3.14.8** and the project venv.
-- Source of truth: private GitHub repository, with `main` as stable baseline, `develop` for integration, and feature branches for work. Current branch: `feature/settings-certificates`.
-- Production server: Proxmox **CT 104**, Arch Linux, running the existing ARBY PATCH COMMAND service. **Do not change CT 104 without explicit user approval.**
-- Monitoring: **CT 102** runs monitoring and a legacy V1 agent. **Do not change CT 102 without explicit user approval.**
-- Production behavior is observer-only: no unattended package upgrades, automatic reboots, or automatic deployment.
-- V2 enrollment/reporting and new TLS settings must remain isolated from the production service until explicitly reviewed and approved.
-- Preferred delivery: commit and push tested changes to the feature branch, then open a PR to `develop`; do not merge or deploy automatically. Before any production rollout, plan backup, migration, verification and rollback.
+The operator reported the following from their Arch Linux desktop on 2026-10-29:
 
-## Confirmed GitHub progress
+```
+Ran 622 tests in 7.759s
+OK
+[Patch Command] PASS
+[Patch Command] Running isolated beta HTTPS acceptance...
+"status": "passed"
+"tls_protocol_check": "passed"
+"production_installed": false
+"systemd_started": false
+"agent_enrolled": false
+"external_network_requests_made": false
+```
 
-The repository currently contains Build 2's settings foundation and the following Build 3 feature commits on `feature/settings-certificates`:
+This verified the code through commit `3d9dc53` on `feature/runtime-visibility`, **not** later documentation or code changes. The isolated shell installer smoke test was changed to invoke the installed agent CLI help rather than depend on live Arch package mirrors. The optional real scan remains separately testable.
 
-| Commit | Confirmed milestone | Desktop tests reported |
-| --- | --- | --- |
-| `a3f2e2f` | Certificate import/validation and staging Settings UI | 444 passed |
-| `26b14a1` | Certificate inspection and expiration warnings | 451 passed |
-| `22ed10a` | Offline server-leaf certificate renewal | 458 passed |
-| `2c085b9` | Read-only installer settings preflight | 465 passed |
-| `bac34fc` | Fail-closed runtime configuration bridge | 471 passed |
+**Local verification command:**
 
-**Important synchronization note:** Two later archives were offered in chat: a runtime-status UI/API integration (476 tests claimed in the assistant's isolated environment) and settings hardening (481 tests claimed). **Neither has been confirmed applied or pushed to GitHub.** They must not be described as present in the repository. Inspect the GitHub files before reimplementing or integrating those ideas. All numbered test counts above are user-reported desktop results except where explicitly labeled otherwise; rerun tests for any new change.
+```bash
+cd ~/Projects/arby-patch-command && git pull --ff-only && bash installer/local-check.sh --protocol-check
+```
 
-## Existing functionality (staged, not live)
+Full unittest log defaults to `/tmp/arby-tests.log`. Hosted CI is manual/checkpoint-oriented; avoid triggering GitHub Actions casually.
 
-- `server_settings.py`: schema validation and private atomic JSON settings persistence.
-- `server_settings_api.py`: administrator-authenticated settings GET/PATCH endpoints; API responses explicitly indicate `applied: false`.
-- `settings_ui.py`: preliminary cyberpunk-themed Settings page with in-memory bearer-token entry; staging only.
-- `installer/settings-cli.py`: settings read/write CLI.
-- `installer/generate-certificates.py`: local certificate generation foundation.
-- `certificate_management.py` and `installer/manage-certificates.py`: certificate/key validation, non-overwriting import, and certificate inspection.
-- `certificate_renewal.py`: offline server certificate/key renewal using an existing CA; no live proxy reload or trust rotation.
-- `installer/settings-preflight.py`: read-only configuration readiness checks.
-- `runtime_configuration.py` and `installer/runtime-status.py`: fail-closed effective flag evaluation and read-only reporting; **not connected to production routers**.
-- Existing agent registry, approval/revocation, credential authentication, heartbeats, scan reporting and legacy SSH scanner components remain in the repository; confirm precise routing and integration in code.
+## Architecture and implementation
 
-See `BUILD3-NOTES.md` and `README-PORTABILITY.md` for command examples and limitations. Those documents contain older checkpoint wording; do not interpret every older “not implemented” statement as current without checking source.
+**Server:** FastAPI `main.py` with health endpoint, legacy local/SSH update scanner endpoints, agent-related routers, admin inventory and browser UI. Legacy endpoints are still present while the agent architecture matures.
 
-## Product requirements and decisions
+**Persistence:** SQLite registry in `agent_registry.py` stores agents, states, reports, and credential hashes. Existing deployment uses a legacy data path; tests use disposable databases. Never overwrite a live database or copy secrets into Git.
 
-1. **Portable product** for other users, not tied to ARBY hostnames, IPs, CA fingerprints, or the current homelab. Avoid hard-coded deployment assumptions.
-2. **Friendly interactive installer** and **scriptable noninteractive CLI** for both server and agents, with equivalent administration capabilities where practical.
-3. **Web GUI Settings** for server and agent configuration, with equivalent CLI options. Changes should be validated, authorized, auditable, and have safe apply/rollback semantics.
-4. **TLS certificate management:** support importing user-supplied certificate/private key and easy generation/management for nonexperts; validate certificate/key match and hostname/IP SAN; securely distribute CA trust to agents; support renewal and eventual CA rotation without silent trust changes. Never commit keys or secrets.
-5. **Secure agent lifecycle:** registration, explicit approval, credential issuance/revocation, authenticated reporting, and eventual easy discovery/onboarding. Do not expose V2 enrollment in production by default.
-6. **Observer-only patch dashboard** initially; no automatic updates or reboots.
-7. **Appearance:** cyberpunk/dark-glass UI is preferred, with user-configurable appearance.
-8. **Future branding:** rename ARBY PATCH COMMAND to a professional standalone product name **before packaging/release**, but **do not rename prematurely**.
+**Agent:** Python package under `agent/`; identity, credential handling, registration/enrollment, heartbeat, scan and reporting modules. Targets Arch and Debian. Ed25519 challenge/response and trusted TLS are exercised in isolated protocol tests.
 
-## Outstanding engineering work (not yet verified complete)
+**Administrator surface:** `admin_agents_api.py` exposes read-only `/api/v1/admin/agents`, requiring admin auth. `dashboard_ui.py` provides `/admin/dashboard`, with online/attention counts, update totals, agent health, search/filter/sort. `settings_ui.py` provides `/admin/settings`, with staged settings and runtime visibility. Tokens are entered for API requests rather than intentionally persisted by the page.
 
-- Connect validated settings to the actual server lifecycle and routing, preserving fail-closed behavior and production V2 isolation.
-- Finish Settings GUI and CLI parity; secure certificate upload/generation/inspection/renewal workflows with explicit apply and rollback.
-- Implement safe TLS termination integration, CA trust enrollment and renewal/rotation policy.
-- Finish server and agent installers, service units, portable configuration and migration handling.
-- Add end-to-end tests for TLS handshakes, agent enrollment/approval/reporting, certificate trust and failure cases.
-- Audit auth, file permissions, atomic writes, certificate handling, logging and secrets.
-- Add CI to run tests on supported Python versions; test on user's Arch desktop before release.
-- Plan staged deployment with backups, health checks and rollback; **never touch CT 104 or CT 102 without approval**.
+**Health classification:** approved agents with a valid recent heartbeat (within 30 minutes) are online; stale/no-contact/unknown cases are distinct. Pending and revoked states are not reported as online. Invalid or future timestamps must not be treated as healthy.
 
-## Recommended next action
+**Settings:** `server_settings.py`, `server_settings_api.py`, `runtime_configuration.py`, `runtime_status_api.py` and installer CLI tools provide validation, staged persistence and fail-closed visibility. Settings alone never grant production activation. Legacy environment gates remain part of compatibility and must not be bypassed.
 
-Work directly against `feature/settings-certificates` through the connected GitHub integration. Review the current implementation, then develop the next **coordinated** installer/configuration integration batch, run tests, push to the feature branch, and open a PR to `develop` for review. Keep `main` stable. Update this handoff document after meaningful milestones and note exact commit hashes and test environments.
+**Certificates:** `certificate_management.py`, `certificate_renewal.py`, `installer/manage-certificates.py` and generation helpers provide offline certificate handling. They do not imply live TLS termination, automatic CA rotation, or proxy reload.
 
-**Security boundary:** Source-control changes are authorized development work; they are **not** permission to deploy, enable agent enrollment/reporting, rotate live certificates, or change any production host.
+**Installation:** `installer/build-agent-package.py`, `validate-package.py`, `install-files.py`, `install-ca.py`, `setup-config.py`, `install-systemd.py`, `stage-beta.py`, `audit-test-install.py`, `agent-preflight.py`, `deployment-readiness.py`, `beta-selftest.py`, and `beta-evaluate.py` support packaging, secure filesystem operations, inert staging and disposable verification. `installer/install-agent.sh --install` remains **disabled**.
+
+**Security design:** restrictive private directories, non-following file operations, validated archive contents, atomic release and integrity mechanisms, staged certificate validation, explicit agent approval and credential revocation. These are engineering intentions with automated tests, **not** an independent security certification.
+
+## Homelab deployment boundary
+
+- Proxmox VE 9 mini PC; current live service on **CT104** (Arch Linux).
+- **CT102** (Arch Linux) runs monitoring and has legacy integration.
+- CT100 Debian DNS; CT101 Debian Docker; CT103 Arch Tailscale subnet router.
+- The new feature branch is **not** presumed installed on any of these.
+- **Never modify CT104 or CT102 without explicit operator approval.** Do not silently change other live containers either.
+- No unattended package upgrades, automatic reboots, unsolicited agent enrollment, or automatic service restarts.
+
+## Product and naming decisions
+
+The public-facing product name is **Patch Command**, with restrained professional UI styling. Do not reintroduce the older branding or aesthetic terminology in visible UI, messages, or new code. Some old internal identifiers, paths, service unit names, environment variables and persisted settings values must remain until a deliberate compatibility migration is designed and tested. Use neutral language in new code where feasible.
+
+The repository must **clearly disclose AI authorship**. The README includes the user's exact requested wording, alongside an explicit caution that independent review is required. Avoid pretending the project has been professionally audited.
+
+## Development milestones completed
+
+- Registry, agent approval/revocation, token/credential lifecycle, heartbeat and report storage.
+- Feature-gated agent API and staged settings/runtime-status interfaces.
+- Offline certificate import/inspection/renewal foundations.
+- Package builder and archive validation, private-state-safe installer components, atomic release handling and filesystem hardening tests.
+- Isolated beta staging, repeated-installation integrity audit, and disposable loopback TLS enrollment/reporting acceptance.
+- Authenticated read-only agent inventory and professional fleet dashboard, including search/filter/sort and conservative health indicators.
+- Offline beta evaluation wrapper and user-reported 622-test checkpoint.
+- Fixed flaky shell-installation regression that depended on external package repository availability.
+
+Historical docs such as `BUILD3-NOTES.md` describe earlier milestones; **do not treat their old branch names or outstanding-task lists as current**.
+
+## Outstanding work — prioritized
+
+1. **Controlled beta installer:** implement a reviewed, explicit installation transaction, dependency preflight, durable backup/rollback, idempotent reinstall and safe service lifecycle. Do not simply enable the current `--install` switch.
+2. **Approved end-to-end enrollment:** clean disposable Arch/Debian container trial with HTTPS trust, manual approval, authenticated heartbeat/reporting, and revocation, all with clear audit evidence.
+3. **Production-safe server setup:** supported TLS termination, configuration/apply semantics, admin authentication hardening, secrets management, migration and rollback.
+4. **Fleet operations:** safe agent discovery/onboarding design, approval UI, richer operational failure states and documentation.
+5. **Compatibility cleanup:** staged migration away from legacy identifiers and paths, with backward-compatible upgrade tests.
+6. **Independent security review:** threat model, privilege analysis, filesystem/SQLite race conditions, token exposure, CA trust lifecycle, authorization boundaries, dependency and supply-chain review.
+7. **Release readiness:** clean installation on supported distributions, upgrade/uninstall procedures, recovery testing, reproducible packaging and user documentation.
+
+## Next development session
+
+Inspect `feature/runtime-visibility` first. The next intended engineering milestone is a **usable beta installation workflow** with preflight and rollback safeguards, developed and tested **without** touching live systems. Work in substantial batches; provide one local regression command. Do not assume passing disposable tests means the operator approved deployment.
+
+## Reference index
+
+- `README.md` — overview, AI provenance and project entry point
+- `docs/USER-MANUAL.md` — current operator manual
+- `BETA-EVALUATION.md` — disposable beta workflow
+- `docs/DEPLOYMENT-BETA-GATE.md` — explicit production blockers
+- `docs/RUNTIME-VISIBILITY.md` — runtime gate behavior
+- `docs/AGENT-INSTALL-PREFLIGHT.md` and `docs/AGENT-INSTALL-AUDIT.md` — installation checks
+- `docs/RELEASE-READINESS.md` — release-related controls
+- `BUILD3-NOTES.md` — historical certificate milestone notes
+
+**Last rule:** GitHub commits are development authorization only. Never equate them with authorization to change live infrastructure.
