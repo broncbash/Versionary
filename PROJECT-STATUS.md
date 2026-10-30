@@ -150,3 +150,39 @@ Following the operator-verified **692-test** checkpoint, hardened `installer/res
 ## Operator-verified expanded recovery hardening checkpoint (2026-10-30)
 
 Operator reports **703 tests passed in 12.065s**, `[Patch Command] PASS`, and isolated beta HTTPS acceptance `status: passed`. Package built, test CA generated, repeat staging succeeded, integrity audit verified, and TLS protocol check passed. Network requests were confined to the isolated test (`network_requests_made: true`, `external_network_requests_made: false`); production installation, systemd startup, and agent enrollment remained false. This verifies the expanded restart-recovery hardening batch through commit `933fcca`. **Testing policy:** operator prefers local Arch desktop tests to avoid hosted GitHub testing fees; do not configure GitHub Actions or other hosted runners without approval. Continue larger batches before requesting local verification. No CT104/CT102 changes, deployment, or merge without permission.
+
+## Desktop Dashboard Demo — October 30, 2026
+
+### Completed
+
+- Created isolated FastAPI desktop demonstration.
+- Reused the existing Patch Command dashboard presentation.
+- Added six fictional Linux agents with representative health states.
+- Enabled automatic dashboard population.
+- Disabled the Clear Access control in demo mode.
+- Added 11 automated regression tests.
+- Created docs/DESKTOP-DEMO.md.
+- Confirmed successful browser rendering in Brave Origin Nightly.
+
+### Verification
+
+- Local readiness: PASSED
+- Total regression tests: 759
+- Packaging: PASSED
+- Beta checks: PASSED
+- Compatibility matrix: PASSED
+- Reported issues: 0
+
+### Safety boundaries
+
+- Development performed on Arch Linux desktop only.
+- No changes to CT104, CT102, or other homelab systems.
+- No production agent installations or deployments.
+- No hosted GitHub CI.
+- No authorization for production deployment.
+
+### Next steps
+
+- Review and commit desktop demo implementation.
+- Continue local development and testing on feature/runtime-visibility.
+- Preserve the existing production deployment restrictions.
