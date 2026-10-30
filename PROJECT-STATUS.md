@@ -273,3 +273,30 @@ Capabilities:
 No production installation, disposable staging execution,
 certificate generation, network communication, enrollment,
 or service activation is enabled by this interface.
+
+## Unified Readiness Integration — October 30, 2026
+
+Integrated the existing beta-install-plan and deployment
+preflight chain into unified onboarding through a separate
+read-only adapter.
+
+The onboarding result now includes preflight checks,
+isolated-test readiness, blockers, and next actions.
+
+Certificate generation remains a separate future operation.
+The adapter does not perform installation, enrollment,
+network requests, or service activation.
+
+## Disposable Onboarding Execution — October 30, 2026
+
+Added a separate disposable trial coordinator that reuses unified
+onboarding readiness and the existing disposable-install-trial.
+
+Execution requires an explicit confirmation token, existing CA,
+agent package, and passing isolated-test readiness.
+
+The coordinator does not accept an installation root and does not
+enable production installation, service activation, or enrollment.
+
+The filesystem transaction simulator remains separate from actual
+installation staging.
