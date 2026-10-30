@@ -117,7 +117,7 @@ Recent verified features:
 6. **Independent security review:** threat model, privilege analysis, filesystem/SQLite race conditions, token exposure, CA trust lifecycle, authorization boundaries, dependency and supply-chain review.
 7. **Release readiness:** clean installation on supported distributions, upgrade/uninstall procedures, recovery testing, reproducible packaging and user documentation.
 
-## Next development session
+## GitHub workflow ownership\n\nThe assistant manages development branches, commits, and pull request preparation. The operator does not need to manipulate branches or merges manually. **No merge to develop/main without explicit operator approval.** The operator runs the single local verification command and reports results.\n\n## Latest unverified development batch (2026-10-30)\n\nAfter the operator-verified 662-test checkpoint, additional commits hardened snapshot manifest mode/metadata validation, added three regression cases, and created `docs/COORDINATED-ROLLBACK-DESIGN.md`. These new commits are **not yet operator-tested**. The next implementation milestone is a read-only coordinated rollback planner and disposable fault injection, not a live installer.\n\n## Next development session
 
 Inspect `feature/runtime-visibility` first. The next milestone is **review of interrupted restoration behavior and coordinated code/config/CA/systemd rollback design**, without touching live systems. Work without touching live systems. Work in substantial batches; provide one local regression command. Do not assume passing disposable tests means the operator approved deployment.
 
