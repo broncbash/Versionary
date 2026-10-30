@@ -1,6 +1,6 @@
 # Patch Command — Comprehensive Project Handoff
 
-**Checkpoint date:** 2026-10-29  
+**Checkpoint date:** 2026-10-30  
 **Repository:** `broncbash/arby-patch-command` (private)  
 **Development branch:** `feature/runtime-visibility`  
 **Integration target:** `develop` (draft PR #1); `main` remains baseline  
@@ -19,22 +19,11 @@
 
 ## Current verified checkpoint
 
-The operator reported the following from their Arch Linux desktop on 2026-10-29:
+**Latest operator-verified result:** On 2026-10-30, the Arch/CachyOS desktop reported **686 tests passing in 7.685 seconds**, plus passing isolated beta HTTPS acceptance, TLS protocol check, and package integrity audit. No production installation, systemd service start, agent enrollment, or external network requests. Verified through commit `615b152`; subsequent independent-process recovery commits remain **unverified**.
 
-```
-Ran 655 tests in 7.690s
-OK
-[Patch Command] PASS
-[Patch Command] Running isolated beta HTTPS acceptance...
-"status": "passed"
-"tls_protocol_check": "passed"
-"production_installed": false
-"systemd_started": false
-"agent_enrolled": false
-"external_network_requests_made": false
-```
+**Latest unverified development:** Independent-process disposable recovery trial, `installer/restart-recovery-trial.py`, six new test methods, and documentation, through commit `3cc4f9f`. **Expected next count: 692, not yet confirmed.** The recovery trial terminates one worker and launches another in a parent-owned temporary directory; it is not a production installer or proof of crash/power-loss safety.
 
-This verified the code through commit `0cc1f8f` on `feature/runtime-visibility`, including isolated asset snapshots; later commits require separate verification. The isolated shell installer smoke test was changed to invoke the installed agent CLI help rather than depend on live Arch package mirrors. The optional real scan remains separately testable.
+**Desktop maintenance interruption:** User paused development to install Arch/CachyOS updates. Immediately before maintenance, `ssh -T git@github.com` returned `Permission denied (publickey)` and `ssh-add -l` returned `Could not open a connection to your authentication agent.` Likely SSH agent/session issue, but cause is **not yet established**. Suggested first diagnostic: `eval "$(ssh-agent -s)"`, then inspect available keys and load the existing key if needed. Do not generate or replace keys prematurely. The GitHub connector remains available for repository work independently of the desktop SSH session.
 
 **Local verification command:**
 
@@ -127,7 +116,7 @@ Operator reported **686 tests passed in 7.685s**, with isolated beta HTTPS accep
 
 ## Unverified independent-process recovery batch\n\nAdded `installer/restart-recovery-trial.py`, `tests/test_restart_recovery_trial.py` (six new test methods), and `docs/RESTART-RECOVERY-TRIAL.md`. A parent-owned disposable directory is used by a switch worker that exits at an injected checkpoint, followed by a separate recovery worker. Tampered journal and backup cases must refuse recovery. This is **not** a production crash-recovery implementation. Operator verification pending; no live changes or merges.\n\n## Next development session
 
-Inspect `feature/runtime-visibility` first. The next milestone is **review of interrupted restoration behavior and coordinated code/config/CA/systemd rollback design**, without touching live systems. Work without touching live systems. Work in substantial batches; provide one local regression command. Do not assume passing disposable tests means the operator approved deployment.
+Inspect `feature/runtime-visibility` first. The next milestone is **verify the 692-test checkpoint, then develop interrupted-recovery restart and durability/failure testing in disposable roots**, without touching live systems. Work without touching live systems. Work in substantial batches; provide one local regression command. Do not assume passing disposable tests means the operator approved deployment.
 
 ## Reference index
 
@@ -141,3 +130,11 @@ Inspect `feature/runtime-visibility` first. The next milestone is **review of in
 - `BUILD3-NOTES.md` — historical certificate milestone notes
 
 **Last rule:** GitHub commits are development authorization only. Never equate them with authorization to change live infrastructure.
+
+## Return-to-project checklist (2026-10-30)
+
+1. Read this file and inspect the actual remote branch head before modifying anything.
+2. Help restore desktop GitHub SSH authentication if still broken; avoid rotating keys without evidence.
+3. Run the single local verification command above once desktop maintenance and SSH access are restored. Expect 692 tests, but rely on actual output.
+4. If passing, record the operator-verified checkpoint and proceed with substantial batches of isolated recovery tests.
+5. Preserve the GitHub workflow: assistant commits on `feature/runtime-visibility`, no merge to `develop`/`main` without approval; no live CT104/CT102 changes or production deployment without explicit approval.
