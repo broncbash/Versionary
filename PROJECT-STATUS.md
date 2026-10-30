@@ -105,7 +105,7 @@ Recent verified features:
 - Tests: `tests/test_release_recovery.py`, `tests/test_recover_isolated_release.py`, `tests/test_installation_inventory.py`, `tests/test_installation_snapshot.py`.
 - Docs: `docs/BETA-INSTALL-PLAN.md`, `docs/DISPOSABLE-INSTALL-TRIAL.md`, `docs/RELEASE-SWITCH-TRIAL.md`, `docs/INSTALLATION-INVENTORY.md`, `docs/INSTALLATION-SNAPSHOT.md`.
 
-**Current unverified development batch:** isolated empty-root snapshot restoration added in `installer/restore-installation-snapshot.py`, with regression tests in `tests/test_restore_installation_snapshot.py` and documentation in `docs/INSTALLATION-SNAPSHOT.md`. This is not an in-place rollback and has not yet passed operator verification. **Next batch after verification:** review failure behavior and design coordinated release/configuration/CA/systemd rollback. Do not deploy, merge, or touch CT104/CT102 without explicit permission. Snapshots do not constitute complete backups or authenticated trust anchors.
+**Operator-verified checkpoint (2026-10-30):** 662 tests passed in 7.638s, isolated beta HTTPS acceptance passed, TLS protocol check passed, package integrity verified, no production installation, no systemd start, no agent enrollment, and no external network requests. The verified batch added in `installer/restore-installation-snapshot.py`, with regression tests in `tests/test_restore_installation_snapshot.py` and documentation in `docs/INSTALLATION-SNAPSHOT.md`. This is not an in-place rollback; verification covers the reported local regression and isolated beta acceptance only. **Next batch after verification:** review failure behavior and design coordinated release/configuration/CA/systemd rollback. Do not deploy, merge, or touch CT104/CT102 without explicit permission. Snapshots do not constitute complete backups or authenticated trust anchors.
 
 ## Outstanding work — prioritized
 
@@ -119,7 +119,7 @@ Recent verified features:
 
 ## Next development session
 
-Inspect `feature/runtime-visibility` first. The immediate milestone is **operator verification of isolated snapshot restoration**, followed by review of interrupted writes and coordinated code/config/CA/systemd rollback design. Work without touching live systems. Work in substantial batches; provide one local regression command. Do not assume passing disposable tests means the operator approved deployment.
+Inspect `feature/runtime-visibility` first. The next milestone is **review of interrupted restoration behavior and coordinated code/config/CA/systemd rollback design**, without touching live systems. Work without touching live systems. Work in substantial batches; provide one local regression command. Do not assume passing disposable tests means the operator approved deployment.
 
 ## Reference index
 
