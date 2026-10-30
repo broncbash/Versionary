@@ -47,6 +47,10 @@ def stage(*, root, server, ca_cert, package=DEFAULT_PACKAGE, verify_only=False, 
         raise ValueError("Agent package must be a regular file")
     validator.validate(package)
 
+    if not verify_only:
+        preflight = module("beta-preflight.py", "arby_beta_preflight")
+        preflight.inspect(root, server, ca_source.read_bytes(), package)
+
     if verify_only:
         audit = module("audit-test-install.py", "arby_beta_audit")
         result = audit.audit(root, package)
