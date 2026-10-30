@@ -138,3 +138,7 @@ Inspect `feature/runtime-visibility` first. The next milestone is **verify the 6
 3. Run the single local verification command above once desktop maintenance and SSH access are restored. Expect 692 tests, but rely on actual output.
 4. If passing, record the operator-verified checkpoint and proceed with substantial batches of isolated recovery tests.
 5. Preserve the GitHub workflow: assistant commits on `feature/runtime-visibility`, no merge to `develop`/`main` without approval; no live CT104/CT102 changes or production deployment without explicit approval.
+
+## Operator-verified independent-process recovery checkpoint (2026-10-30)
+
+Operator reported **692 tests passed in 8.145s**, `[Patch Command] PASS`, and isolated beta HTTPS acceptance `status: passed`. Package built, test CA generated, repeated staging succeeded, integrity audit verified, and TLS protocol check passed. The disposable acceptance exercised local network requests (`network_requests_made: true`) but **no external network requests** (`external_network_requests_made: false`); no production installation, systemd start, or agent enrollment occurred. This verifies the independent-process restart recovery trial batch. Desktop GitHub access was restored following system updates and reboot. Next development: substantial disposable interrupted-recovery restart, durability, and failure-injection testing; no production gates lifted, no CT104/CT102 changes, no merge.
