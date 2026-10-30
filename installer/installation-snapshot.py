@@ -112,7 +112,7 @@ def verify(destination):
             or not isinstance(manifest.get("assets"), dict)
             or set(manifest["assets"]) != set(inventory.FILES)):
         raise ValueError("Invalid snapshot manifest")
-    if set(manifest) != {"version", "assets", "private_state"}:\n        raise ValueError("Unexpected snapshot manifest fields")\n    if not isinstance(manifest["private_state"], dict):\n        raise ValueError("Invalid private state metadata")\n    expected_entries = {"manifest.json"}
+    if set(manifest) != {"version", "assets", "private_state"}:\n        raise ValueError("Unexpected snapshot manifest fields")\n    if manifest["private_state"] not in ("absent", "present-not-inspected"):\n        raise ValueError("Invalid private state metadata")\n    expected_entries = {"manifest.json"}
     for index, relative in enumerate(inventory.FILES):
         item = manifest["assets"][relative]
         if not isinstance(item, dict) or not isinstance(item.get("present"), bool):
