@@ -300,3 +300,18 @@ enable production installation, service activation, or enrollment.
 
 The filesystem transaction simulator remains separate from actual
 installation staging.
+
+## Disposable Recovery Matrix — October 30, 2026
+
+Added failure-injection tests for disposable staging
+and verification cleanup, plus coverage of every
+filesystem transaction simulation checkpoint.
+
+The tests distinguish temporary-workspace cleanup
+from actual installation rollback.
+
+The transaction simulator remains separate from the
+agent installation workflow.
+
+No production deployment or live-host mutation
+is authorized.
