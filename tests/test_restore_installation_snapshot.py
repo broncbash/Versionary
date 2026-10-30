@@ -59,6 +59,35 @@ class RestoreSnapshotTests(unittest.TestCase):
             restore.restore(self.snap, self.root)
         self.assertEqual(list(self.root.iterdir()), [])
 
+    def test_manifest_rejects_unsafe_mode_before_writes(self):
+        manifest_path = self.snap / "manifest.json"
+        manifest = json.loads(manifest_path.read_text())
+        manifest["assets"]["etc/arby-patch-agent/config.json"]["mode"] = "0o666"
+        manifest_path.write_text(json.dumps(manifest))
+        manifest_path.chmod(0o600)
+        with self.assertRaises(ValueError):
+            restore.restore(self.snap, self.root)
+        self.assertEqual(list(self.root.iterdir()), [])
+
+    def test_manifest_rejects_invalid_mode_before_writes(self):
+        manifest_path = self.snap / "manifest.json"
+        manifest = json.loads(manifest_path.read_text())
+        manifest["assets"]["etc/arby-patch-agent/config.json"]["mode"] = "0o9"
+        manifest_path.write_text(json.dumps(manifest))
+        manifest_path.chmod(0o600)
+        with self.assertRaises(ValueError):
+            restore.restore(self.snap, self.root)
+        self.assertEqual(list(self.root.iterdir()), [])
+
+    def test_manifest_rejects_unknown_fields(self):
+        manifest_path = self.snap / "manifest.json"
+        manifest = json.loads(manifest_path.read_text())
+        manifest["unexpected"] = "injected"
+        manifest_path.write_text(json.dumps(manifest))
+        manifest_path.chmod(0o600)
+        with self.assertRaises(ValueError):
+            restore.restore(self.snap, self.root)
+
     def test_live_root_refused(self):
         with self.assertRaises(ValueError):
             restore.restore(self.snap, "/")
