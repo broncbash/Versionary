@@ -256,3 +256,20 @@ Added an independent, read-only installation manifest generator:
 
 No installation execution, certificate generation, enrollment,
 service activation, or production deployment is enabled.
+
+## Unified Onboarding v1 — October 30, 2026
+
+Added installer/onboard.py as a consolidated setup interface.
+
+Capabilities:
+
+- Interactive role, URL, and certificate-mode prompts.
+- Scriptable JSON and human-readable output.
+- Reuse of the installation-preview manifest.
+- Explicit preview acknowledgment without execution.
+- Server role placeholder.
+- Automated onboarding integration and safety tests.
+
+No production installation, disposable staging execution,
+certificate generation, network communication, enrollment,
+or service activation is enabled by this interface.
