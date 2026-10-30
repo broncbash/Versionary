@@ -112,7 +112,11 @@ def verify(destination):
             or not isinstance(manifest.get("assets"), dict)
             or set(manifest["assets"]) != set(inventory.FILES)):
         raise ValueError("Invalid snapshot manifest")
-    if set(manifest) != {"version", "assets", "private_state"}:\n        raise ValueError("Unexpected snapshot manifest fields")\n    if manifest["private_state"] not in ("absent", "present-not-inspected"):\n        raise ValueError("Invalid private state metadata")\n    expected_entries = {"manifest.json"}
+    if set(manifest) != {"version", "assets", "private_state"}:
+        raise ValueError("Unexpected snapshot manifest fields")
+    if manifest["private_state"] not in ("absent", "present-not-inspected"):
+        raise ValueError("Invalid private state metadata")
+    expected_entries = {"manifest.json"}
     for index, relative in enumerate(inventory.FILES):
         item = manifest["assets"][relative]
         if not isinstance(item, dict) or not isinstance(item.get("present"), bool):
@@ -125,7 +129,15 @@ def verify(destination):
                 or not isinstance(item["size"], int) or isinstance(item["size"], bool)
                 or not 0 <= item["size"] <= 1048576
                 or not isinstance(item["sha256"], str) or len(item["sha256"]) != 64
-                or not isinstance(item["mode"], str)\n                or not isinstance(item["sha256"], str)\n                or any(ch not in "0123456789abcdef" for ch in item["sha256"])\n                or not item["mode"].startswith("0o")\n                or any(ch not in "01234567" for ch in item["mode"][2:])\n                or item["mode"] != oct(int(item["mode"], 8))\n                or int(item["mode"], 8) == 0\n                or int(item["mode"], 8) & 0o022\n                or int(item["mode"], 8) > 0o777):
+                or not isinstance(item["mode"], str)
+                or not isinstance(item["sha256"], str)
+                or any(ch not in "0123456789abcdef" for ch in item["sha256"])
+                or not item["mode"].startswith("0o")
+                or any(ch not in "01234567" for ch in item["mode"][2:])
+                or item["mode"] != oct(int(item["mode"], 8))
+                or int(item["mode"], 8) == 0
+                or int(item["mode"], 8) & 0o022
+                or int(item["mode"], 8) > 0o777):
             raise ValueError("Invalid asset metadata")
         name = f"asset-{index}"
         expected_entries.add(name)
