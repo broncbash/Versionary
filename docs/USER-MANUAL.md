@@ -124,3 +124,24 @@ Read-only asset inventory, snapshots, rollback planning, an in-memory transactio
 - This code is AI-authored and requires independent review, especially around credentials, authentication, filesystem security and update-scanning privileges.
 
 For future development context, read [the current handoff](../PROJECT-STATUS.md). For production acceptance requirements, read [the deployment gate](DEPLOYMENT-BETA-GATE.md).
+
+
+## 12. Versionary Beta 0.8 local-development supplement (2026-10-30)
+
+The selected professional product name is **Versionary**. This manual retains historical Patch Command terminology and paths because deployed/internal compatibility names have not yet been migrated. The operator-reported local checkout passed **974 unittest cases, OK (1 skipped)** and six real-HTTPS tests; this does **not** certify a production release or mean the remote branch contains every local test.
+
+To run the existing disposable package/certificate/staging and real loopback-HTTPS protocol self-test from the local repo:
+
+```bash
+./.venv/bin/python installer/beta-selftest.py --protocol-check
+```
+
+Expected JSON includes `status: passed`, `tls_protocol_check: passed`, `production_installed: false`, `systemd_started: false`, `external_network_requests_made: false`. `network_requests_made: true` reflects **loopback-only** TLS traffic. This option does not request a host package-manager smoke scan. Its output is test evidence, not a deployment approval.
+
+For focused HTTPS regression tests:
+
+```bash
+./.venv/bin/python -m unittest tests.test_beta_tls_journey -v
+```
+
+The six-test local suite covers enrollment, authentication, reporting, revocation, feature gates, untrusted CA and cross-agent credential isolation. Other tests cover replay and malformed report rejection. The local `versionary_local_beta.py serve` dashboard is development-only at `http://127.0.0.1:8765/admin/dashboard`; never share the private token or `.versionary-local-beta/` state. For the next-session plan and full context see [Versionary handoff](VERSIONARY-SESSION-HANDOFF-2026-10-30.md).

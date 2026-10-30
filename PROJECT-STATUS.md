@@ -325,3 +325,10 @@ The expected recovery mechanism is deletion of the disposable
 temporary workspace, not restoration of a production installation.
 
 Production deployment remains disabled.
+
+
+## Latest operator-reported local checkpoint — Versionary Beta 0.8 (2026-10-30)
+
+**Supersedes the historical test-count and next-session claims above for the user's LOCAL checkout, but not the remote source state.** The chosen product name is **Versionary**; old internal identifiers remain for compatibility. The operator ran **974 unittest cases in 16.039s, OK (skipped=1)**; the real loopback-HTTPS suite ran **6/6** after adding cross-agent credential isolation. Disposable package/certificate staging and `installer/beta-selftest.py --protocol-check` passed, with no external network requests or production installation. The newest Beta 0.5–0.8 files and local test changes may not be on the GitHub branch. **Do not blindly pull or overwrite the local checkout.**
+
+The complete authoritative handoff for next session is [docs/VERSIONARY-SESSION-HANDOFF-2026-10-30.md](docs/VERSIONARY-SESSION-HANDOFF-2026-10-30.md). Next: Beta 0.9 release-candidate readiness in isolated/disposable tests, with rollback/fault-injection, portability, package/secret audit and a deliberate local/remote reconciliation. Production gates remain closed. This docs-only GitHub update does not commit or push the user's local uncommitted source.
