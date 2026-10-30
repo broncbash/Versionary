@@ -12,7 +12,7 @@ class DashboardUITests(unittest.TestCase):
     def test_dashboard_available(self):
         response = self.client.get("/admin/dashboard")
         self.assertEqual(response.status_code, 200)
-        self.assertIn("PATCH COMMAND", response.text)
+        self.assertIn("VERSIONARY · PRIVATE BETA", response.text)
         self.assertIn("Infrastructure monitoring · Observer mode", response.text)
 
     def test_dashboard_uses_authenticated_read_only_inventory(self):
@@ -27,7 +27,8 @@ class DashboardUITests(unittest.TestCase):
     def test_dashboard_escapes_untrusted_agent_fields(self):
         page = self.client.get("/admin/dashboard").text
         self.assertIn("element.textContent=text", page)
-        self.assertIn("card.append(node('h3',a.hostname)", page)
+        self.assertIn("info.append(node('h3',a.hostname),node('p',distroName))", page)
+        self.assertIn("mark.setAttribute('aria-label',distroName+' distribution')", page)
         self.assertNotIn("innerHTML", page)
 
     def test_dashboard_security_headers(self):

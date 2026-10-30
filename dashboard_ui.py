@@ -5,7 +5,7 @@ from fastapi.responses import HTMLResponse
 router = APIRouter()
 PAGE = r'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Patch Command | Agent Fleet</title>
+<title>Versionary | Agent Fleet</title>
 <style>
 :root{color-scheme:dark;font:16px system-ui,sans-serif;background:#0f172a;color:#e2e8f0}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;background:#0f172a}
@@ -23,8 +23,12 @@ input{min-width:180px;flex:1}select{font:inherit;border:1px solid #475569;border
 .approved,.online{color:#86efac}.pending,.stale,.no_contact,.unknown{color:#fbbf24}.revoked{color:#fda4af}.error{color:#fda4af}
 #message{min-height:24px;color:#ffcf91}#fleet:empty:after{content:'No agents to display.';color:#9db5c7}
 footer{margin-top:28px;color:#93aabd;font-size:.85rem}
+.agent-identity{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.agent-labels{min-width:0}.agent-labels p{margin:5px 0 0}
+.distro-mark{flex:none;display:grid;place-items:center;width:48px;height:48px;border-radius:13px;font-size:1.25rem;font-weight:800;background:#334155;color:white;border:1px solid #64748b}
+.distro-arch{background:#136b9c}.distro-debian{background:#a80030}.distro-ubuntu{background:#a83b15}.distro-fedora{background:#294a90}.distro-opensuse{background:#417c19}.distro-almalinux{background:#326b6d}.distro-rocky{background:#087a5a}.distro-rhel{background:#9c2727}
 </style></head><body><main>
-<header><div><div class="eyebrow">PATCH COMMAND</div><h1>Agent Fleet</h1><p class="sub">Infrastructure monitoring · Observer mode</p></div><a href="/admin/settings">Settings</a></header>
+<header><div><div class="eyebrow">VERSIONARY · PRIVATE BETA</div><h1>Agent Fleet</h1><p class="sub">Infrastructure monitoring · Observer mode</p></div><a href="/admin/settings">Settings</a></header>
 <section class="controls" aria-label="Administrator controls">
 <input id="token" type="password" autocomplete="off" spellcheck="false" aria-label="Admin bearer token" placeholder="Admin bearer token (memory only)">
 <button id="refresh" type="button">Refresh fleet</button><button id="clear" type="button">Clear access</button>
@@ -71,7 +75,15 @@ function render(agents){
   $('results').textContent='Showing '+selected.length+' of '+agents.length+' agents';
   for(const a of selected){
     const card=node('article','', 'agent');
-    card.append(node('h3',a.hostname),node('p',a.platform));
+    const identity=node('div','', 'agent-identity');
+    const distro=String(a.distro_id||a.platform||'linux').toLowerCase();
+    const distroName=String(a.distro_name||a.platform||'Linux');
+    const logos={arch:'A',debian:'D',ubuntu:'U',fedora:'F',opensuse:'S',almalinux:'Al',rocky:'R',rhel:'RH'};
+    const mark=node('span',logos[distro]||'L','distro-mark distro-'+(Object.hasOwn(logos,distro)?distro:'linux'));
+    mark.setAttribute('role','img');mark.setAttribute('aria-label',distroName+' distribution');
+    const info=node('div','', 'agent-labels');
+    info.append(node('h3',a.hostname),node('p',distroName));
+    identity.append(mark,info);card.append(identity);
     const meta=node('div','', 'meta');
     for(const [key,value] of [
       ['Connection',a.health==='online'?'Online':a.health==='stale'?'Stale (>30 min)':a.health==='no_contact'?'No heartbeat':a.health==='unknown'?'Unknown':a.health],

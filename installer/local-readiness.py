@@ -46,7 +46,7 @@ def verify(runner=run_command):
         try:
             log = outputs["tests"].stderr + "\n" + outputs["tests"].stdout
             match = re.search(r"^Ran ([0-9]+) tests? in ", log, re.MULTILINE)
-            if match is None or re.search(r"^OK$", log, re.MULTILINE) is None:
+            if match is None or re.search(r"^OK(?: \(skipped=[0-9]+\))?$", log, re.MULTILINE) is None:
                 raise ValueError("Missing test success markers")
             count = int(match.group(1))
             evidence = evidence_gate().inspect(

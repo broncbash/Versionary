@@ -146,6 +146,66 @@ class BetaTLSJourney(unittest.TestCase):
         with self.assertRaisesRegex(ReportingError, "authentication rejected"):
             send_report(self.identity, token, report, **args)
 
+    def test_cross_agent_credentials_rejected_over_tls(self):
+        first = self.identity
+        second = {
+            "agent_id": str(uuid4()),
+            "hostname": "beta-second-agent",
+            "platform": "debian",
+        }
+
+        for identity, prefix in ((first, "first"), (second, "second")):
+            register_v2(
+                identity,
+                key_path=self.state / f"{prefix}-key.json",
+                post=self.post,
+            )
+            self.assertTrue(
+                agent_registry.approve_agent(identity["agent_id"])
+            )
+            result = complete_v2(
+                identity,
+                key_path=self.state / f"{prefix}-key.json",
+                journal_path=self.state / f"{prefix}-journal.json",
+                credential_path=self.state / f"{prefix}-credential.json",
+                post=self.post,
+            )
+            self.assertEqual(result["status"], "enrolled")
+
+        first_token = load_credential(self.state / "first-credential.json")
+        second_token = load_credential(self.state / "second-credential.json")
+        args = {"server": self.server_url, "ca_cert": self.certs / "ca.crt"}
+
+        self.assertNotEqual(first_token, second_token)
+
+        with self.assertRaises(HeartbeatError):
+            send_heartbeat(second, first_token, **args)
+
+        report = {
+            "status": "success",
+            "packages": [
+                {"name": "unauthorized-package", "installed": "1.0",
+                 "available": "2.0"}
+            ],
+            "error": None,
+        }
+
+        with self.assertRaises(ReportingError):
+            send_report(second, first_token, report, **args)
+
+        with closing(sqlite3.connect(self.db)) as db:
+            count = db.execute(
+                "SELECT COUNT(*) FROM scan_reports WHERE agent_id = ?",
+                (second["agent_id"],),
+            ).fetchone()[0]
+
+        self.assertEqual(count, 0)
+
+        self.assertEqual(
+            send_heartbeat(second, second_token, **args)["status"],
+            "ok",
+        )
+
     def test_reporting_gate_blocks_tls_requests(self):
         register_v2(self.identity, key_path=self.state / "key.json", post=self.post)
         self.assertTrue(agent_registry.approve_agent(self.identity["agent_id"]))

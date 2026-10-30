@@ -26,6 +26,7 @@ class DesktopDemoTests(unittest.TestCase):
         response = self.client.get("/api/v1/admin/agents")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["count"], 6)
+        self.assertTrue(all("distro_id" in a and "distro_name" in a for a in response.json()["agents"]))
 
     def test_fleet_has_expected_health_states(self):
         agents = self.client.get(
@@ -68,7 +69,7 @@ class DesktopDemoTests(unittest.TestCase):
         response = self.client.get("/admin/dashboard")
         self.assertEqual(response.status_code, 200)
         self.assertIn(
-            "Patch Command",
+            "Versionary",
             response.text,
         )
 

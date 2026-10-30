@@ -12,7 +12,7 @@ from fastapi.responses import HTMLResponse
 from dashboard_ui import PAGE
 
 app = FastAPI(
-    title="Patch Command Desktop Demo",
+    title="Versionary Desktop Demo",
     docs_url=None,
     redoc_url=None,
 )
@@ -49,6 +49,8 @@ def sample_fleet(now=None):
                 "id": index,
                 "hostname": hostname,
                 "platform": platform,
+                "distro_id": platform,
+                "distro_name": {"arch":"Arch Linux", "debian":"Debian"}.get(platform,"Linux"),
                 "status": status,
                 "health": health,
                 "registered_at": (now - timedelta(days=3)).isoformat(),

@@ -12,7 +12,7 @@ class ProductPresentationTests(unittest.TestCase):
                 with self.subTest(path=path):
                     response = client.get(path)
                     self.assertEqual(response.status_code, 200)
-                    self.assertIn("Patch Command", response.text)
+                    self.assertIn("Versionary" if path == "/admin/dashboard" else "Patch Command", response.text)
                     self.assertNotIn("ARBY", response.text.upper())
                     # The legacy option value remains for stored settings compatibility.\n                    # Assert that the old theme name is not visible as UI copy.\n                    self.assertNotIn(">Cyberpunk<", response.text)
 
