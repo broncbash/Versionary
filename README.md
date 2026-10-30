@@ -27,6 +27,7 @@ The user interface uses the name **Patch Command**. Some internal paths, identif
 - [Runtime visibility](docs/RUNTIME-VISIBILITY.md) — feature-gate behavior.
 - [Isolated release recovery](docs/RELEASE-SWITCH-TRIAL.md) — interrupted code-release trial inspection and explicit recovery.
 - [Installation snapshots](docs/INSTALLATION-SNAPSHOT.md) — experimental private asset snapshots, verification, and current restoration limitations.
+- [Independent-process recovery trial](docs/RESTART-RECOVERY-TRIAL.md) — disposable fault-injection and recovery across worker processes; not a production rollback engine.
 
 ## Local development verification
 
@@ -36,7 +37,7 @@ From a checkout with a working `.venv` and installed project dependencies:
 bash installer/local-check.sh --protocol-check
 ```
 
-This builds the agent package, runs the Python regression suite, and then runs disposable HTTPS acceptance. The latest **user-reported** checkpoint on 2026-10-29 was **655 tests passed**, plus passing isolated HTTPS acceptance. This result applies to that checkout, not automatically to future commits.
+This builds the agent package, runs the Python regression suite, and then runs disposable HTTPS acceptance. The latest **user-reported** checkpoint on 2026-10-30 was **686 tests passed**, plus passing isolated HTTPS acceptance. The subsequent independent-process recovery batch adds six test methods (**692 expected, not yet verified**). These results apply only to the respective checkouts.
 
 To evaluate the beta candidate separately:
 
