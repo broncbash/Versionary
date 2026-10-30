@@ -210,3 +210,34 @@ Operator reports **703 tests passed in 12.065s**, `[Patch Command] PASS`, and is
 
 All work remains on the Arch development workstation.
 No changes were made to homelab containers or production agents.
+
+## Unified Setup Wizard v1 — October 30, 2026
+
+Implemented a new read-only installation planning interface:
+
+- Interactive and noninteractive invocation.
+- Agent and server role selection.
+- Reuse of existing agent beta planning logic.
+- HTTPS-origin validation.
+- Human-readable and JSON reports.
+- Explicit rejection of production installation.
+- New automated regression coverage.
+- Documentation: docs/SETUP-WIZARD.md.
+
+The wizard is planning-only. No live installation or enrollment
+has been authorized or enabled.
+
+### Unified Setup Wizard v1 — Verification
+
+Completed local verification on October 30, 2026:
+
+- 19 focused wizard tests passed.
+- 783 total regression tests passed.
+- Packaging, beta, and compatibility checks passed.
+- No issues reported by the local readiness suite.
+- No production installation, agent enrollment, or deployment.
+- No hosted GitHub CI.
+
+The next development phase is interactive onboarding,
+configuration previews, and disposable installation
+orchestration using the existing installer components.
