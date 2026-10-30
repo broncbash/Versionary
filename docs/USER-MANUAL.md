@@ -98,6 +98,8 @@ Certificate tools support validation, inspection, offline import and renewal sce
 
 ## 9. Troubleshooting
 
+**Desktop GitHub SSH access fails:** if `ssh -T git@github.com` says `Permission denied (publickey)` and `ssh-add -l` cannot connect to an authentication agent, inspect/start the existing SSH agent and reload the existing key; do not generate a new key without diagnosis. This affects desktop Git access, not the GitHub repository contents.
+
 **Test suite fails:** inspect the full log at `/tmp/arby-tests.log` (or configured override), starting with `FAIL:` or `ERROR:`. Do not assume the last console lines identify the failing test.
 
 **Scanner reports “Cannot fetch updates”:** check the host's package mirror/network state. Do not treat this as a successful scan with zero updates. Offline installation tests should still pass.
@@ -108,7 +110,11 @@ Certificate tools support validation, inspection, offline import and renewal sce
 
 **TLS errors:** confirm the URL hostname/IP matches the certificate SAN and that the client trusts the correct CA. Do not bypass certificate verification to force a test to pass.
 
-## 10. Known limitations and safety
+## 10. Disposable rollback experiments
+
+Read-only asset inventory, snapshots, rollback planning, an in-memory transaction model, a disposable filesystem trial, and a separate-process recovery trial are available for development and testing. The latest recovery trial is documented in [Independent-process recovery trial](RESTART-RECOVERY-TRIAL.md). None is an approved production installer or power-loss-safe rollback implementation. The last operator-verified checkpoint was **686 tests**; the six newly added recovery tests are pending verification.
+
+## 11. Known limitations and safety
 
 - Experimental snapshot restoration exists only for empty disposable roots; no approved production installer or supported automated rollback workflow exists.
 - No approved deployment of the new agent stack to live infrastructure.
