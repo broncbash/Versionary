@@ -125,7 +125,7 @@ Following the operator-verified **665-test** checkpoint (through `e194986`), a r
 
 Operator reported **686 tests passed in 7.685s**, with isolated beta HTTPS acceptance, TLS protocol check, and integrity audit passing. No production installation, systemd start, agent enrollment, or external network requests. This verifies the disposable filesystem transaction trial through commit `615b152`. The next task is separately restarted recovery in a disposable root, including journal integrity and interruption tests. Production gates remain closed.
 
-## Next development session
+## Unverified independent-process recovery batch\n\nAdded `installer/restart-recovery-trial.py`, `tests/test_restart_recovery_trial.py` (six new test methods), and `docs/RESTART-RECOVERY-TRIAL.md`. A parent-owned disposable directory is used by a switch worker that exits at an injected checkpoint, followed by a separate recovery worker. Tampered journal and backup cases must refuse recovery. This is **not** a production crash-recovery implementation. Operator verification pending; no live changes or merges.\n\n## Next development session
 
 Inspect `feature/runtime-visibility` first. The next milestone is **review of interrupted restoration behavior and coordinated code/config/CA/systemd rollback design**, without touching live systems. Work without touching live systems. Work in substantial batches; provide one local regression command. Do not assume passing disposable tests means the operator approved deployment.
 
