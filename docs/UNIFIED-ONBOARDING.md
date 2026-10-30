@@ -69,3 +69,31 @@ Server onboarding currently returns not-implemented.
 The onboarding workflow is intentionally separate from
 the existing disposable staging engine until its integration
 and rollback behavior have been reviewed and tested.
+
+## Integrated readiness reporting
+
+The onboarding JSON response includes a `readiness` object
+derived from the existing beta installation planner.
+
+The readiness report contains:
+
+- Isolated-test readiness
+- Production readiness (always false)
+- Individual preflight checks
+- Failed checks and actionable blockers
+- The next safe action
+
+For repeatable offline testing, the CLI accepts:
+
+    --package /path/to/agent-package.tar.gz
+    --os-release /path/to/test-os-release
+
+Selecting `generate-test-ca` leaves readiness pending until
+the test CA has actually been created. No certificate is
+generated during onboarding.
+
+The existing planner's production and enrollment gates
+remain visible even if disposable testing is ready.
+
+The onboarding interface does not execute staging or
+authorize changes to live systems.

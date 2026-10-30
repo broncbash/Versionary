@@ -21,6 +21,16 @@ def load_preview():
     return module
 
 
+def load_readiness():
+    path = HERE / "onboarding-readiness.py"
+    spec = importlib.util.spec_from_file_location(
+        "patch_command_onboarding_readiness", path
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def prompt_value(label, default=None):
     suffix = f" [{default}]" if default is not None else ""
     value = input(f"{label}{suffix}: ").strip()
@@ -65,6 +75,8 @@ def build_onboarding(
     ca_cert=None,
     certificate_mode=None,
     target="disposable",
+    package=None,
+    os_release="/etc/os-release",
 ):
     preview_module = load_preview()
 
@@ -81,6 +93,15 @@ def build_onboarding(
 
     supported = manifest["status"] == "preview-only"
 
+    readiness = load_readiness().evaluate(
+        role=role,
+        server=server,
+        ca_cert=ca_cert,
+        certificate_mode=certificate_mode,
+        package=package,
+        os_release=os_release,
+    )
+
     return {
         "schema_version": 1,
         "product": "Patch Command",
@@ -88,6 +109,7 @@ def build_onboarding(
         "status": "preview-ready" if supported else "not-implemented",
         "role": role,
         "manifest": manifest,
+        "readiness": readiness,
         "review": {
             "required": True,
             "completed": False,
@@ -140,6 +162,12 @@ def render_text(result):
 
     lines.extend([
         "",
+        "READINESS",
+        f"  Status: {result['readiness']['status']}",
+        f"  Isolated test ready: "
+        f"{result['readiness']['ready_for_isolated_test']}",
+        f"  Next action: {result['readiness']['next_action']}",
+        "",
         "SAFETY",
         "  Production installation: DISABLED",
         "  Service activation: DISABLED",
@@ -163,6 +191,8 @@ def main(argv=None):
         choices=("existing-ca", "generate-test-ca"),
     )
     parser.add_argument("--target", default="disposable")
+    parser.add_argument("--package")
+    parser.add_argument("--os-release", default="/etc/os-release")
     parser.add_argument("--interactive", action="store_true")
     parser.add_argument("--acknowledge-preview", action="store_true")
     parser.add_argument("--format", choices=("text", "json"), default="text")
@@ -188,6 +218,8 @@ def main(argv=None):
             ca_cert=args.ca_cert,
             certificate_mode=args.certificate_mode,
             target=args.target,
+            package=args.package,
+            os_release=args.os_release,
         )
 
         if args.acknowledge_preview:
