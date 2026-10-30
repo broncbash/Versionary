@@ -87,3 +87,58 @@ authenticated Patch Command server.
 
 The interface displays fictional fleet information. It does not
 perform network discovery, live agent communication, or patch operations.
+
+## Enhanced demo controls — October 30, 2026
+
+The desktop demonstration includes additional controls that are
+not part of the production dashboard.
+
+### Simulation banner
+
+A prominent SIMULATION MODE banner identifies the dashboard as
+a fictional demonstration with no live infrastructure access.
+
+### Health filtering
+
+The Health dropdown filters the currently displayed agent cards:
+
+- All health states
+- Online
+- Stale
+- Pending
+- Revoked
+- No contact
+
+Health filtering works alongside the existing hostname search,
+approval-status filter, and sorting controls.
+
+### Reset filters
+
+Reset filters clears the hostname search, restores the approval
+filter to All statuses, restores hostname sorting, and restores
+the health filter to All health states.
+
+### Refresh fleet
+
+Refresh fleet requests a new fictional snapshot from the local
+demo endpoint. No real agents or production services are contacted.
+
+### Demo information endpoint
+
+GET /demo/about returns basic information about the simulated
+environment, including confirmation that mutations are disabled.
+
+### Browser verification
+
+The enhanced interface was manually checked in Brave Origin Nightly
+on an Arch Linux development workstation.
+
+The user reported that the automatic fleet population, simulation
+banner, health filters, reset control, and refresh functionality
+appeared to work correctly.
+
+### Implementation boundary
+
+The enhancements are applied to the demo's rendered HTML.
+The production dashboard source and authentication behavior
+remain unchanged.

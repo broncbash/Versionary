@@ -118,9 +118,55 @@ class DesktopDemoTests(unittest.TestCase):
                 "/health",
                 "/api/v1/admin/agents",
                 "/admin/dashboard",
+                "/demo/about",
             },
         )
 
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class DemoEnhancementTests(unittest.TestCase):
+    def test_enhancement_adds_controls(self):
+        from desktop_demo import enhance_demo_page
+        response = enhance_demo_page(
+            '<html><head></head><body><main>'
+            '<div class="grid" id="fleet"></div>'
+            '</main></body></html>'
+        )
+        self.assertIn('id="demo-health"', response)
+        self.assertIn('id="demo-reset"', response)
+        self.assertIn("SIMULATION MODE", response)
+
+    def test_enhancement_rejects_missing_marker(self):
+        from desktop_demo import enhance_demo_page
+        with self.assertRaises(ValueError):
+            enhance_demo_page("<html></html>")
+
+    def test_demo_about_is_read_only(self):
+        response = TestClient(app).get("/demo/about")
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.json()["mutations_enabled"])
+
+
+
+class DemoDashboardIntegrationTests(unittest.TestCase):
+    def test_served_dashboard_contains_enhancements(self):
+        response = TestClient(app).get("/admin/dashboard")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('id="demo-banner"', response.text)
+        self.assertIn('id="demo-health"', response.text)
+        self.assertIn('id="demo-reset"', response.text)
+        self.assertIn("card.dataset.health=a.health", response.text)
+
+    def test_demo_remains_read_only(self):
+        client = TestClient(app)
+        self.assertEqual(
+            client.post("/api/v1/admin/agents").status_code,
+            405,
+        )
+        self.assertEqual(
+            client.post("/demo/about").status_code,
+            405,
+        )

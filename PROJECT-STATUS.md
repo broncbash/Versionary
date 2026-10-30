@@ -186,3 +186,27 @@ Operator reports **703 tests passed in 12.065s**, `[Patch Command] PASS`, and is
 - Review and commit desktop demo implementation.
 - Continue local development and testing on feature/runtime-visibility.
 - Preserve the existing production deployment restrictions.
+
+## Enhanced Desktop Demo — October 30, 2026
+
+### Completed
+
+- Added a prominent simulation-mode banner.
+- Added demo-only agent health filtering.
+- Added a Reset filters control.
+- Added an explicit health attribute to rendered demo agent cards.
+- Added a read-only /demo/about information endpoint.
+- Added five additional automated tests.
+- Confirmed browser functionality in Brave Origin Nightly.
+- Expanded docs/DESKTOP-DEMO.md.
+
+### Verification targets
+
+- Focused desktop demo tests: 16 passing.
+- Full regression target: 764 tests.
+- Production deployment remains unauthorized.
+
+### Safety
+
+All work remains on the Arch development workstation.
+No changes were made to homelab containers or production agents.
