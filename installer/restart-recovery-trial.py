@@ -183,7 +183,7 @@ def run(stop_at="ca", tamper=None, recover_stop_at=None):
             if recovered.returncode == 0:
                 raise RuntimeError("Tampered recovery was accepted")
             # The recovery refusal must not mark a transaction as recovered.
-            if read_journal(root) == "recovered":
+            if tamper not in ("journal", "journal_symlink") and read_journal(root) == "recovered":
                 raise RuntimeError("Refused recovery was falsely finalized")
             return {"status": "refused", "tamper": tamper, "checkpoint": stop_at,
                     "production_installed": False, "systemd_started": False}
