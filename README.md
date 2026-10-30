@@ -60,3 +60,9 @@ Neither command deploys an agent to production. The disposable protocol test use
 Development occurs on feature branches, with review toward `develop`; `main` remains the stable baseline. Hosted CI is intended for deliberate checkpoints rather than automatic runs on every feature push. Local tests are the primary rapid feedback loop.
 
 **AI provenance:** This is a human-directed, AI-authored experimental project. Treat its outputs and documentation as unverified until independently checked. Contributions and audits are welcome, but no warranty or fitness for operational use is implied.
+
+## Versionary naming and latest local checkpoint (2026-10-30)
+
+**Versionary** is the selected future product name; legacy Patch Command identifiers remain for compatibility pending a planned migration. The user-reported **local desktop** checkpoint is **974 unittest cases, OK (1 skipped)**, with six real loopback-HTTPS tests passing and a passing disposable `installer/beta-selftest.py --protocol-check` run. **These local changes and counts are not guaranteed present in this remote branch**. Do not infer deployment readiness from them.
+
+**Start the next session with [the detailed Versionary handoff](docs/VERSIONARY-SESSION-HANDOFF-2026-10-30.md).** Before syncing, compare the local working tree and remote feature branch; preserve local uncommitted code, credentials and state. The older historical checkpoints elsewhere in this README refer to earlier remote development.
