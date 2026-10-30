@@ -99,7 +99,10 @@ def read_journal(root):
         raise RecoveryError('Invalid journal') from exc
     if not isinstance(journal, dict) or journal.get('version') != 1 or journal.get('state') not in ('prepared', *ASSETS, 'verified', 'recovered'):
         raise RecoveryError('Invalid journal state')
-    if any(set(journal.get(k, {})) != set(ASSETS) for k in ('previous', 'candidate')):
+    if set(journal) != {'version', 'state', 'previous', 'candidate'}:
+        raise RecoveryError('Unexpected journal fields')
+    if any(not isinstance(journal.get(k), dict) or set(journal[k]) != set(ASSETS)
+           for k in ('previous', 'candidate')):
         raise RecoveryError('Invalid journal manifest')
     for key in ('previous', 'candidate'):
         if any(not isinstance(v, str) or len(v) != 64 or any(c not in '0123456789abcdef' for c in v) for v in journal[key].values()):
