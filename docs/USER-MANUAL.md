@@ -48,7 +48,7 @@ This command:
 
 Override the log path with `PATCH_COMMAND_TEST_LOG=/path/to/log` (the older `ARBY_TEST_LOG` override remains supported).
 
-**Last reported result:** 622 tests passed and HTTPS acceptance passed on 2026-10-29. Test totals are historical checkpoints, not guaranteed for new revisions.
+**Last reported result:** 655 tests passed and HTTPS acceptance passed on 2026-10-29. Test totals are historical checkpoints, not guaranteed for new revisions.
 
 The isolated installer smoke test checks that the installed agent CLI starts **without requiring live package repositories**. A real package scan is a separate, optional check; `checkupdates` can fail when mirrors are unreachable, which is not the same as installation failure.
 
@@ -110,7 +110,7 @@ Certificate tools support validation, inspection, offline import and renewal sce
 
 ## 10. Known limitations and safety
 
-- No approved production installer or supported automated rollback workflow yet.
+- Experimental snapshot restoration exists only for empty disposable roots; no approved production installer or supported automated rollback workflow exists.
 - No approved deployment of the new agent stack to live infrastructure.
 - No unattended upgrades, reboots, or automatic LAN agent discovery.
 - A passing disposable TLS test does not prove a real network deployment is safe.
