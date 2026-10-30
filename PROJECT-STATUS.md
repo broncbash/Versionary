@@ -315,3 +315,13 @@ agent installation workflow.
 
 No production deployment or live-host mutation
 is authorized.
+
+## Post-write Disposable Failure Matrix
+
+Added a real-subprocess test matrix that injects failures after
+successful staging phases, including final audit.
+
+The expected recovery mechanism is deletion of the disposable
+temporary workspace, not restoration of a production installation.
+
+Production deployment remains disabled.
