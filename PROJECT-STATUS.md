@@ -241,3 +241,18 @@ Completed local verification on October 30, 2026:
 The next development phase is interactive onboarding,
 configuration previews, and disposable installation
 orchestration using the existing installer components.
+
+## Installation Configuration Preview — October 30, 2026
+
+Added an independent, read-only installation manifest generator:
+
+- Portable agent configuration preview.
+- Proposed filesystem and systemd artifacts.
+- Existing-CA and generated-test-CA planning modes.
+- Machine-readable JSON and human-readable text.
+- Explicit safety policy and disabled installation operations.
+- Dedicated automated tests.
+- Documentation: docs/INSTALLATION-PREVIEW.md.
+
+No installation execution, certificate generation, enrollment,
+service activation, or production deployment is enabled.
