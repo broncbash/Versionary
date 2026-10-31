@@ -6,6 +6,7 @@ agents, production enrollment, or operating-system trust stores.
 """
 
 import argparse
+import hashlib
 import importlib.util
 import json
 import sys
@@ -19,6 +20,13 @@ spec = importlib.util.spec_from_file_location(
 )
 state = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(state)
+
+export_spec = importlib.util.spec_from_file_location(
+    "versionary_admin_export",
+    ROOT / "installer/release-trust-export.py",
+)
+export_module = importlib.util.module_from_spec(export_spec)
+export_spec.loader.exec_module(export_module)
 
 
 def summary(record):
@@ -47,6 +55,10 @@ def main(argv=None):
     install.add_argument("--policy", required=True, type=Path)
     install.add_argument("--signature", required=True, type=Path)
 
+    export_parser = sub.add_parser("export")
+    export_parser.add_argument("--database", required=True, type=Path)
+    export_parser.add_argument("--destination", required=True, type=Path)
+
     args = parser.parse_args(argv)
 
     try:
@@ -72,6 +84,12 @@ def main(argv=None):
             result["status"] = "installed"
             result["installed_version"] = version
 
+        elif args.command == "export":
+            result = export_module.export_state(
+                args.database, args.destination
+            )
+            result["status"] = "exported"
+
         else:
             parser.error("Unknown command")
 
@@ -80,6 +98,7 @@ def main(argv=None):
 
     except (
         state.TrustStateError,
+        export_module.TrustExportError,
         state._UPDATES.PolicyUpdateError,
         OSError,
         ValueError,

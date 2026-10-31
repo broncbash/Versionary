@@ -49,3 +49,42 @@ Implement a portable **inventory configuration** for the legacy update scanner
 endpoints with read-only validation, explicit fallback behavior, and isolated
 tests. Keep the live deployment unchanged. After that, work on V2 enrollment
 integration and a reversible server installer.
+
+
+## Transactional release trust state — development milestone
+
+At commit 4ceb26a, the development branch includes authenticated
+monotonic policy updates, transactional SQLite state, a development
+administrative CLI, and adversarial filesystem and recovery tests.
+
+The verified milestone completed 1,106 tests, one skipped, zero failures.
+
+This milestone does not authorize production deployment.
+
+### Remaining trust-state blockers
+
+- Authenticated backup and recovery
+- Rollback and conflicting-policy rejection
+- Independent freshness mechanism for database replacement threats
+- Remaining filesystem-race review
+- Administrative GUI/CLI parity
+- Operator recovery and audit procedures
+
+See docs/TRUST-STATE-OPERATIONS.md.
+
+Documentation must be updated at every substantial milestone.
+
+
+## Phase VI-B — Development snapshot export
+
+A development-only trust-state export CLI and snapshot validation
+tests have been added.
+
+Exports are exclusive, owner-only files in private directories.
+The export is captured from a SQLite read transaction.
+
+Export integrity checks are not signatures and cannot establish
+freshness or prevent privileged snapshot rollback.
+
+Authenticated recovery, independent freshness protection, and
+production integration remain release blockers.
