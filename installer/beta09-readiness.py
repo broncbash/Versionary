@@ -34,14 +34,30 @@ def audit(python):
     with tempfile.TemporaryDirectory(prefix="versionary-beta09-audit-") as tmp:
         checkout = Path(tmp) / "checkout"
 
+        head = subprocess.run(
+            ["git", "rev-parse", "--verify", "HEAD"],
+            cwd=ROOT, capture_output=True, text=True,
+        )
+        if head.returncode:
+            raise RuntimeError(f"Cannot resolve HEAD: {head.stderr}")
+        commit = head.stdout.strip()
+
         clone = subprocess.run(
             ["git", "clone", "--quiet", "--local", "--no-hardlinks",
-             "--branch", "feature/runtime-visibility",
-             str(ROOT), str(checkout)],
+             "--no-checkout", str(ROOT), str(checkout)],
             capture_output=True, text=True,
         )
         if clone.returncode:
             raise RuntimeError(f"Clone failed: {clone.stderr}")
+
+        checkout_result = subprocess.run(
+            ["git", "checkout", "--quiet", "--detach", commit],
+            cwd=checkout, capture_output=True, text=True,
+        )
+        if checkout_result.returncode:
+            raise RuntimeError(
+                f"Checkout failed: {checkout_result.stderr}"
+            )
 
         checks = [
             ("isolated-staging",
