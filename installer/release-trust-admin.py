@@ -21,6 +21,13 @@ spec = importlib.util.spec_from_file_location(
 state = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(state)
 
+recovery_spec = importlib.util.spec_from_file_location(
+    "versionary_admin_recovery",
+    ROOT / "installer/release-trust-recovery.py",
+)
+recovery_module = importlib.util.module_from_spec(recovery_spec)
+recovery_spec.loader.exec_module(recovery_module)
+
 export_spec = importlib.util.spec_from_file_location(
     "versionary_admin_export",
     ROOT / "installer/release-trust-export.py",
@@ -59,6 +66,17 @@ def main(argv=None):
     export_parser.add_argument("--database", required=True, type=Path)
     export_parser.add_argument("--destination", required=True, type=Path)
 
+    recovery_parser = sub.add_parser("recover")
+    recovery_parser.add_argument("--database", required=True, type=Path)
+    recovery_parser.add_argument(
+        "--authority-public", required=True, type=Path
+    )
+    recovery_parser.add_argument("--policy", required=True, type=Path)
+    recovery_parser.add_argument("--signature", required=True, type=Path)
+    recovery_parser.add_argument(
+        "--minimum-version", required=True, type=int
+    )
+
     args = parser.parse_args(argv)
 
     try:
@@ -84,6 +102,15 @@ def main(argv=None):
             result["status"] = "installed"
             result["installed_version"] = version
 
+        elif args.command == "recover":
+            result = recovery_module.recover(
+                args.database,
+                args.authority_public,
+                args.policy,
+                args.signature,
+                args.minimum_version,
+            )
+
         elif args.command == "export":
             result = export_module.export_state(
                 args.database, args.destination
@@ -99,6 +126,7 @@ def main(argv=None):
     except (
         state.TrustStateError,
         export_module.TrustExportError,
+        recovery_module.RecoveryError,
         state._UPDATES.PolicyUpdateError,
         OSError,
         ValueError,

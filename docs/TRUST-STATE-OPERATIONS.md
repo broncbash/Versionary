@@ -135,3 +135,32 @@ trust database. Authenticated recovery remains unimplemented.
 Outstanding engineering work includes recovery authorization,
 independent freshness anchoring, and more extensive concurrency,
 crash-durability, and filesystem-race testing.
+
+## Phase VI-C1 — Existing-database authenticated recovery
+
+Development-only command:
+
+    python installer/release-trust-admin.py recover --database /private/trust.db --authority-public /trusted/authority.pem --policy /signed/policy.json --signature /signed/policy.sig.json --minimum-version 12
+
+The authority must be independently trusted. The minimum version
+must come from an independently trusted source, not the database
+being recovered or an unauthenticated snapshot.
+
+The command authenticates exact policy bytes using Ed25519,
+rejects authority mismatches, older versions and same-version
+conflicts, and applies newer versions in one SQLite transaction.
+
+An identical same-version policy is an authenticated no-op.
+
+This command does not create missing databases, restore snapshots,
+change running services, or enable the production installer.
+
+The CLI cannot establish that the supplied minimum version is
+genuinely current. An untrusted or outdated floor remains a
+rollback risk. Signed historical policies can still be replayed
+after privileged replacement of the entire trust database unless
+independent monotonic state is enforced.
+
+Remaining: missing-database recovery, durable signature retention,
+independent freshness anchoring, additional filesystem-race and
+crash testing, and GUI/CLI parity.

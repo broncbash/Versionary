@@ -88,3 +88,17 @@ freshness or prevent privileged snapshot rollback.
 
 Authenticated recovery, independent freshness protection, and
 production integration remain release blockers.
+
+## Phase VI-C1 — Authenticated recovery (development)
+
+The development CLI now supports signed policy recovery into an
+existing database with an independently supplied authority key
+and mandatory minimum-version floor.
+
+This is not complete disaster recovery: missing databases are
+never implicitly recreated; export snapshots are not recovery
+credentials; freshness remains an external operator obligation.
+
+Do not enable production deployment until the remaining
+recovery, rollback, filesystem, and operational blockers are
+resolved.
