@@ -45,8 +45,10 @@ def read_config(paths):
         raise RuntimeError("Invalid agent configuration")
     server = validate_server(data["server"])
     ca = Path(data["ca_cert"])
-    if not ca.is_absolute() or not ca.is_file():
-        raise RuntimeError("CA certificate must be an existing absolute file")
+    if not ca.is_absolute() or ca.is_symlink() or not ca.is_file():
+        raise RuntimeError(
+            "CA certificate must be an existing regular file, not a symlink"
+        )
     return server, ca
 
 
@@ -78,10 +80,28 @@ def identity_for(paths):
 
 def existing_identity(paths):
     validate_directory(paths["root"])
+    validate_identity_file(paths["identity"])
     identity = load_identity(paths["identity"])
     if identity is None:
         raise RuntimeError("No identity yet; run register first")
     return identity
+
+
+def validate_identity_file(path):
+    """Reject identity substitution and unsafe permissions."""
+    if path.is_symlink():
+        raise RuntimeError("Agent identity symlinks are forbidden")
+
+    info = path.stat()
+
+    if (
+        not stat.S_ISREG(info.st_mode)
+        or info.st_uid != os.geteuid()
+        or stat.S_IMODE(info.st_mode) != 0o600
+    ):
+        raise RuntimeError(
+            "Agent identity must be an owned private file (0600)"
+        )
 
 
 def run(args):
@@ -100,6 +120,8 @@ def run(args):
 
     server, ca = read_config(paths)
     if args.command == "status":
+        if paths["identity"].exists() or paths["identity"].is_symlink():
+            validate_identity_file(paths["identity"])
         identity = load_identity(paths["identity"])
         print("Server:", server)
         print("Agent ID:", identity["agent_id"] if identity else "not registered")
@@ -116,6 +138,8 @@ def run(args):
         return 0
 
     if args.command == "register":
+        if paths["identity"].exists() or paths["identity"].is_symlink():
+            validate_identity_file(paths["identity"])
         identity = identity_for(paths)
         post = functools.partial(post_json, server=server, ca_cert=ca)
         response = register_v2(identity, key_path=paths["key"], post=post)
