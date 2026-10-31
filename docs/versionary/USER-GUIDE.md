@@ -1,0 +1,146 @@
+# Versionary — Agent User Guide
+
+Status: Development preview, not a production installation guide.
+
+## What Versionary does
+
+Versionary helps administrators see which Linux systems have
+package updates available.
+
+The current agent is observer-only. It does not install updates,
+upgrade packages, or reboot machines.
+
+## Requirements
+
+For the current source-checkout workflow:
+
+- Supported Linux development environment.
+- Python and required project dependencies.
+- Versionary source checkout.
+- HTTPS Versionary server endpoint.
+- Locally available trusted CA certificate.
+- Administrator approval for enrollment.
+
+The portable setup tool does not download or install dependencies.
+
+## Preview configuration
+
+From the repository checkout:
+
+.venv/bin/python installer/versionary-agent-setup.py \
+  --server https://server.example:8443 \
+  --ca-cert /absolute/path/to/ca.crt \
+  --dry-run
+
+Replace the example server and CA path with real values.
+
+Dry-run validates configuration inputs and previews paths.
+It does not create the agent configuration.
+
+## Unattended configuration
+
+.venv/bin/python installer/versionary-agent-setup.py \
+  --server https://server.example:8443 \
+  --ca-cert /absolute/path/to/ca.crt
+
+This creates private local configuration.
+
+It does not register an agent or install a service.
+
+## Interactive configuration
+
+.venv/bin/python installer/versionary-agent-setup.py \
+  --interactive
+
+The installer prompts for missing settings.
+
+## Check status
+
+.venv/bin/python versionary_agent_cli.py status
+
+Status shows the configured server, local identity state,
+and whether a local credential is provisioned.
+
+Local credential presence does not prove the server still
+authorizes the agent.
+
+## Register the agent
+
+.venv/bin/python versionary_agent_cli.py register
+
+Registration requests administrator approval.
+
+It does not grant approval automatically.
+
+## Administrator approval
+
+An authorized administrator must review and approve the
+pending agent on the Versionary server.
+
+The exact administrative workflow remains part of the
+development/beta interface and may change before release.
+
+## Complete enrollment
+
+After approval:
+
+.venv/bin/python versionary_agent_cli.py enroll
+
+This performs the enrollment protocol and provisions
+the local agent credential.
+
+## Send a heartbeat
+
+.venv/bin/python versionary_agent_cli.py heartbeat
+
+This contacts the configured server using the trusted CA
+and the provisioned agent credential.
+
+## Send an update report
+
+.venv/bin/python versionary_agent_cli.py report
+
+This scans the local system for package updates and sends
+an inventory report.
+
+It does not install those updates.
+
+## Custom state directory
+
+For each agent CLI operation, specify:
+
+--state-dir /path/to/private/agent-state
+
+The option appears before the command:
+
+.venv/bin/python versionary_agent_cli.py \
+  --state-dir /path/to/private/agent-state \
+  status
+
+For the setup script, the option can be passed alongside
+other setup arguments.
+
+## Safety and troubleshooting
+
+If configuration already exists, setup refuses to overwrite it.
+
+If the CA path is missing or a symlink, setup fails.
+
+If the server URL is not a bare HTTPS origin, setup fails.
+
+If identity or credential permissions are unsafe, the CLI
+may refuse to load them.
+
+Do not work around these protections by making credential
+files world-readable.
+
+Do not put agent tokens, private keys, or administrator
+credentials into support tickets or terminal transcripts.
+
+## Current limitations
+
+- Source checkout required.
+- No standalone package yet.
+- No service or timer installer yet.
+- No automatic enrollment or reporting schedule.
+- No production release approval.
