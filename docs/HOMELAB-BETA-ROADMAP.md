@@ -70,3 +70,52 @@ Do not merge or tag until the release gates are satisfied.
   and return-prompt.md.
 - Update this roadmap and operational documentation with each
   substantial milestone.
+
+## Phase VII-A — Verified desktop acceptance
+
+Checkpoint: 2026-10-31
+
+- Isolated agent beta evaluation: PASSED.
+- Disposable package build, staging, repeat staging and integrity: PASSED.
+- Loopback HTTPS protocol acceptance: PASSED.
+- Real Arch desktop scan: SUCCESS, 109 available updates.
+- Authenticated agent report and inventory integration: PASSED.
+- Agent health in inventory: ONLINE.
+- Dashboard HTTP route: PASSED.
+- Clean-checkout beta09 readiness audit: PASSED.
+- Recovery/security regression: PASSED.
+- No production installation or enrollment.
+- No homelab containers modified.
+- Protected local development assets remain untouched.
+
+### Phase VII-B — Next development stage
+
+1. Prepare a fresh disposable Arch test environment.
+2. Validate the agent's prerequisites and installation lifecycle.
+3. Repeat installation and verify integrity.
+4. Test failure recovery and clean removal.
+5. Repeat equivalent acceptance on Debian.
+6. Connect disposable server and agent over trusted HTTPS.
+7. Verify real reports in a running browser dashboard.
+8. Produce a reviewed, reversible homelab beta deployment plan.
+9. Obtain explicit target-by-target approval before any live changes.
+
+The existing production installer remains disabled. No CT104, CT102,
+or production agent changes are authorized by this checkpoint.
+
+### Phase VII-B — Disposable cross-distribution staging acceptance
+
+**Result: PASSED — Arch Linux and Debian 12.**
+
+- Built disposable test images with Python 3.14.9 (Arch) and Python 3.11.2 (Debian 12).
+- Built and validated the Versionary agent distribution archive.
+- Generated a temporary CA with CA basic constraints and certificate-signing key usage.
+- Both distributions passed initial staging, repeat staging, and read-only integrity verification.
+- Both container acceptance runs exited with code 0.
+- No production installation, systemd startup, agent enrollment, or network requests occurred.
+- Discovered Debian 12's older `cryptography` API lacks `not_valid_before_utc` and `not_valid_after_utc`.
+- Updated CA validity checks to support both older naive-UTC and newer timezone-aware properties without relaxing certificate validity requirements.
+- Added three regression tests covering valid, expired, and not-yet-valid certificates through the legacy API.
+- All eleven targeted CA tests passed.
+
+**Remaining Phase VII-B gates:** live service execution, authenticated HTTPS agent-to-server integration in a disposable environment, browser dashboard verification, recovery/removal acceptance, and a reviewed homelab deployment plan requiring explicit approval.

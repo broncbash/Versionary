@@ -37,11 +37,17 @@ def validate_ca(data, expected_sha256=None):
 
     now = datetime.now(timezone.utc)
 
-    if not (
-        certificate.not_valid_before_utc
-        <= now
-        < certificate.not_valid_after_utc
-    ):
+    # cryptography versions bundled with Debian 12 predate the
+    # timezone-aware certificate validity properties.
+    not_before = getattr(certificate, "not_valid_before_utc", None)
+    not_after = getattr(certificate, "not_valid_after_utc", None)
+
+    if not_before is None:
+        not_before = certificate.not_valid_before.replace(tzinfo=timezone.utc)
+    if not_after is None:
+        not_after = certificate.not_valid_after.replace(tzinfo=timezone.utc)
+
+    if not (not_before <= now < not_after):
         raise ValueError("CA certificate is outside its validity period")
 
     fingerprint = certificate.fingerprint(
