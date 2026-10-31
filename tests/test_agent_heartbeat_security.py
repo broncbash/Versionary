@@ -1,4 +1,4 @@
-"""Security regression tests for ARBY PATCH AGENT heartbeat."""
+"""Security regression tests for VERSIONARY AGENT heartbeat."""
 
 
 import io

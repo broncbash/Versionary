@@ -19,7 +19,7 @@ class SnapshotTests(unittest.TestCase):
         self.root = base / "root"
         self.root.mkdir(mode=0o700)
         self.output = base / "snapshot"
-        self.config = self.root / "etc/arby-patch-agent/config.json"
+        self.config = self.root / "etc/versionary-agent/config.json"
         self.config.parent.mkdir(parents=True)
         self.config.write_text('{"server":"https://example.test"}')
 
@@ -58,7 +58,7 @@ class SnapshotTests(unittest.TestCase):
             snapshot.verify(self.output)
 
     def test_private_state_not_copied(self):
-        state = self.root / "var/lib/arby-patch-agent"
+        state = self.root / "var/lib/versionary-agent"
         state.mkdir(parents=True, mode=0o700)
         (state / "token").write_text("private-token")
         snapshot.snapshot(self.root, self.output)

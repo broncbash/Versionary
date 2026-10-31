@@ -19,7 +19,7 @@ LAB="$(mktemp -d -t patch-command-demo-XXXXXXXX)"
 .venv/bin/python installer/try-agent-lab.py --workspace "$LAB"
 ```
 
-The command prints the workspace path, staged root, agent package path, and an asset inventory. It generates a disposable CA, builds the agent package, stages it in `$LAB/isolated-root`, audits it, and leaves the files for inspection. You can inspect `$LAB/isolated-root/etc/arby-patch-agent/config.json`, inactive service/timer files, and the package archive. The test server URL is a loopback placeholder, **not** a running endpoint.
+The command prints the workspace path, staged root, agent package path, and an asset inventory. It generates a disposable CA, builds the agent package, stages it in `$LAB/isolated-root`, audits it, and leaves the files for inspection. You can inspect `$LAB/isolated-root/etc/versionary-agent/config.json`, inactive service/timer files, and the package archive. The test server URL is a loopback placeholder, **not** a running endpoint.
 
 When finished, remove only the specific workspace you created. Do not use a directory containing personal or live installation files.
 

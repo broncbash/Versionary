@@ -1,4 +1,4 @@
-"""Regression tests for ARBY PATCH AGENT installation."""
+"""Regression tests for VERSIONARY AGENT installation."""
 
 import importlib.util
 import os
@@ -16,7 +16,7 @@ spec = importlib.util.spec_from_file_location(
 installer = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(installer)
 
-ARCHIVE = ROOT / "installer/dist/arby-patch-agent.tar.gz"
+ARCHIVE = ROOT / "installer/dist/versionary-agent.tar.gz"
 
 
 class TestAgentInstaller(unittest.TestCase):
@@ -29,13 +29,13 @@ class TestAgentInstaller(unittest.TestCase):
     def test_fresh_installation(self):
         installer.install(ARCHIVE, self.root)
 
-        agent = self.root / "opt/arby-patch-agent/agent"
+        agent = self.root / "opt/versionary-agent/agent"
         self.assertEqual(
             {p.name for p in agent.glob("*.py")},
             installer.MODULES,
         )
 
-        state = self.root / "var/lib/arby-patch-agent"
+        state = self.root / "var/lib/versionary-agent"
         self.assertEqual(
             state.stat().st_mode & 0o777,
             0o700,
@@ -44,7 +44,7 @@ class TestAgentInstaller(unittest.TestCase):
     def test_reinstallation_preserves_identity(self):
         installer.install(ARCHIVE, self.root)
 
-        state = self.root / "var/lib/arby-patch-agent"
+        state = self.root / "var/lib/versionary-agent"
         identity = state / "identity.json"
         credential = state / "credential.json"
 
@@ -80,7 +80,7 @@ class TestAgentInstaller(unittest.TestCase):
 
         opt = self.root / "opt"
         opt.mkdir()
-        (opt / "arby-patch-agent").symlink_to(
+        (opt / "versionary-agent").symlink_to(
             outside, target_is_directory=True
         )
 
@@ -88,7 +88,7 @@ class TestAgentInstaller(unittest.TestCase):
             installer.install(ARCHIVE, self.root)
 
     def test_reject_symlinked_module(self):
-        agent = self.root / "opt/arby-patch-agent/agent"
+        agent = self.root / "opt/versionary-agent/agent"
         agent.mkdir(parents=True)
 
         target = self.root / "outside.py"

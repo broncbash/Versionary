@@ -53,7 +53,7 @@ fi
 
 if [[ "$MODE" == "test-install" ]]; then
     SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-    PACKAGE="${SCRIPT_DIR}/dist/arby-patch-agent.tar.gz"
+    PACKAGE="${SCRIPT_DIR}/dist/versionary-agent.tar.gz"
     INSTALLER="${SCRIPT_DIR}/install-files.py"
 
     TEST_ROOT="$(mktemp -d)"
@@ -66,9 +66,9 @@ if [[ "$MODE" == "test-install" ]]; then
     echo
     echo "=== INSTALLED RELEASE ==="
 
-    test -L "$TEST_ROOT/opt/arby-patch-agent/agent"
-    test -d "$TEST_ROOT/opt/arby-patch-agent/agent"
-    test "$(stat -c %a "$TEST_ROOT/var/lib/arby-patch-agent")" = "700"
+    test -L "$TEST_ROOT/opt/versionary-agent/agent"
+    test -d "$TEST_ROOT/opt/versionary-agent/agent"
+    test "$(stat -c %a "$TEST_ROOT/var/lib/versionary-agent")" = "700"
 
     echo "[OK] Agent release activated"
     echo "[OK] Private state directory verified"
@@ -90,15 +90,15 @@ if [[ "$MODE" == "test-install" ]]; then
 
     python3 "$CA_INSTALLER" "$CA_SOURCE" --root "$TEST_ROOT"
 
-    test -f "$TEST_ROOT/etc/arby-patch-agent/ca.crt"
-    test ! -L "$TEST_ROOT/etc/arby-patch-agent/ca.crt"
+    test -f "$TEST_ROOT/etc/versionary-agent/ca.crt"
+    test ! -L "$TEST_ROOT/etc/versionary-agent/ca.crt"
 
     echo "[OK] Trusted CA installed into isolated root"
 
     echo
     echo "=== PORTABLE AGENT CONFIGURATION ==="
     python3 "${SCRIPT_DIR}/setup-config.py" --root "$TEST_ROOT" --server "$SERVER"
-    test -f "$TEST_ROOT/etc/arby-patch-agent/config.json"
+    test -f "$TEST_ROOT/etc/versionary-agent/config.json"
     echo "[OK] Agent configuration installed"
 
     echo
@@ -108,7 +108,7 @@ if [[ "$MODE" == "test-install" ]]; then
 
     python3 "$SYSTEMD_INSTALLER" --root "$TEST_ROOT"
 
-    for unit in arby-patch-agent.service arby-patch-agent.timer; do
+    for unit in versionary-agent.service versionary-agent.timer; do
         UNIT_PATH="${TEST_ROOT}/etc/systemd/system/${unit}"
 
         test -f "$UNIT_PATH"
@@ -122,7 +122,7 @@ if [[ "$MODE" == "test-install" ]]; then
     echo "=== INSTALLED AGENT SMOKE TEST ==="
 
     (
-        cd "$TEST_ROOT/opt/arby-patch-agent"
+        cd "$TEST_ROOT/opt/versionary-agent"
         python3 -m agent --help >/dev/null
     )
 
@@ -135,31 +135,31 @@ if [[ "$MODE" == "test-install" ]]; then
 
     echo
     echo "=== IDEMPOTENT REINSTALLATION CHECK ==="
-    BEFORE_RELEASE="$(readlink -- "$TEST_ROOT/opt/arby-patch-agent/agent")"
-    BEFORE_CONFIG="$(sha256sum -- "$TEST_ROOT/etc/arby-patch-agent/config.json" | cut -d ' ' -f 1)"
-    BEFORE_CA="$(sha256sum -- "$TEST_ROOT/etc/arby-patch-agent/ca.crt" | cut -d ' ' -f 1)"
-    BEFORE_SERVICE="$(sha256sum -- "$TEST_ROOT/etc/systemd/system/arby-patch-agent.service" | cut -d ' ' -f 1)"
-    BEFORE_TIMER="$(sha256sum -- "$TEST_ROOT/etc/systemd/system/arby-patch-agent.timer" | cut -d ' ' -f 1)"
+    BEFORE_RELEASE="$(readlink -- "$TEST_ROOT/opt/versionary-agent/agent")"
+    BEFORE_CONFIG="$(sha256sum -- "$TEST_ROOT/etc/versionary-agent/config.json" | cut -d ' ' -f 1)"
+    BEFORE_CA="$(sha256sum -- "$TEST_ROOT/etc/versionary-agent/ca.crt" | cut -d ' ' -f 1)"
+    BEFORE_SERVICE="$(sha256sum -- "$TEST_ROOT/etc/systemd/system/versionary-agent.service" | cut -d ' ' -f 1)"
+    BEFORE_TIMER="$(sha256sum -- "$TEST_ROOT/etc/systemd/system/versionary-agent.timer" | cut -d ' ' -f 1)"
 
     python3 "$INSTALLER" "$PACKAGE" --root "$TEST_ROOT"
     python3 "$CA_INSTALLER" "$CA_SOURCE" --root "$TEST_ROOT"
     python3 "${SCRIPT_DIR}/setup-config.py" --root "$TEST_ROOT" --server "$SERVER"
     python3 "$SYSTEMD_INSTALLER" --root "$TEST_ROOT"
 
-    test "$(readlink -- "$TEST_ROOT/opt/arby-patch-agent/agent")" = "$BEFORE_RELEASE"
-    test "$(sha256sum -- "$TEST_ROOT/etc/arby-patch-agent/config.json" | cut -d ' ' -f 1)" = "$BEFORE_CONFIG"
-    test "$(sha256sum -- "$TEST_ROOT/etc/arby-patch-agent/ca.crt" | cut -d ' ' -f 1)" = "$BEFORE_CA"
-    test "$(sha256sum -- "$TEST_ROOT/etc/systemd/system/arby-patch-agent.service" | cut -d ' ' -f 1)" = "$BEFORE_SERVICE"
-    test "$(sha256sum -- "$TEST_ROOT/etc/systemd/system/arby-patch-agent.timer" | cut -d ' ' -f 1)" = "$BEFORE_TIMER"
+    test "$(readlink -- "$TEST_ROOT/opt/versionary-agent/agent")" = "$BEFORE_RELEASE"
+    test "$(sha256sum -- "$TEST_ROOT/etc/versionary-agent/config.json" | cut -d ' ' -f 1)" = "$BEFORE_CONFIG"
+    test "$(sha256sum -- "$TEST_ROOT/etc/versionary-agent/ca.crt" | cut -d ' ' -f 1)" = "$BEFORE_CA"
+    test "$(sha256sum -- "$TEST_ROOT/etc/systemd/system/versionary-agent.service" | cut -d ' ' -f 1)" = "$BEFORE_SERVICE"
+    test "$(sha256sum -- "$TEST_ROOT/etc/systemd/system/versionary-agent.timer" | cut -d ' ' -f 1)" = "$BEFORE_TIMER"
     python3 "${SCRIPT_DIR}/audit-test-install.py" --root "$TEST_ROOT" --package "$PACKAGE"
     echo "[OK] Identical reinstallation preserved release, CA, config and units"
     echo "[OK] Test root will be removed automatically"
     exit 0
 fi
 
-AGENT_DIR="/opt/arby-patch-agent"
-STATE_DIR="/var/lib/arby-patch-agent"
-CONFIG_DIR="/etc/arby-patch-agent"
+AGENT_DIR="/opt/versionary-agent"
+STATE_DIR="/var/lib/versionary-agent"
+CONFIG_DIR="/etc/versionary-agent"
 SERVER="${SERVER:-<not-configured>}"
 
 if [[ ! -r /etc/os-release ]]; then
@@ -186,7 +186,7 @@ case "${ID:-}" in
 esac
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-PACKAGE="${SCRIPT_DIR}/dist/arby-patch-agent.tar.gz"
+PACKAGE="${SCRIPT_DIR}/dist/versionary-agent.tar.gz"
 
 echo "=== INSTALLER PREFLIGHT ==="
 

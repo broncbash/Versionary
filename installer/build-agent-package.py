@@ -39,7 +39,7 @@ def build(destination):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", type=Path, default=ROOT / "installer/dist/arby-patch-agent.tar.gz")
+    parser.add_argument("--output", type=Path, default=ROOT / "installer/dist/versionary-agent.tar.gz")
     args = parser.parse_args()
     print(f"[OK] Built and validated {build(args.output)}")
 

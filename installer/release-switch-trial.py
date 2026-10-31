@@ -42,7 +42,7 @@ def active_identifier(app):
 
 def switch_and_restore(*, root, package):
     root = require_test_root(root)
-    app = root / "opt/arby-patch-agent"
+    app = root / "opt/versionary-agent"
     atomic = load("atomic-release.py", "patch_release_switch")
     recovery = load("release-recovery.py", "patch_release_recovery")
     validator = load("validate-package.py", "patch_release_validator")

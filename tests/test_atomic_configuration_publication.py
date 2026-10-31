@@ -27,7 +27,7 @@ class AtomicConfigurationTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.target = (
-            self.root / "etc/arby-patch-agent/config.json"
+            self.root / "etc/versionary-agent/config.json"
         )
 
     def install(self, server=SERVER):

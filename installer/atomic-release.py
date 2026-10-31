@@ -1,4 +1,4 @@
-"""Atomic release staging for ARBY PATCH AGENT.
+"""Atomic release staging for VERSIONARY AGENT.
 
 This module does not install services or activate agents.
 """

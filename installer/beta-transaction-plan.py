@@ -11,11 +11,11 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ASSETS = (
-    ('release', 'opt/arby-patch-agent/agent', 'symlink'),
-    ('config', 'etc/arby-patch-agent/config.json', 'file'),
-    ('ca', 'etc/arby-patch-agent/ca.crt', 'file'),
-    ('service', 'etc/systemd/system/arby-patch-agent.service', 'file'),
-    ('timer', 'etc/systemd/system/arby-patch-agent.timer', 'file'),
+    ('release', 'opt/versionary-agent/agent', 'symlink'),
+    ('config', 'etc/versionary-agent/config.json', 'file'),
+    ('ca', 'etc/versionary-agent/ca.crt', 'file'),
+    ('service', 'etc/systemd/system/versionary-agent.service', 'file'),
+    ('timer', 'etc/systemd/system/versionary-agent.timer', 'file'),
 )
 
 
@@ -38,11 +38,11 @@ def build(root, server, ca_data, package):
     identifier = _load('atomic-release.py', 'beta_plan_release').release_id(modules)
     expected = {
         'release': f'releases/{identifier}/agent'.encode(),
-        'config': json.dumps({'server': server, 'ca_cert': '/etc/arby-patch-agent/ca.crt'},
+        'config': json.dumps({'server': server, 'ca_cert': '/etc/versionary-agent/ca.crt'},
                              sort_keys=True, separators=(',', ':')).encode(),
         'ca': ca_data,
-        'service': (HERE / 'systemd/arby-patch-agent.service').read_bytes(),
-        'timer': (HERE / 'systemd/arby-patch-agent.timer').read_bytes(),
+        'service': (HERE / 'systemd/versionary-agent.service').read_bytes(),
+        'timer': (HERE / 'systemd/versionary-agent.timer').read_bytes(),
     }
     return {
         'schema': 1,

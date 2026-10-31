@@ -1,4 +1,4 @@
-"""Tests for persistent ARBY PATCH AGENT identity."""
+"""Tests for persistent VERSIONARY AGENT identity."""
 
 import json
 import tempfile

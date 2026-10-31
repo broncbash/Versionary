@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""ARBY PATCH AGENT v0.1 — read-only Linux update scanner."""
+"""VERSIONARY AGENT v0.1 — read-only Linux update scanner."""
 
 import argparse
 import json
@@ -167,7 +167,7 @@ def scan():
 
 def main():
     parser = argparse.ArgumentParser(
-        description="ARBY PATCH AGENT — observer-only scanner"
+        description="VERSIONARY AGENT — observer-only scanner"
     )
     parser.add_argument(
         "--scan",

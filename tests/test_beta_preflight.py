@@ -44,49 +44,49 @@ class BetaPreflightTests(unittest.TestCase):
         self.assertFalse(self.inspect()['changes_made'])
         self.assertEqual(sorted(p.name for p in self.root.iterdir()), ['package.tar.gz'])
     def test_conflicting_ca(self):
-        self.write('etc/arby-patch-agent/ca.crt', b'wrong')
+        self.write('etc/versionary-agent/ca.crt', b'wrong')
         with self.assertRaisesRegex(ValueError, 'CA differs'): self.inspect()
     def test_matching_ca(self):
-        self.write('etc/arby-patch-agent/ca.crt', self.ca)
+        self.write('etc/versionary-agent/ca.crt', self.ca)
         self.inspect()
     def test_conflicting_config(self):
-        self.write('etc/arby-patch-agent/config.json', b'{"server":"wrong"}')
+        self.write('etc/versionary-agent/config.json', b'{"server":"wrong"}')
         with self.assertRaisesRegex(ValueError, 'configuration differs'): self.inspect()
     def test_matching_config(self):
-        self.write('etc/arby-patch-agent/config.json', json.dumps({'server':self.server,'ca_cert':'/etc/arby-patch-agent/ca.crt'}).encode())
+        self.write('etc/versionary-agent/config.json', json.dumps({'server':self.server,'ca_cert':'/etc/versionary-agent/ca.crt'}).encode())
         self.inspect()
     def test_corrupt_config(self):
-        self.write('etc/arby-patch-agent/config.json', b'not-json')
+        self.write('etc/versionary-agent/config.json', b'not-json')
         with self.assertRaisesRegex(ValueError, 'Invalid existing'): self.inspect()
     def test_conflicting_unit(self):
-        self.write('etc/systemd/system/arby-patch-agent.timer', b'wrong')
+        self.write('etc/systemd/system/versionary-agent.timer', b'wrong')
         with self.assertRaisesRegex(ValueError, 'systemd unit differs'): self.inspect()
     def test_matching_unit(self):
-        self.write('etc/systemd/system/arby-patch-agent.timer', (HERE/'systemd/arby-patch-agent.timer').read_bytes())
+        self.write('etc/systemd/system/versionary-agent.timer', (HERE/'systemd/versionary-agent.timer').read_bytes())
         self.inspect()
     def test_symlink_ancestor(self):
         (self.root/'etc').symlink_to(self.root)
         with self.assertRaisesRegex(ValueError, 'Unsafe beta directory'): self.inspect()
     def test_symlink_ca(self):
         target = self.write('external', b'CA')
-        path = self.root/'etc/arby-patch-agent/ca.crt'
+        path = self.root/'etc/versionary-agent/ca.crt'
         path.parent.mkdir(parents=True)
         path.symlink_to(target)
         with self.assertRaisesRegex(ValueError, 'Unsafe beta destination'): self.inspect()
     def test_hardlinked_config(self):
         target = self.write('external', b'{}')
-        path = self.root/'etc/arby-patch-agent/config.json'
+        path = self.root/'etc/versionary-agent/config.json'
         path.parent.mkdir(parents=True)
         os.link(target, path)
         with self.assertRaisesRegex(ValueError, 'Unsafe beta destination'): self.inspect()
     def test_wrong_active_release(self):
-        app = self.root/'opt/arby-patch-agent'
+        app = self.root/'opt/versionary-agent'
         app.mkdir(parents=True)
         (app/'agent').symlink_to('releases/wrong/agent')
         with self.assertRaisesRegex(ValueError, 'release differs'): self.inspect()
     def test_unactivated_release(self):
         release = load('atomic-release.py','beta_release_test')
-        (self.root/'opt/arby-patch-agent/releases'/release.release_id(self.modules)).mkdir(parents=True)
+        (self.root/'opt/versionary-agent/releases'/release.release_id(self.modules)).mkdir(parents=True)
         with self.assertRaisesRegex(ValueError, 'Unactivated'): self.inspect()
     def test_root_rejected(self):
         with self.assertRaises(ValueError): preflight.inspect('/',self.server,self.ca,self.package)

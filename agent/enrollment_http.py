@@ -1,4 +1,4 @@
-"""Verified HTTPS transport for ARBY PATCH AGENT enrollment v2."""
+"""Verified HTTPS transport for VERSIONARY AGENT enrollment v2."""
 
 import json
 import ssl

@@ -1,4 +1,4 @@
-"""Tests for authenticated ARBY PATCH AGENT reporting."""
+"""Tests for authenticated VERSIONARY AGENT reporting."""
 
 
 import io

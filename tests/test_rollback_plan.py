@@ -26,7 +26,7 @@ class RollbackPlanTests(unittest.TestCase):
         base = Path(temp.name)
         self.root = base / "root"
         self.root.mkdir(mode=0o700)
-        self.config = self.root / "etc/arby-patch-agent/config.json"
+        self.config = self.root / "etc/versionary-agent/config.json"
         self.config.parent.mkdir(parents=True)
         self.config.write_text('{"value":"old"}')
         self.config.chmod(0o600)
@@ -53,7 +53,7 @@ class RollbackPlanTests(unittest.TestCase):
         self.assertEqual(result["changes"][0]["action"], "create")
 
     def test_proposed_removal_blocker(self):
-        extra = self.root / "etc/arby-patch-agent/ca.crt"
+        extra = self.root / "etc/versionary-agent/ca.crt"
         extra.write_text("CA")
         extra.chmod(0o600)
         result = planner.plan(self.root, self.snapshot)
@@ -80,7 +80,7 @@ class RollbackPlanTests(unittest.TestCase):
             planner.plan(self.root, self.snapshot)
 
     def test_private_state_excluded(self):
-        state = self.root / "var/lib/arby-patch-agent"
+        state = self.root / "var/lib/versionary-agent"
         state.mkdir(parents=True, mode=0o700)
         state.chmod(0o700)
         (state / "token").write_text("secret-do-not-read")

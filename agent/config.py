@@ -6,8 +6,8 @@ import stat
 import urllib.parse
 from pathlib import Path
 
-DEFAULT_CONFIG = Path("/etc/arby-patch-agent/config.json")
-DEFAULT_CA = Path("/etc/arby-patch-agent/ca.crt")
+DEFAULT_CONFIG = Path("/etc/versionary-agent/config.json")
+DEFAULT_CA = Path("/etc/versionary-agent/ca.crt")
 
 class ConfigurationError(RuntimeError):
     pass

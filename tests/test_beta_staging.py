@@ -58,7 +58,7 @@ class BetaStagingTests(unittest.TestCase):
     def test_persistent_stage_and_repeat_preserve_files(self):
         """Exercise the actual staging pipeline without touching live paths."""
         root_dir = SCRIPT.parents[1]
-        package = root_dir / "installer/dist/arby-patch-agent.tar.gz"
+        package = root_dir / "installer/dist/versionary-agent.tar.gz"
         if not package.is_file():
             self.skipTest("Build agent package first (CI builds it before tests)")
         with tempfile.TemporaryDirectory() as tmp:
@@ -78,11 +78,11 @@ class BetaStagingTests(unittest.TestCase):
             self.assertFalse(first["systemd_started"])
             self.assertFalse(first["agent_enrolled"])
             self.assertFalse(first["network_requests_made"])
-            active = test_root / "opt/arby-patch-agent/agent"
-            config = test_root / "etc/arby-patch-agent/config.json"
-            installed_ca = test_root / "etc/arby-patch-agent/ca.crt"
-            service = test_root / "etc/systemd/system/arby-patch-agent.service"
-            timer = test_root / "etc/systemd/system/arby-patch-agent.timer"
+            active = test_root / "opt/versionary-agent/agent"
+            config = test_root / "etc/versionary-agent/config.json"
+            installed_ca = test_root / "etc/versionary-agent/ca.crt"
+            service = test_root / "etc/systemd/system/versionary-agent.service"
+            timer = test_root / "etc/systemd/system/versionary-agent.timer"
             before = (os.readlink(active), *(p.read_bytes() for p in
                       (config, installed_ca, service, timer)))
             second = beta.stage(root=test_root, server="https://patch.example.test",
@@ -122,13 +122,13 @@ class BetaStagingTests(unittest.TestCase):
             ca.write_bytes(b"certificate-placeholder")
             package = root / "package.tar.gz"
             package.write_bytes(b"archive-placeholder")
-            config = root / "etc/arby-patch-agent/config.json"
+            config = root / "etc/versionary-agent/config.json"
             config.parent.mkdir(parents=True)
             config.write_text(json.dumps({
                 "server": "https://example.test",
-                "ca_cert": "/etc/arby-patch-agent/ca.crt",
+                "ca_cert": "/etc/versionary-agent/ca.crt",
             }))
-            installed_ca = root / "etc/arby-patch-agent/ca.crt"
+            installed_ca = root / "etc/versionary-agent/ca.crt"
             installed_ca.write_bytes(ca.read_bytes())
             class Module:
                 pass
@@ -157,7 +157,7 @@ class BetaStagingTests(unittest.TestCase):
             self.assertFalse(result["network_requests_made"])
             self.assertEqual(run.call_count, 1)
             self.assertEqual(run.call_args.kwargs["cwd"],
-                             str(root / "opt/arby-patch-agent"))
+                             str(root / "opt/versionary-agent"))
             self.assertIn("-B", run.call_args.args[0])
 
     def test_cli_failure_returns_nonzero(self):

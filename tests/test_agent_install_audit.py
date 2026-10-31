@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "installer/audit-test-install.py"
-PACKAGE = ROOT / "installer/dist/arby-patch-agent.tar.gz"
+PACKAGE = ROOT / "installer/dist/versionary-agent.tar.gz"
 INSTALL = ROOT / "installer/install-files.py"
 spec = importlib.util.spec_from_file_location("agent_install_audit", SCRIPT)
 audit = importlib.util.module_from_spec(spec)
@@ -52,7 +52,7 @@ class AgentInstallAuditTests(unittest.TestCase):
                                   "--root", str(self.root)], capture_output=True,
                                  text=True, check=False)
         self.assertEqual(process.returncode, 0, process.stderr)
-        release = self.root / "opt/arby-patch-agent/agent"
+        release = self.root / "opt/versionary-agent/agent"
         (release / "config.py").write_text("tampered")
         result = audit.audit(self.root, PACKAGE)
         checks = {item["name"]: item["ok"] for item in result["checks"]}
@@ -64,7 +64,7 @@ class AgentInstallAuditTests(unittest.TestCase):
                                   "--root", str(self.root)], capture_output=True,
                                  text=True, check=False)
         self.assertEqual(process.returncode, 0, process.stderr)
-        return self.root / "opt/arby-patch-agent/agent"
+        return self.root / "opt/versionary-agent/agent"
 
     def _source_integrity_ok(self):
         result = audit.audit(self.root, PACKAGE)
@@ -111,13 +111,13 @@ class AgentInstallAuditTests(unittest.TestCase):
         # Build an isolated file layout for adversarial file-type checks.
         # The full shell installer is covered separately by smoke tests.
         self._installed_release()
-        config_dir = self.root / "etc/arby-patch-agent"
+        config_dir = self.root / "etc/versionary-agent"
         config_dir.mkdir(parents=True, exist_ok=True)
         (config_dir / "config.json").write_text('{"server":"https://example.test"}')
         (config_dir / "ca.crt").write_text("-----BEGIN CERTIFICATE-----\\nTEST\\n")
         units_dir = self.root / "etc/systemd/system"
         units_dir.mkdir(parents=True, exist_ok=True)
-        for name in ("arby-patch-agent.service", "arby-patch-agent.timer"):
+        for name in ("versionary-agent.service", "versionary-agent.timer"):
             (units_dir / name).write_text("[Unit]\\nDescription=Test\\n")
             (units_dir / name).chmod(0o644)
         return config_dir, units_dir
@@ -141,20 +141,20 @@ class AgentInstallAuditTests(unittest.TestCase):
 
     def test_symlinked_systemd_unit_rejected(self):
         _, units = self._install_full_test_root()
-        service = units / "arby-patch-agent.service"
+        service = units / "versionary-agent.service"
         original = self.root / "service-copy"
         original.write_bytes(service.read_bytes())
         service.unlink()
         service.symlink_to(original)
         checks = {item["name"]: item["ok"] for item in audit.audit(self.root, PACKAGE)["checks"]}
-        self.assertFalse(checks["arby-patch-agent.service"])
+        self.assertFalse(checks["versionary-agent.service"])
 
     def test_hardlinked_systemd_unit_rejected(self):
         import os
         _, units = self._install_full_test_root()
-        os.link(units / "arby-patch-agent.timer", self.root / "timer-hardlink")
+        os.link(units / "versionary-agent.timer", self.root / "timer-hardlink")
         checks = {item["name"]: item["ok"] for item in audit.audit(self.root, PACKAGE)["checks"]}
-        self.assertFalse(checks["arby-patch-agent.timer"])
+        self.assertFalse(checks["versionary-agent.timer"])
 
     def test_cli_failure_json(self):
         process = subprocess.run([sys.executable, str(SCRIPT), "--root", str(self.root),

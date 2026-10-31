@@ -39,11 +39,11 @@ def inspect(root, server, ca_data, package):
     if root == Path('/') or not safe_directory(root):
         raise ValueError('Preflight requires an existing isolated beta root')
     # Validate every existing ancestor; do not follow symlinks into host paths.
-    for relative in ('opt', 'opt/arby-patch-agent', 'opt/arby-patch-agent/releases',
-                     'var', 'var/lib', 'var/lib/arby-patch-agent',
-                     'etc', 'etc/arby-patch-agent', 'etc/systemd', 'etc/systemd/system'):
+    for relative in ('opt', 'opt/versionary-agent', 'opt/versionary-agent/releases',
+                     'var', 'var/lib', 'var/lib/versionary-agent',
+                     'etc', 'etc/versionary-agent', 'etc/systemd', 'etc/systemd/system'):
         safe_directory(root / relative)
-    app = root / 'opt/arby-patch-agent'
+    app = root / 'opt/versionary-agent'
     active = app / 'agent'
     release = load('atomic-release.py', 'beta_preflight_release')
     validator = load('validate-package.py', 'beta_preflight_validator')
@@ -74,20 +74,20 @@ def inspect(root, server, ca_data, package):
         # A partial release may be present from an interrupted installation.
         # Do not attempt to interpret it as safe to overwrite.
         raise ValueError('Unactivated beta release exists; manual inspection required')
-    config = root / 'etc/arby-patch-agent/config.json'
+    config = root / 'etc/versionary-agent/config.json'
     data = safe_file(config)
     if data is not None:
-        expected = {'server': server, 'ca_cert': '/etc/arby-patch-agent/ca.crt'}
+        expected = {'server': server, 'ca_cert': '/etc/versionary-agent/ca.crt'}
         try:
             actual = json.loads(data)
         except (ValueError, UnicodeDecodeError) as exc:
             raise ValueError('Invalid existing beta configuration') from exc
         if actual != expected:
             raise ValueError('Existing beta configuration differs')
-    existing_ca = safe_file(root / 'etc/arby-patch-agent/ca.crt')
+    existing_ca = safe_file(root / 'etc/versionary-agent/ca.crt')
     if existing_ca is not None and existing_ca != ca_data:
         raise ValueError('Existing beta CA differs')
-    for name in ('arby-patch-agent.service', 'arby-patch-agent.timer'):
+    for name in ('versionary-agent.service', 'versionary-agent.timer'):
         existing = safe_file(root / 'etc/systemd/system' / name)
         if existing is not None and existing != (HERE / 'systemd' / name).read_bytes():
             raise ValueError(f'Existing beta systemd unit differs: {name}')

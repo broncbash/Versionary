@@ -20,7 +20,7 @@ class InstallerPresentationTests(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0)
         self.assertIn("Production installation remains disabled.", result.stdout)
-        self.assertNotIn("ARBY PATCH AGENT", result.stdout)
+        self.assertNotIn("VERSIONARY AGENT", result.stdout)
 
     def test_install_mode_does_not_enable_deployment(self):
         installer = (ROOT / "installer/install-agent.sh").read_text()

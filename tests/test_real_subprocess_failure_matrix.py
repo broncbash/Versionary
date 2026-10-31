@@ -67,7 +67,7 @@ class RealSubprocessFailureMatrix(unittest.TestCase):
 
         cls.ca_cert = cls.certs / "ca.crt"
         cls.package = (
-            INSTALLER / "dist/arby-patch-agent.tar.gz"
+            INSTALLER / "dist/versionary-agent.tar.gz"
         )
 
         if not cls.ca_cert.is_file():

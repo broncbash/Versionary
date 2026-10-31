@@ -1,5 +1,5 @@
 [Unit]
-Description=ARBY PATCH AGENT - Observer-only update reporting
+Description=VERSIONARY AGENT - Observer-only update reporting
 Wants=network-online.target
 After=network-online.target
 
@@ -7,7 +7,7 @@ After=network-online.target
 Type=oneshot
 User=root
 Group=root
-WorkingDirectory=/opt/arby-patch-agent
+WorkingDirectory=/opt/versionary-agent
 ExecStart=/usr/bin/python3 -m agent report
 
 NoNewPrivileges=yes
@@ -20,7 +20,7 @@ ProtectControlGroups=yes
 RestrictSUIDSGID=yes
 LockPersonality=yes
 
-ReadWritePaths=/var/lib/arby-patch-agent
+ReadWritePaths=/var/lib/versionary-agent
 UMask=0077
 
 TimeoutStartSec=180

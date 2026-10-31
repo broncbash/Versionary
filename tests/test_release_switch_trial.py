@@ -19,7 +19,7 @@ class ReleaseSwitchTrialTests(unittest.TestCase):
     def test_rejects_missing_active_release(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            app = root / "opt/arby-patch-agent"
+            app = root / "opt/versionary-agent"
             app.mkdir(parents=True)
             with self.assertRaises(ValueError):
                 trial.active_identifier(app)
@@ -28,7 +28,7 @@ class ReleaseSwitchTrialTests(unittest.TestCase):
         atomic = trial.load("atomic-release.py", "test_release_switch_atomic")
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            app = root / "opt/arby-patch-agent"
+            app = root / "opt/versionary-agent"
             app.mkdir(parents=True)
             original = atomic.install_release(app, {"__main__.py": b"print('original')\n"})
             class Validator:

@@ -37,13 +37,13 @@ def audit(root, package):
     if not safe_root or root == Path("/"):
         return {"ready": False, "changes_made": False, "checks": checks}
 
-    app = root / "opt/arby-patch-agent"
+    app = root / "opt/versionary-agent"
     active = app / "agent"
-    state = root / "var/lib/arby-patch-agent"
-    config = root / "etc/arby-patch-agent/config.json"
-    ca = root / "etc/arby-patch-agent/ca.crt"
+    state = root / "var/lib/versionary-agent"
+    config = root / "etc/versionary-agent/config.json"
+    ca = root / "etc/versionary-agent/ca.crt"
     units = [root / "etc/systemd/system" / name for name in
-             ("arby-patch-agent.service", "arby-patch-agent.timer")]
+             ("versionary-agent.service", "versionary-agent.timer")]
     try:
         modules = validator.load_modules(package)
         digest = hashlib.sha256()

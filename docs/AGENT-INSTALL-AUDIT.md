@@ -21,7 +21,7 @@ For an existing disposable test root, use:
 ```sh
 python3 installer/audit-test-install.py \
   --root /path/to/isolated-root \
-  --package installer/dist/arby-patch-agent.tar.gz
+  --package installer/dist/versionary-agent.tar.gz
 ```
 
 The audit returns JSON and exits 0 only if its checks pass. It refuses the

@@ -1,4 +1,4 @@
-"""Authenticated update reporting for ARBY PATCH AGENT."""
+"""Authenticated update reporting for VERSIONARY AGENT."""
 
 import json
 import ssl

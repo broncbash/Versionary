@@ -28,7 +28,7 @@ class PortableConfigurationTests(unittest.TestCase):
     def test_config_roundtrip(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / 'config.json'
-            data = {'server': 'https://test.local:9443', 'ca_cert': '/etc/arby-patch-agent/ca.crt'}
+            data = {'server': 'https://test.local:9443', 'ca_cert': '/etc/versionary-agent/ca.crt'}
             path.write_text(json.dumps(data))
             self.assertEqual(load_config(path), data)
 
@@ -44,7 +44,7 @@ class PortableConfigurationTests(unittest.TestCase):
         mod = load_module('setup_config_preserve', ROOT/'installer/setup-config.py')
         with tempfile.TemporaryDirectory() as tmp:
             mod.install_config(tmp, 'https://example.org')
-            config = Path(tmp) / 'etc/arby-patch-agent/config.json'
+            config = Path(tmp) / 'etc/versionary-agent/config.json'
             before = config.read_bytes()
             with self.assertRaises(ValueError):
                 mod.install_config(tmp, 'https://different.example.org')
@@ -54,7 +54,7 @@ class PortableConfigurationTests(unittest.TestCase):
         mod = load_module('setup_config_symlink', ROOT/'installer/setup-config.py')
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            config_dir = root / 'etc/arby-patch-agent'
+            config_dir = root / 'etc/versionary-agent'
             config_dir.mkdir(parents=True)
             outside = root / 'outside.json'
             outside.write_text('DO NOT MODIFY')
@@ -67,7 +67,7 @@ class PortableConfigurationTests(unittest.TestCase):
         mod = load_module('setup_config_ca_conflict', ROOT/'installer/setup-config.py')
         with tempfile.TemporaryDirectory() as tmp:
             mod.install_config(tmp, 'https://example.org')
-            config = Path(tmp) / 'etc/arby-patch-agent/config.json'
+            config = Path(tmp) / 'etc/versionary-agent/config.json'
             before = config.read_bytes()
             with self.assertRaises(ValueError):
                 mod.install_config(tmp, 'https://example.org',

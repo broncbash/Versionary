@@ -45,7 +45,7 @@ class InstallationPreviewTests(unittest.TestCase):
         result = self.agent()
         state = next(
             item for item in result["artifacts"]
-            if item["path"] == "/var/lib/arby-patch-agent"
+            if item["path"] == "/var/lib/versionary-agent"
         )
         self.assertEqual(state["permissions"], "0700")
 

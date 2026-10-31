@@ -17,11 +17,11 @@ def safe_app(root):
     root = Path(root).absolute()
     if root == Path("/"):
         raise ValueError("Production root is forbidden")
-    for path in (root, root / "opt", root / "opt/arby-patch-agent"):
+    for path in (root, root / "opt", root / "opt/versionary-agent"):
         info = path.lstat()
         if not stat.S_ISDIR(info.st_mode) or info.st_uid != os.geteuid() or info.st_mode & 0o022:
             raise ValueError("Unsafe isolated directory")
-    return root / "opt/arby-patch-agent"
+    return root / "opt/versionary-agent"
 
 
 def _identifier(value):

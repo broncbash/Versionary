@@ -14,39 +14,39 @@ from pathlib import Path
 
 AGENT_ARTIFACTS = (
     {
-        "path": "/opt/arby-patch-agent",
+        "path": "/opt/versionary-agent",
         "purpose": "Versioned agent application releases",
         "kind": "directory",
     },
     {
-        "path": "/etc/arby-patch-agent",
+        "path": "/etc/versionary-agent",
         "purpose": "Agent configuration and trusted CA",
         "kind": "directory",
     },
     {
-        "path": "/var/lib/arby-patch-agent",
+        "path": "/var/lib/versionary-agent",
         "purpose": "Private agent identity and persistent state",
         "kind": "directory",
         "permissions": "0700",
     },
     {
-        "path": "/etc/arby-patch-agent/config.json",
+        "path": "/etc/versionary-agent/config.json",
         "purpose": "Validated agent configuration",
         "kind": "file",
     },
     {
-        "path": "/etc/arby-patch-agent/ca.crt",
+        "path": "/etc/versionary-agent/ca.crt",
         "purpose": "Trusted server CA certificate",
         "kind": "file",
     },
     {
-        "path": "/etc/systemd/system/arby-patch-agent.service",
+        "path": "/etc/systemd/system/versionary-agent.service",
         "purpose": "Agent service definition",
         "kind": "file",
         "activation": "disabled",
     },
     {
-        "path": "/etc/systemd/system/arby-patch-agent.timer",
+        "path": "/etc/systemd/system/versionary-agent.timer",
         "purpose": "Agent scheduling definition",
         "kind": "file",
         "activation": "disabled",
@@ -158,7 +158,7 @@ def create_preview(
         "artifacts": [dict(item) for item in AGENT_ARTIFACTS],
         "configuration": {
             "server": server,
-            "ca_cert": "/etc/arby-patch-agent/ca.crt",
+            "ca_cert": "/etc/versionary-agent/ca.crt",
         },
         "certificate": certificate,
         "operations": operations,

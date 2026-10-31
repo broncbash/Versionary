@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install ARBY PATCH AGENT files into an isolated root."""
+"""Install VERSIONARY AGENT files into an isolated root."""
 
 import argparse
 import importlib.util
@@ -53,7 +53,7 @@ directory_spec.loader.exec_module(secure_directories)
 MODULES = {
     "__main__.py",
     "config.py",
-    "arby_patch_agent.py",
+    "versionary_agent.py",
     "credentials.py",
     "enrollment_client.py",
     "enrollment_crypto.py",
@@ -195,9 +195,9 @@ def install(archive_path, root):
     require_production_root(root)
     require_secure_install_root(root)
 
-    app = root / "opt/arby-patch-agent"
-    state = root / "var/lib/arby-patch-agent"
-    config = root / "etc/arby-patch-agent"
+    app = root / "opt/versionary-agent"
+    state = root / "var/lib/versionary-agent"
+    config = root / "etc/versionary-agent"
 
     for directory in (app, state, config):
         require_safe_directory(directory, root)
@@ -216,7 +216,7 @@ def install(archive_path, root):
         stack.enter_context(
             secure_directories.secure_directory(
                 root,
-                "opt/arby-patch-agent",
+                "opt/versionary-agent",
                 create=True,
                 mode=0o755,
             )
@@ -225,7 +225,7 @@ def install(archive_path, root):
         stack.enter_context(
             secure_directories.secure_directory(
                 root,
-                "var/lib/arby-patch-agent",
+                "var/lib/versionary-agent",
                 create=True,
                 mode=0o700,
             )
@@ -234,7 +234,7 @@ def install(archive_path, root):
         stack.enter_context(
             secure_directories.secure_directory(
                 root,
-                "etc/arby-patch-agent",
+                "etc/versionary-agent",
                 create=True,
                 mode=0o755,
             )

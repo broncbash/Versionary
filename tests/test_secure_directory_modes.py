@@ -30,13 +30,13 @@ class TestSecureDirectoryModes(unittest.TestCase):
     def test_private_directory_created_with_0700(self):
         with secure.secure_directory(
             self.root,
-            "var/lib/arby-patch-agent",
+            "var/lib/versionary-agent",
             create=True,
             mode=0o700,
         ):
             pass
 
-        directory = self.root / "var/lib/arby-patch-agent"
+        directory = self.root / "var/lib/versionary-agent"
 
         self.assertEqual(
             stat.S_IMODE(directory.stat().st_mode),
@@ -46,13 +46,13 @@ class TestSecureDirectoryModes(unittest.TestCase):
     def test_application_directory_created_with_0755(self):
         with secure.secure_directory(
             self.root,
-            "opt/arby-patch-agent",
+            "opt/versionary-agent",
             create=True,
             mode=0o755,
         ):
             pass
 
-        directory = self.root / "opt/arby-patch-agent"
+        directory = self.root / "opt/versionary-agent"
 
         self.assertEqual(
             stat.S_IMODE(directory.stat().st_mode),

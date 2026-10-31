@@ -1,4 +1,4 @@
-"""Secure persistent Ed25519 identity keys for ARBY PATCH AGENT."""
+"""Secure persistent Ed25519 identity keys for VERSIONARY AGENT."""
 
 import json
 import os
@@ -28,7 +28,7 @@ except ImportError:
 
 
 DEFAULT_KEY_PATH = Path(
-    "/var/lib/arby-patch-agent/enrollment-key.json"
+    "/var/lib/versionary-agent/enrollment-key.json"
 )
 
 

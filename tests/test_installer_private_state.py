@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 INSTALLER = ROOT / "installer/install-files.py"
-ARCHIVE = ROOT / "installer/dist/arby-patch-agent.tar.gz"
+ARCHIVE = ROOT / "installer/dist/versionary-agent.tar.gz"
 
 
 spec = importlib.util.spec_from_file_location(
@@ -24,7 +24,7 @@ class PrivateStateTests(unittest.TestCase):
     def test_rejects_existing_0755_state(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            state = root / "var/lib/arby-patch-agent"
+            state = root / "var/lib/versionary-agent"
             state.mkdir(parents=True)
             os.chmod(state, 0o755)
 
@@ -37,14 +37,14 @@ class PrivateStateTests(unittest.TestCase):
                 state.stat().st_mode & 0o777, 0o755
             )
 
-            agent = root / "opt/arby-patch-agent/agent"
+            agent = root / "opt/versionary-agent/agent"
             self.assertFalse(agent.exists())
             self.assertFalse(agent.is_symlink())
 
     def test_accepts_existing_0700_state(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            state = root / "var/lib/arby-patch-agent"
+            state = root / "var/lib/versionary-agent"
             state.mkdir(parents=True)
             os.chmod(state, 0o700)
 
@@ -54,7 +54,7 @@ class PrivateStateTests(unittest.TestCase):
                 state.stat().st_mode & 0o777, 0o700
             )
 
-            agent = root / "opt/arby-patch-agent/agent"
+            agent = root / "opt/versionary-agent/agent"
             self.assertTrue(agent.is_symlink())
 
 

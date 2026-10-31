@@ -1,4 +1,4 @@
-"""Secure HTTPS registration for ARBY PATCH AGENT."""
+"""Secure HTTPS registration for VERSIONARY AGENT."""
 
 import json
 import ssl
@@ -10,7 +10,7 @@ from .config import connection
 
 DEFAULT_SERVER = None
 DEFAULT_CA_CERT = Path(
-    "/etc/arby-patch-agent/ca.crt"
+    "/etc/versionary-agent/ca.crt"
 )
 
 

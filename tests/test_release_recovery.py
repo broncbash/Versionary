@@ -25,7 +25,7 @@ class RecoveryTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
-        self.app = self.root / "opt/arby-patch-agent"
+        self.app = self.root / "opt/versionary-agent"
         self.app.mkdir(parents=True)
         self.previous = "a" * 64
         self.candidate = "b" * 64

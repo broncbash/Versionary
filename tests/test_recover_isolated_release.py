@@ -25,7 +25,7 @@ class RecoveryCommandTests(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.root = Path(self.tmp.name)
-        self.app = self.root / "opt/arby-patch-agent"
+        self.app = self.root / "opt/versionary-agent"
         self.app.mkdir(parents=True)
         self.old = atomic.install_release(self.app, {"__main__.py": b"old\n"})
         self.new = atomic.install_release(self.app, {"__main__.py": b"new\n"})

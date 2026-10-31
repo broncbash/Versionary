@@ -1,4 +1,4 @@
-"""Tests for the ARBY PATCH AGENT heartbeat client."""
+"""Tests for the VERSIONARY AGENT heartbeat client."""
 
 
 import io

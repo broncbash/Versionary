@@ -6,10 +6,10 @@
 
 ## Agent configuration
 
-The installed agent reads `/etc/arby-patch-agent/config.json` at runtime. Required fields:
+The installed agent reads `/etc/versionary-agent/config.json` at runtime. Required fields:
 
 ```json
-{"server": "https://patch.example.net:8443", "ca_cert": "/etc/arby-patch-agent/ca.crt"}
+{"server": "https://patch.example.net:8443", "ca_cert": "/etc/versionary-agent/ca.crt"}
 ```
 
 The installer refuses to overwrite an existing configuration with different values. Changing a configured server or CA will require an explicit migration workflow (future work).

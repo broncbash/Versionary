@@ -113,12 +113,12 @@ def install_ca(source, root, expected_sha256=None):
     data = source.read_bytes()
     fingerprint = validate_ca(data, expected_sha256)
 
-    destination_dir = root / "etc/arby-patch-agent"
+    destination_dir = root / "etc/versionary-agent"
     destination = destination_dir / "ca.crt"
 
     current = root
 
-    for component in ("etc", "arby-patch-agent"):
+    for component in ("etc", "versionary-agent"):
         current = current / component
 
         if current.is_symlink():

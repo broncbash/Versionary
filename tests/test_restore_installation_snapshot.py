@@ -24,7 +24,7 @@ class RestoreSnapshotTests(unittest.TestCase):
         base = Path(tmp.name)
         self.source = base / "source"
         self.source.mkdir(mode=0o700)
-        self.config = self.source / "etc/arby-patch-agent/config.json"
+        self.config = self.source / "etc/versionary-agent/config.json"
         self.config.parent.mkdir(parents=True)
         self.config.write_text('{"server":"https://example.test"}')
         self.config.chmod(0o600)
@@ -35,7 +35,7 @@ class RestoreSnapshotTests(unittest.TestCase):
 
     def test_restore_and_permissions(self):
         result = restore.restore(self.snap, self.root)
-        target = self.root / "etc/arby-patch-agent/config.json"
+        target = self.root / "etc/versionary-agent/config.json"
         self.assertEqual(target.read_bytes(), self.config.read_bytes())
         self.assertEqual(target.stat().st_mode & 0o777, 0o600)
         self.assertFalse(result["production_installed"])
@@ -62,7 +62,7 @@ class RestoreSnapshotTests(unittest.TestCase):
     def test_manifest_rejects_unsafe_mode_before_writes(self):
         manifest_path = self.snap / "manifest.json"
         manifest = json.loads(manifest_path.read_text())
-        manifest["assets"]["etc/arby-patch-agent/config.json"]["mode"] = "0o666"
+        manifest["assets"]["etc/versionary-agent/config.json"]["mode"] = "0o666"
         manifest_path.write_text(json.dumps(manifest))
         manifest_path.chmod(0o600)
         with self.assertRaises(ValueError):
@@ -72,7 +72,7 @@ class RestoreSnapshotTests(unittest.TestCase):
     def test_manifest_rejects_invalid_mode_before_writes(self):
         manifest_path = self.snap / "manifest.json"
         manifest = json.loads(manifest_path.read_text())
-        manifest["assets"]["etc/arby-patch-agent/config.json"]["mode"] = "0o9"
+        manifest["assets"]["etc/versionary-agent/config.json"]["mode"] = "0o9"
         manifest_path.write_text(json.dumps(manifest))
         manifest_path.chmod(0o600)
         with self.assertRaises(ValueError):
@@ -102,14 +102,14 @@ class RestoreSnapshotTests(unittest.TestCase):
             if str(path).endswith("ca.crt") and flags & os.O_CREAT:
                 raise OSError("injected interruption")
             return original(path, flags, *args, **kwargs)
-        ca = self.source / "etc/arby-patch-agent/ca.crt"
+        ca = self.source / "etc/versionary-agent/ca.crt"
         ca.write_text("public-ca")
         snapshot_dir = self.snap.parent / "second-snapshot"
         snapshot.snapshot(self.source, snapshot_dir)
         with patch.object(restore.os, "open", side_effect=fail_second):
             with self.assertRaises(OSError):
                 restore.restore(snapshot_dir, self.root)
-        self.assertTrue((self.root / "etc/arby-patch-agent/config.json").exists())
+        self.assertTrue((self.root / "etc/versionary-agent/config.json").exists())
         with self.assertRaises(ValueError):
             restore.restore(snapshot_dir, self.root)
 

@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-DEFAULT_PACKAGE = HERE / "dist/arby-patch-agent.tar.gz"
+DEFAULT_PACKAGE = HERE / "dist/versionary-agent.tar.gz"
 
 
 def module(filename, name):
@@ -35,7 +35,7 @@ def stage(*, root, server, ca_cert, package=DEFAULT_PACKAGE, verify_only=False, 
         raise ValueError("--smoke-scan requires --verify-only")
     # Validate all external inputs before any installer changes the test root.
     config = module("setup-config.py", "arby_beta_config")
-    config.validate_config({"server": server, "ca_cert": "/etc/arby-patch-agent/ca.crt"})
+    config.validate_config({"server": server, "ca_cert": "/etc/versionary-agent/ca.crt"})
     ca = module("install-ca.py", "arby_beta_ca")
     ca_source = Path(ca_cert)
     if ca_source.is_symlink() or not ca_source.is_file():
@@ -56,9 +56,9 @@ def stage(*, root, server, ca_cert, package=DEFAULT_PACKAGE, verify_only=False, 
         result = audit.audit(root, package)
         if not result["ready"]:
             raise ValueError("Existing beta installation failed integrity audit")
-        installed_config = root / "etc/arby-patch-agent/config.json"
-        installed_ca = root / "etc/arby-patch-agent/ca.crt"
-        expected = {"server": server, "ca_cert": "/etc/arby-patch-agent/ca.crt"}
+        installed_config = root / "etc/versionary-agent/config.json"
+        installed_ca = root / "etc/versionary-agent/ca.crt"
+        expected = {"server": server, "ca_cert": "/etc/versionary-agent/ca.crt"}
         if json.loads(installed_config.read_text(encoding="utf-8")) != expected:
             raise ValueError("Existing beta configuration does not match requested server")
         if installed_ca.read_bytes() != ca_source.read_bytes():
@@ -67,7 +67,7 @@ def stage(*, root, server, ca_cert, package=DEFAULT_PACKAGE, verify_only=False, 
         if smoke_scan:
             result = subprocess.run(
                 [sys.executable, "-B", "-m", "agent", "scan"],
-                cwd=str(root / "opt/arby-patch-agent"),
+                cwd=str(root / "opt/versionary-agent"),
                 env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
                 capture_output=True, text=True, timeout=150, check=False,
             )

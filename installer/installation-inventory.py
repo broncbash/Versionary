@@ -12,12 +12,12 @@ import sys
 from pathlib import Path
 
 FILES = (
-    "etc/arby-patch-agent/config.json",
-    "etc/arby-patch-agent/ca.crt",
-    "etc/systemd/system/arby-patch-agent.service",
-    "etc/systemd/system/arby-patch-agent.timer",
+    "etc/versionary-agent/config.json",
+    "etc/versionary-agent/ca.crt",
+    "etc/systemd/system/versionary-agent.service",
+    "etc/systemd/system/versionary-agent.timer",
 )
-PRIVATE_DIR = "var/lib/arby-patch-agent"
+PRIVATE_DIR = "var/lib/versionary-agent"
 
 
 def inspect(root):

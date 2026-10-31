@@ -11,7 +11,7 @@ from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 INSTALLER = ROOT / "installer"
-PACKAGE = INSTALLER / "dist/arby-patch-agent.tar.gz"
+PACKAGE = INSTALLER / "dist/versionary-agent.tar.gz"
 
 PHASES = (
     "install-files.py",

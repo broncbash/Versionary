@@ -1,4 +1,4 @@
-"""Descriptor-based directory traversal for ARBY PATCH AGENT."""
+"""Descriptor-based directory traversal for VERSIONARY AGENT."""
 
 import os
 import stat

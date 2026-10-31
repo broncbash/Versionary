@@ -25,7 +25,7 @@ class TestAtomicReleaseRace(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
 
-        self.app = Path(self.temp.name) / "arby-patch-agent"
+        self.app = Path(self.temp.name) / "versionary-agent"
         self.app.mkdir()
 
         self.first = atomic.stage_release(

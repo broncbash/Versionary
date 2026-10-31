@@ -1,10 +1,10 @@
 [Unit]
-Description=ARBY PATCH AGENT - Optional update reporting timer
+Description=VERSIONARY AGENT - Optional update reporting timer
 
 [Timer]
 OnCalendar=*-*-* 06:00:00
 Persistent=false
-Unit=arby-patch-agent.service
+Unit=versionary-agent.service
 
 [Install]
 WantedBy=timers.target

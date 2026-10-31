@@ -7,7 +7,7 @@ Example, **only after staging a disposable root** with `installer/stage-beta.py`
 ```bash
 python installer/release-switch-trial.py \
   --root /path/to/disposable-test-root \
-  --package installer/dist/arby-patch-agent.tar.gz
+  --package installer/dist/versionary-agent.tar.gz
 ```
 
 The exercise verifies the original active release, stages the candidate, activates it, and restores the original release under the install lock. It rejects the real filesystem root, unsafe root permissions, malformed active release links, and invalid package archives.

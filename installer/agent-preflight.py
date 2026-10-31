@@ -22,7 +22,7 @@ spec = importlib.util.spec_from_file_location("agent_package_validator_preflight
 validator = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(validator)
 
-DEFAULT_PACKAGE = ROOT / "installer/dist/arby-patch-agent.tar.gz"
+DEFAULT_PACKAGE = ROOT / "installer/dist/versionary-agent.tar.gz"
 
 
 def inspect(*, server=None, ca_cert=None, package=None, os_release="/etc/os-release"):
@@ -46,7 +46,7 @@ def inspect(*, server=None, ca_cert=None, package=None, os_release="/etc/os-rele
     valid_server = False
     if server:
         try:
-            validate_config({"server": server, "ca_cert": "/etc/arby-patch-agent/ca.crt"})
+            validate_config({"server": server, "ca_cert": "/etc/versionary-agent/ca.crt"})
             valid_server = True
         except (ConfigurationError, ValueError, TypeError, KeyError):
             pass

@@ -1,4 +1,4 @@
-"""Authenticated HTTPS heartbeat for ARBY PATCH AGENT."""
+"""Authenticated HTTPS heartbeat for VERSIONARY AGENT."""
 
 import json
 import ssl

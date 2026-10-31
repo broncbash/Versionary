@@ -23,17 +23,17 @@ class InstallationInventoryTests(unittest.TestCase):
         self.assertTrue(all(not item["present"] for item in result["assets"].values()))
 
     def test_hashes_existing_configuration_without_mutation(self):
-        config = self.root / "etc/arby-patch-agent/config.json"
+        config = self.root / "etc/versionary-agent/config.json"
         config.parent.mkdir(parents=True)
         config.write_text('{"server":"https://example.test"}')
         before = config.read_bytes()
         result = inventory.inspect(self.root)
-        self.assertTrue(result["assets"]["etc/arby-patch-agent/config.json"]["present"])
+        self.assertTrue(result["assets"]["etc/versionary-agent/config.json"]["present"])
         self.assertEqual(config.read_bytes(), before)
         self.assertFalse(result["changes_made"])
 
     def test_symlink_asset_rejected(self):
-        config = self.root / "etc/arby-patch-agent/config.json"
+        config = self.root / "etc/versionary-agent/config.json"
         config.parent.mkdir(parents=True)
         config.symlink_to("/etc/passwd")
         with self.assertRaises(ValueError):
@@ -45,7 +45,7 @@ class InstallationInventoryTests(unittest.TestCase):
             inventory.inspect(self.root)
 
     def test_private_state_contents_not_read(self):
-        state = self.root / "var/lib/arby-patch-agent"
+        state = self.root / "var/lib/versionary-agent"
         state.mkdir(parents=True, mode=0o700)
         (state / "secret").write_text("private")
         result = inventory.inspect(self.root)

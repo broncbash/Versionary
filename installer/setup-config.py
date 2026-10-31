@@ -42,7 +42,7 @@ def check_existing(target, payload):
         )
 
 
-def install_config(root, server, ca_cert="/etc/arby-patch-agent/ca.crt"):
+def install_config(root, server, ca_cert="/etc/versionary-agent/ca.crt"):
     root = Path(root).absolute()
 
     if root.is_symlink() or not root.is_dir():
@@ -53,7 +53,7 @@ def install_config(root, server, ca_cert="/etc/arby-patch-agent/ca.crt"):
         "ca_cert": ca_cert,
     })
 
-    directory = root / "etc/arby-patch-agent"
+    directory = root / "etc/versionary-agent"
 
     if directory.is_symlink():
         raise ValueError("Symlinked configuration directory")
@@ -104,7 +104,7 @@ def main():
     parser.add_argument("--server", required=True)
     parser.add_argument(
         "--ca-cert",
-        default="/etc/arby-patch-agent/ca.crt",
+        default="/etc/versionary-agent/ca.crt",
     )
     args = parser.parse_args()
 
