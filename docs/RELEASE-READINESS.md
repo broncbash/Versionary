@@ -139,3 +139,12 @@ failures are covered by development tests.
 Remaining blockers include real crash testing, signature
 retention, independently anchored freshness, and a complete
 disposable-system deployment test.
+
+## Homelab-first priority change
+
+The immediate development priority is Phase VII, a controlled
+observer-only homelab beta, followed by Phase VIII remote update
+controls and then public RC1 stabilization.
+
+See docs/HOMELAB-BETA-ROADMAP.md for the phased acceptance criteria,
+verification checkpoint and deployment restrictions.
