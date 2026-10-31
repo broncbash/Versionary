@@ -1,3 +1,4 @@
+from contextlib import closing
 """Disposable in-process beta journey: enrollment, approval, reporting, revocation.
 
 No sockets, hosted infrastructure, production database, or live container access.
@@ -96,7 +97,7 @@ class BetaAgentServerJourney(unittest.TestCase):
         self.assertEqual(heartbeat.status_code, 200, heartbeat.text)
         recorded = self.report(token)
         self.assertEqual(recorded.status_code, 201, recorded.text)
-        with sqlite3.connect(self.db) as db:
+        with closing(sqlite3.connect(self.db)) as db:
             status, count, packages = db.execute(
                 "SELECT status, count, packages_json FROM scan_reports "
                 "WHERE agent_id = ?", (self.identity["agent_id"],)
@@ -116,7 +117,7 @@ class BetaAgentServerJourney(unittest.TestCase):
         with patch.dict(os.environ, {"ARBY_ENROLLMENT_V2_ENABLED": "false"}):
             with self.assertRaisesRegex(RuntimeError, "503"):
                 register_v2(self.identity, key_path=self.key, post=self.post)
-        with sqlite3.connect(self.db) as db:
+        with closing(sqlite3.connect(self.db)) as db:
             self.assertIsNone(db.execute(
                 "SELECT id FROM agents WHERE id = ?",
                 (self.identity["agent_id"],)
@@ -143,7 +144,7 @@ class BetaAgentServerJourney(unittest.TestCase):
         token = load_credential(self.credential)
         self.assertTrue(agent_registry.authenticate_agent(self.identity["agent_id"], token))
         self.assertEqual(self.report(token).status_code, 201)
-        with sqlite3.connect(self.db) as db:
+        with closing(sqlite3.connect(self.db)) as db:
             count = db.execute("SELECT COUNT(*) FROM agent_credentials WHERE agent_id = ?",
                                (self.identity["agent_id"],)).fetchone()[0]
         self.assertEqual(count, 1)

@@ -232,7 +232,7 @@ class BetaTLSJourney(unittest.TestCase):
         with self.assertRaises(EnrollmentHTTPError):
             post_json("/api/v2/agents/register", {}, server=self.server_url,
                       ca_cert=other / "ca.crt")
-        with sqlite3.connect(self.db) as db:
+        with closing(sqlite3.connect(self.db)) as db:
             self.assertEqual(db.execute("SELECT COUNT(*) FROM agents").fetchone()[0], 0)
 
     def test_disabled_enrollment_rejects_verified_https(self):
