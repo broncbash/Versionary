@@ -5,6 +5,7 @@ This script never installs, starts or registers an agent. The generated archive
 is intentionally ignored by Git and validated before use.
 """
 import argparse
+import gzip
 import io
 import tarfile
 from pathlib import Path
@@ -20,19 +21,26 @@ spec.loader.exec_module(validator)
 def build(destination):
     destination = Path(destination)
     destination.parent.mkdir(parents=True, exist_ok=True)
-    with tarfile.open(destination, "w:gz", compresslevel=9) as archive:
-        for name in sorted(validator.EXPECTED):
-            source = ROOT / name
-            if source.is_symlink() or not source.is_file():
-                raise ValueError(f"Required agent source missing or unsafe: {name}")
-            data = source.read_bytes()
-            info = tarfile.TarInfo(name)
-            info.size = len(data)
-            info.mode = 0o644
-            info.mtime = 0
-            info.uid = info.gid = 0
-            info.uname = info.gname = ""
-            archive.addfile(info, io.BytesIO(data))
+    with destination.open("wb") as output:
+        with gzip.GzipFile(
+            filename="", mode="wb", fileobj=output,
+            compresslevel=9, mtime=0
+        ) as compressed:
+            with tarfile.open(fileobj=compressed, mode="w") as archive:
+                for name in sorted(validator.EXPECTED):
+                    source = ROOT / name
+                    if source.is_symlink() or not source.is_file():
+                        raise ValueError(
+                            f"Required agent source missing or unsafe: {name}"
+                        )
+                    data = source.read_bytes()
+                    info = tarfile.TarInfo(name)
+                    info.size = len(data)
+                    info.mode = 0o644
+                    info.mtime = 0
+                    info.uid = info.gid = 0
+                    info.uname = info.gname = ""
+                    archive.addfile(info, io.BytesIO(data))
     validator.validate(destination)
     return destination
 
