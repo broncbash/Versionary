@@ -90,6 +90,13 @@ class PolicyUpdateTests(unittest.TestCase):
     def test_valid_authenticated_update(self):
         self.assertEqual(self.verify(), 2)
 
+    def test_bootstrap_version_zero_accepted(self):
+        self.assertEqual(self.verify(current=0), 2)
+
+    def test_signed_policy_version_zero_rejected(self):
+        with self.assertRaises(updates.PolicyUpdateError):
+            updates.signed_message(0, "0" * 64)
+
     def test_replay_rejected(self):
         with self.assertRaisesRegex(
             updates.PolicyUpdateError, "rollback or replay"
