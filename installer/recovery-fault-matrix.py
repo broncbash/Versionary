@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Offline fault-matrix runner for Patch Command's disposable recovery trial.
+"""Offline fault-matrix runner for Versionary's disposable recovery trial.
 
 Runs subprocess-based trials with private temporary roots. No production paths,
 network calls, agent enrollment, service control, or hosted CI.

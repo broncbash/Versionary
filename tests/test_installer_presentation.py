@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class InstallerPresentationTests(unittest.TestCase):
     def test_local_runner_uses_product_name(self):
         runner = (ROOT / "installer/local-check.sh").read_text()
-        self.assertIn("[Patch Command] PASS", runner)
+        self.assertIn("[Versionary] PASS", runner)
         self.assertIn("PATCH_COMMAND_TEST_LOG", runner)
         self.assertIn("ARBY_TEST_LOG", runner)  # Existing override stays supported.
 

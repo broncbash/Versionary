@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Safely install the public ARBY PATCH COMMAND CA certificate."""
+"""Safely install the public Versionary CA certificate."""
 
 import argparse
 import os
@@ -50,7 +50,7 @@ def validate_ca(data, expected_sha256=None):
 
     if expected_sha256 is not None and fingerprint != expected_sha256:
         raise ValueError(
-            "CA fingerprint does not match trusted PATCH COMMAND CA"
+            "CA fingerprint does not match trusted Versionary CA"
         )
 
     return fingerprint

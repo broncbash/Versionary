@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Unified, non-deploying Patch Command onboarding interface."""
+"""Unified, non-deploying Versionary onboarding interface."""
 
 import argparse
 import importlib.util
@@ -38,7 +38,7 @@ def prompt_value(label, default=None):
 
 
 def collect_interactive(args):
-    print("\nPATCH COMMAND — UNIFIED ONBOARDING")
+    print("\nVERSIONARY — UNIFIED ONBOARDING")
     print("Planning only. No installation will occur.\n")
 
     role = args.role or prompt_value("Installation role (agent/server)", "agent")
@@ -50,7 +50,7 @@ def collect_interactive(args):
 
     if role == "agent":
         args.server = args.server or prompt_value(
-            "Patch Command HTTPS server URL"
+            "Versionary HTTPS server URL"
         )
 
         if not args.certificate_mode:
@@ -104,7 +104,7 @@ def build_onboarding(
 
     return {
         "schema_version": 1,
-        "product": "Patch Command",
+        "product": "Versionary",
         "workflow": "unified-onboarding",
         "status": "preview-ready" if supported else "not-implemented",
         "role": role,
@@ -138,7 +138,7 @@ def acknowledge(result):
 def render_text(result):
     manifest = result["manifest"]
     lines = [
-        "PATCH COMMAND — ONBOARDING",
+        "VERSIONARY — ONBOARDING",
         "=" * 40,
         f"Role: {result['role']}",
         f"Status: {result['status']}",

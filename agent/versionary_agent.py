@@ -140,7 +140,7 @@ def scan_debian():
 
 
 def scan():
-    """Return a PATCH COMMAND-compatible scan report."""
+    """Return a Versionary-compatible scan report."""
 
     platform = detect_platform()
 

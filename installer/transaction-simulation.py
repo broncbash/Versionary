@@ -45,7 +45,7 @@ def simulate(fail_after=None):
     expected = before if failure else candidate
     if current != expected:
         raise ValueError("Simulated final generation mismatch")
-    return {"product": "Patch Command", "mode": "in-memory-transaction-model",
+    return {"product": "Versionary", "mode": "in-memory-transaction-model",
             "status": "recovered" if failure else "verified",
             "injected_failure": failure, "journal": journal,
             "recovery_verified": bool(failure), "production_installed": False,

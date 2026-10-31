@@ -146,7 +146,7 @@ def verify(destination):
             raise ValueError("Snapshot integrity mismatch")
     if {p.name for p in entries} != expected_entries:
         raise ValueError("Unexpected snapshot entries")
-    return {"product": "Patch Command", "status": "verified",
+    return {"product": "Versionary", "status": "verified",
             "mode": "isolated-asset-snapshot", "asset_count": len(expected_entries) - 1,
             "private_state_copied": False, "production_installed": False,
             "systemd_started": False, "agent_enrolled": False}

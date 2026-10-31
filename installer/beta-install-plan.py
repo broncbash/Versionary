@@ -25,7 +25,7 @@ def plan(*, server, ca_cert, package=None, os_release="/etc/os-release"):
     checks = readiness["checks"]
     failed = [item["name"] for item in checks if not item["ok"]]
     return {
-        "product": "Patch Command",
+        "product": "Versionary",
         "mode": "read-only-planning",
         "status": "isolated-test-ready" if readiness["ready_for_isolated_test"] else "blocked",
         "ready_for_isolated_test": readiness["ready_for_isolated_test"],

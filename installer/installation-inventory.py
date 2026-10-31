@@ -79,7 +79,7 @@ def inspect(root):
                 or stat.S_IMODE(info.st_mode) != 0o700):
             raise ValueError("Unsafe private state directory")
         state_status = "present-not-inspected"
-    return {"product": "Patch Command", "mode": "read-only-isolated-inventory",
+    return {"product": "Versionary", "mode": "read-only-isolated-inventory",
             "status": "inspected", "assets": records, "private_state": state_status,
             "credential_contents_read": False, "changes_made": False,
             "production_installed": False, "backup_created": False}

@@ -62,7 +62,7 @@ def main(argv=None):
         if args.workspace:
             report = lab(args.workspace)
         else:
-            with tempfile.TemporaryDirectory(prefix="patch-command-lab-") as directory:
+            with tempfile.TemporaryDirectory(prefix="versionary-lab-") as directory:
                 report = lab(directory)
                 report["workspace_retained"] = False
         if args.workspace:

@@ -99,7 +99,7 @@ def post_json(path, payload, server=None,
 
     except (urllib.error.URLError, OSError, ssl.SSLError):
         raise EnrollmentHTTPError(
-            "Secure connection to PATCH COMMAND failed"
+            "Secure connection to Versionary failed"
         ) from None
 
     except (ValueError, UnicodeError, TypeError):

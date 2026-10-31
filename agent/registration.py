@@ -31,7 +31,7 @@ def register_agent(
 
     if not server.startswith("https://"):
         raise RegistrationError(
-            "PATCH COMMAND requires HTTPS"
+            "Versionary requires HTTPS"
         )
 
     context = ssl.create_default_context(

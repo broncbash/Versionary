@@ -148,7 +148,7 @@ def run(stop_at="ca", tamper=None, recover_stop_at=None):
     if tamper not in (None, "journal", "backup", "active", "journal_symlink",
                       "backup_symlink", "active_symlink", "restore_symlink"):
         raise ValueError("Unknown tamper mode")
-    with tempfile.TemporaryDirectory(prefix="patch-command-restart-trial-") as temp:
+    with tempfile.TemporaryDirectory(prefix="versionary-restart-trial-") as temp:
         root = Path(temp)
         root.chmod(0o700)
         for name in ("active", "prior"):

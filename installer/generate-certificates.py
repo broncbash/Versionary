@@ -28,7 +28,7 @@ def generate(host, output):
         raise ValueError("Refusing to overwrite existing certificates")
     now = datetime.now(timezone.utc)
     ca_key = ec.generate_private_key(ec.SECP256R1())
-    ca_name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, 'ARBY PATCH COMMAND Local CA')])
+    ca_name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, 'Versionary Local CA')])
     ca_cert = (x509.CertificateBuilder().subject_name(ca_name).issuer_name(ca_name)
         .public_key(ca_key.public_key()).serial_number(x509.random_serial_number())
         .not_valid_before(now-timedelta(minutes=5)).not_valid_after(now+timedelta(days=3650))

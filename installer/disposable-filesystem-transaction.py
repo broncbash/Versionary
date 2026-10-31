@@ -51,7 +51,7 @@ def journal_write(root, state, expected):
 def run(fail_after=None):
     if fail_after is not None and fail_after not in STAGES:
         raise ValueError("Unknown failure checkpoint")
-    with tempfile.TemporaryDirectory(prefix="patch-command-disposable-") as location:
+    with tempfile.TemporaryDirectory(prefix="versionary-disposable-") as location:
         root = Path(location)
         live = root / "assets"
         old = root / "previous"

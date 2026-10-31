@@ -176,7 +176,7 @@ def send_report(
 
     except (urllib.error.URLError, OSError, ssl.SSLError):
         raise ReportingError(
-            "Secure connection to PATCH COMMAND failed"
+            "Secure connection to Versionary failed"
         ) from None
 
     except (ValueError, UnicodeError):

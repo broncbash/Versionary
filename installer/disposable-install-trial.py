@@ -27,7 +27,7 @@ def trial(*, server, ca_cert, package=None):
         kwargs["package"] = package
     # TemporaryDirectory creates a private new root, not an existing host root.
     # Its cleanup runs even when staging or verification raises an exception.
-    with tempfile.TemporaryDirectory(prefix="patch-command-trial-") as directory:
+    with tempfile.TemporaryDirectory(prefix="versionary-trial-") as directory:
         root = Path(directory)
         staged = staging.stage(root=root, **kwargs)
         if staged["status"] != "staged":
@@ -36,7 +36,7 @@ def trial(*, server, ca_cert, package=None):
         if verified["status"] != "verified" or verified["changes_made"]:
             raise RuntimeError("Agent staging integrity check failed")
         return {
-            "product": "Patch Command",
+            "product": "Versionary",
             "status": "passed",
             "mode": "disposable-install-trial",
             "staging": "verified",

@@ -21,7 +21,7 @@ def send_heartbeat(
     server=None,
     ca_cert=None,
 ):
-    """Send an authenticated heartbeat to PATCH COMMAND."""
+    """Send an authenticated heartbeat to Versionary."""
 
     if server is not None and not server.startswith("https://"):
         raise HeartbeatError("HTTPS is required")
@@ -103,7 +103,7 @@ def send_heartbeat(
         ssl.SSLError,
     ):
         raise HeartbeatError(
-            "Secure connection to PATCH COMMAND failed"
+            "Secure connection to Versionary failed"
         ) from None
 
     except (ValueError, UnicodeError):

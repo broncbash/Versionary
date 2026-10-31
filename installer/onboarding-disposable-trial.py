@@ -26,7 +26,7 @@ def load(filename, name):
 def blocked(reason, readiness=None):
     return {
         "schema_version": 1,
-        "product": "Patch Command",
+        "product": "Versionary",
         "workflow": "onboarding-disposable-trial",
         "status": "blocked",
         "reason": reason,
@@ -92,7 +92,7 @@ def execute(*, server, ca_cert, package,
 
     return {
         "schema_version": 1,
-        "product": "Patch Command",
+        "product": "Versionary",
         "workflow": "onboarding-disposable-trial",
         "status": "passed",
         "readiness": readiness,

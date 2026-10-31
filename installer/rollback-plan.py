@@ -57,7 +57,7 @@ def plan(root, snapshot_dir):
     if any(item["action"] == "remove" for item in changes):
         blockers.append("Proposed asset removal requires explicit review")
     return {
-        "product": "Patch Command", "status": "planned", "mode": "read-only-isolated-rollback-plan",
+        "product": "Versionary", "status": "planned", "mode": "read-only-isolated-rollback-plan",
         "changes": changes, "change_count": sum(item["action"] != "unchanged" for item in changes),
         "blockers": blockers, "apply_allowed": False, "changes_made": False,
         "credential_contents_read": False, "production_installed": False,

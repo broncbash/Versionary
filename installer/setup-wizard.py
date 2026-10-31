@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Unified, read-only Patch Command installation planner.
+"""Unified, read-only Versionary installation planner.
 
 No filesystem mutations, network requests, service changes, or enrollment.
 Production installation is deliberately unavailable.
@@ -62,7 +62,7 @@ def build_plan(role, server=None, ca_cert=None, package=None, os_release="/etc/o
 
     if role == "server":
         return {
-            "product": "Patch Command",
+            "product": "Versionary",
             "role": "server",
             "mode": "read-only-planning",
             "status": "not-yet-supported",
@@ -117,7 +117,7 @@ def interactive_inputs(args):
 
     if args.role == "agent":
         if not args.server:
-            args.server = input("Patch Command HTTPS server: ").strip()
+            args.server = input("Versionary HTTPS server: ").strip()
         if not args.ca_cert:
             args.ca_cert = input("Trusted CA PEM file: ").strip()
 
@@ -126,7 +126,7 @@ def interactive_inputs(args):
 
 def render_text(result):
     lines = [
-        "PATCH COMMAND — INSTALLATION PLAN",
+        "VERSIONARY — INSTALLATION PLAN",
         "=" * 40,
         f"Role: {result['role']}",
         f"Status: {result['status']}",
@@ -156,7 +156,7 @@ def render_text(result):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(
-        description="Interactive or scriptable Patch Command installation planner"
+        description="Interactive or scriptable Versionary installation planner"
     )
     parser.add_argument("--role", choices=("agent", "server"))
     parser.add_argument("--server")

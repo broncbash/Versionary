@@ -87,7 +87,7 @@ def restore(snapshot_dir, root):
     except BaseException:
         # Preserve partial destination for forensic inspection; never auto-delete.
         raise
-    return {"product": "Patch Command", "status": "restored", "mode": "isolated-empty-root-only",
+    return {"product": "Versionary", "status": "restored", "mode": "isolated-empty-root-only",
             "asset_count": written, "private_state_restored": False,
             "production_installed": False, "systemd_started": False, "agent_enrolled": False}
 

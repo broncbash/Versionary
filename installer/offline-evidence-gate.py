@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read-only offline evidence gate for disposable Patch Command verification.
+"""Read-only offline evidence gate for disposable Versionary verification.
 
 Consumes local JSON reports. Never runs a test, modifies a service, or approves
 production deployment. Evidence is untrusted input and is strictly validated.

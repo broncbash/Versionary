@@ -26,7 +26,7 @@ def evaluate(*, protocol_check=False, smoke_scan=False):
     if result["status"] != "passed" or result["production_installed"] or result["systemd_started"]:
         raise RuntimeError("Disposable beta verification did not pass safely")
     return {
-        "product": "Patch Command",
+        "product": "Versionary",
         "evaluation": "isolated-agent-beta",
         "status": "passed",
         "production_ready": False,

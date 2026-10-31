@@ -180,7 +180,7 @@ def safety_policy():
 
 def render_text(preview):
     lines = [
-        "PATCH COMMAND — INSTALLATION PREVIEW",
+        "VERSIONARY — INSTALLATION PREVIEW",
         "=" * 44,
         f"Role: {preview['role']}",
         f"Status: {preview['status']}",

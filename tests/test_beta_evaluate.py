@@ -24,7 +24,7 @@ class BetaEvaluateTests(unittest.TestCase):
         with patch.object(evaluate, "load", return_value=stub):
             result = evaluate.evaluate(protocol_check=True)
         self.assertEqual(stub.kwargs, {"protocol_check": True, "smoke_scan": False})
-        self.assertEqual(result["product"], "Patch Command")
+        self.assertEqual(result["product"], "Versionary")
         self.assertFalse(result["production_ready"])
         self.assertFalse(result["host_modified"])
         self.assertEqual(result["verification"], fake)

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Patch Command agent installer
+# Versionary agent installer
 # Initial version: dry-run only.
 
 MODE="dry-run"
@@ -32,7 +32,7 @@ done
 if (( INTERACTIVE )); then
     [[ -t 0 ]] || { echo "Interactive mode requires a terminal" >&2; exit 2; }
     if [[ -z "$SERVER" ]]; then
-        read -r -p "PATCH COMMAND HTTPS address: " SERVER
+        read -r -p "VERSIONARY HTTPS address: " SERVER
     fi
     if [[ -z "$CA_SOURCE" ]]; then
         read -r -p "Trusted CA PEM file (blank to generate test-only CA): " CA_SOURCE
@@ -78,7 +78,7 @@ if [[ "$MODE" == "test-install" ]]; then
 
     CA_INSTALLER="${SCRIPT_DIR}/install-ca.py"
     if [[ -z "$SERVER" ]]; then
-        SERVER="https://patch-command.example.test"
+        SERVER="https://versionary.example.test"
     fi
     if [[ -z "$CA_SOURCE" ]]; then
         CERT_HOST="$(python3 -c 'import sys, urllib.parse; print(urllib.parse.urlsplit(sys.argv[1]).hostname or "")' "$SERVER")"
@@ -260,7 +260,7 @@ fi
 
 cat <<EOF
 ========================================
- PATCH COMMAND AGENT — INSTALLER DRY RUN
+ VERSIONARY AGENT — INSTALLER DRY RUN
 ========================================
 
 Detected OS:       ${PRETTY_NAME:-unknown}
@@ -270,7 +270,7 @@ Dependencies:      ${DEPENDENCIES}
 Application:       ${AGENT_DIR}
 Persistent state:  ${STATE_DIR}
 Configuration:     ${CONFIG_DIR}
-PATCH COMMAND:     ${SERVER}
+VERSIONARY:     ${SERVER}
 
 Planned installation:
   1. Verify required dependencies
