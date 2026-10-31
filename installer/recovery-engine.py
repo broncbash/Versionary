@@ -51,11 +51,18 @@ def validate_root(root):
     if root == Path('/') or root.is_symlink() or not root.is_dir():
         raise RecoveryError('Disposable test root required')
     info = root.lstat()
-    if info.st_uid != os.geteuid() or info.st_mode & 0o022:
+    if info.st_uid != os.geteuid() or info.st_mode & 0o077:
         raise RecoveryError('Unsafe disposable root')
     marker = root / '.disposable-recovery-test'
     if not marker.is_file() or marker.is_symlink() or safe_read(marker) != b'v1\n':
         raise RecoveryError('Missing disposable-only marker')
+    for name in ('live', 'backup', 'candidate'):
+        directory = root / name
+        info = directory.lstat()
+        if (not stat.S_ISDIR(info.st_mode)
+                or info.st_uid != os.geteuid()
+                or info.st_mode & 0o077):
+            raise RecoveryError('Unsafe disposable asset directory')
     return root
 
 def initialize(root):
@@ -97,7 +104,7 @@ def read_journal(root):
         journal = json.loads(safe_read(path))
     except (OSError, ValueError, TypeError) as exc:
         raise RecoveryError('Invalid journal') from exc
-    if not isinstance(journal, dict) or journal.get('version') != 1 or journal.get('state') not in ('prepared', *ASSETS, 'verified', 'recovered'):
+    if not isinstance(journal, dict) or (type(journal.get('version')) is not int or journal['version'] != 1) or journal.get('state') not in ('prepared', *ASSETS, 'verified', 'recovered'):
         raise RecoveryError('Invalid journal state')
     if set(journal) != {'version', 'state', 'previous', 'candidate'}:
         raise RecoveryError('Unexpected journal fields')
