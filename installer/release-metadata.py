@@ -12,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 VERSION_FILE = ROOT / "installer/release-version.txt"
 VERSION_PATTERN = re.compile(r"0|[1-9]\d*")
-SHA_PATTERN = re.compile(r"[0-9a-f]{64}")
+SHA_PATTERN = re.compile(r"(?:[0-9a-f]{40}|[0-9a-f]{64})")
 
 
 def release_version():
