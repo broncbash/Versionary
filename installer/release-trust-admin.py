@@ -28,6 +28,13 @@ recovery_spec = importlib.util.spec_from_file_location(
 recovery_module = importlib.util.module_from_spec(recovery_spec)
 recovery_spec.loader.exec_module(recovery_module)
 
+rebuild_spec = importlib.util.spec_from_file_location(
+    "versionary_admin_rebuild",
+    ROOT / "installer/release-trust-rebuild.py",
+)
+rebuild_module = importlib.util.module_from_spec(rebuild_spec)
+rebuild_spec.loader.exec_module(rebuild_module)
+
 export_spec = importlib.util.spec_from_file_location(
     "versionary_admin_export",
     ROOT / "installer/release-trust-export.py",
@@ -77,6 +84,17 @@ def main(argv=None):
         "--minimum-version", required=True, type=int
     )
 
+    rebuild_parser = sub.add_parser("recover-new")
+    rebuild_parser.add_argument("--database", required=True, type=Path)
+    rebuild_parser.add_argument(
+        "--authority-public", required=True, type=Path
+    )
+    rebuild_parser.add_argument("--policy", required=True, type=Path)
+    rebuild_parser.add_argument("--signature", required=True, type=Path)
+    rebuild_parser.add_argument(
+        "--minimum-version", required=True, type=int
+    )
+
     args = parser.parse_args(argv)
 
     try:
@@ -101,6 +119,15 @@ def main(argv=None):
             result = summary(state.read_state(args.database))
             result["status"] = "installed"
             result["installed_version"] = version
+
+        elif args.command == "recover-new":
+            result = rebuild_module.rebuild(
+                args.database,
+                args.authority_public,
+                args.policy,
+                args.signature,
+                args.minimum_version,
+            )
 
         elif args.command == "recover":
             result = recovery_module.recover(
@@ -127,6 +154,7 @@ def main(argv=None):
         state.TrustStateError,
         export_module.TrustExportError,
         recovery_module.RecoveryError,
+        rebuild_module.RebuildError,
         state._UPDATES.PolicyUpdateError,
         OSError,
         ValueError,

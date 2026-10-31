@@ -164,3 +164,55 @@ independent monotonic state is enforced.
 Remaining: missing-database recovery, durable signature retention,
 independent freshness anchoring, additional filesystem-race and
 crash testing, and GUI/CLI parity.
+
+## Phase VI-C2A — Missing-database recovery (development only)
+
+Command:
+
+    python installer/release-trust-admin.py recover-new --database /private/new-trust.db --authority-public /trusted/authority.pem --policy /signed/policy.json --signature /signed/policy.sig.json --minimum-version 12
+
+Requires a missing database, private directory, independently
+trusted authority and independently trusted positive version floor.
+Authenticates the signed policy before creating the database.
+
+Current limitations: the bootstrap and install steps reread inputs
+and are not one atomic operation. A failure after creation can leave
+a partial database requiring manual investigation. Do not automatically
+delete or retry over an existing artifact. A privileged attacker can
+still replace or roll back database files. Do not use in production.
+
+Next: single-read immutable inputs, atomic staging/promotion,
+durable signature evidence and stronger filesystem safety.
+
+## Phase VI-C2B — Staged database publication
+
+The development recover-new path now captures authority, policy and
+signature inputs once, authenticates them before creating files,
+builds and validates a private SQLite staging database, then
+publishes using an exclusive hard link.
+
+An existing database is never replaced. Normal exceptions clean
+up staging files; a process crash may leave an orphaned staging
+file for operator investigation.
+
+The destination is complete before publication, but directory
+fsync failure after publication may still produce an error even
+though the destination exists. Inspect the database before retrying.
+
+The private directory must not be writable by an adversary.
+This is not a complete defense against privileged filesystem
+replacement or rollback. Signed evidence is not yet retained
+inside the database. Production deployment remains blocked.
+
+## Phase VI-C2C — Fault-injection verification
+
+Development tests now exercise staging database failures,
+concurrent destination creation, pre-publication fsync failure,
+and post-publication fsync failure.
+
+A post-publication synchronization error may leave a complete
+destination even when the command reports failure. Operators must
+inspect the destination before retrying.
+
+These simulated failures do not replace real process-kill,
+power-loss, or filesystem durability testing.

@@ -102,3 +102,40 @@ credentials; freshness remains an external operator obligation.
 Do not enable production deployment until the remaining
 recovery, rollback, filesystem, and operational blockers are
 resolved.
+
+## Phase VI-C2A — Missing-database recovery
+
+Development-only exclusive rebuild path added with authenticated
+policy inputs and independently supplied positive version floor.
+Not production-ready: crash atomicity, input TOCTOU, signature
+retention and independently enforced freshness remain blockers.
+
+## Phase VI-C2B — Staged rebuild hardening
+
+Single-read authenticated inputs and exclusive staged database
+publication implemented for development-only recover-new.
+
+Still blocked: durable signature retention, external monotonic
+freshness, hostile filesystem-race resistance, crash fault-injection
+testing and operational disaster-recovery procedures.
+
+## Remote update controls — explicit product requirement
+
+See docs/REMOTE-UPDATE-CONTROLS.md.
+
+The intended product includes authenticated per-machine and
+fleet-wide update buttons, with progress, audit history and
+failure handling. These are planned capabilities, not currently
+authorized production features.
+
+Prioritize observer-only homelab beta availability while developing
+remote execution separately behind explicit safety controls.
+
+## Phase VI-C2C — Recovery fault testing
+
+Simulated staging, destination collision and synchronization
+failures are covered by development tests.
+
+Remaining blockers include real crash testing, signature
+retention, independently anchored freshness, and a complete
+disposable-system deployment test.
