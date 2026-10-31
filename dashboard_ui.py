@@ -17,16 +17,26 @@ a{color:#67c9ff}.panel,.stat,.agent{border:1px solid #334155;background:#172338;
 input{min-width:180px;flex:1}select{font:inherit;border:1px solid #475569;border-radius:8px;background:#1e293b;color:#f8fafc;padding:12px}.filters{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 20px}.filters input{max-width:360px}.filters select{min-width:150px}.muted{color:#94a3b8}button{cursor:pointer;border-color:#93c5fd}button:hover,button:focus-visible,a:focus-visible{outline:2px solid #93c5fd;outline-offset:3px}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:24px}
 .stat strong{display:block;font-size:2rem;color:#93c5fd;margin-top:5px}.stat span{color:#a4b8c9}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px}
-.agent h3{margin:0;font-size:1.2rem;overflow-wrap:anywhere}.agent p{color:#a9c0d0}.meta{display:grid;grid-template-columns:1fr auto;gap:8px;font-size:.9rem}
-.meta span:nth-child(2n){text-align:right;overflow-wrap:anywhere}.tag{display:inline-block;border:1px solid #458b9d;border-radius:20px;padding:4px 10px;margin-top:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,350px),1fr));gap:16px}
+.agent{min-width:0;padding:22px}
+.agent h3{margin:0;font-size:1.2rem;overflow-wrap:anywhere}
+.agent p{color:#a9c0d0}
+.meta{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:12px 16px;font-size:.9rem;align-items:start}
+.meta span:nth-child(2n){text-align:right;overflow-wrap:anywhere;line-height:1.5}
+.meta span:nth-child(2n)[title]{font-variant-numeric:tabular-nums}
+.tag{display:inline-block;border:1px solid #458b9d;border-radius:20px;padding:4px 10px;margin-top:16px}
+@media(max-width:420px){
+  main{padding:24px 14px}
+  .agent{padding:16px}
+  .meta{grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:10px}
+}
 .approved,.online{color:#86efac}.pending,.stale,.no_contact,.unknown{color:#fbbf24}.revoked{color:#fda4af}.error{color:#fda4af}
 #message{min-height:24px;color:#ffcf91}#fleet:empty:after{content:'No agents to display.';color:#9db5c7}
 footer{margin-top:28px;color:#93aabd;font-size:.85rem}
 .agent-identity{display:flex;align-items:center;gap:14px;margin-bottom:16px}
 .agent-labels{min-width:0}.agent-labels p{margin:5px 0 0}
 .distro-mark{flex:none;display:grid;place-items:center;width:48px;height:48px;border-radius:13px;font-size:1.25rem;font-weight:800;background:#334155;color:white;border:1px solid #64748b}
-.distro-arch{background:#136b9c}.distro-debian{background:#a80030}.distro-ubuntu{background:#a83b15}.distro-fedora{background:#294a90}.distro-opensuse{background:#417c19}.distro-almalinux{background:#326b6d}.distro-rocky{background:#087a5a}.distro-rhel{background:#9c2727}
+.distro-cachyos{background:#235d72;color:#a5f3fc}.distro-arch{background:#136b9c}.distro-debian{background:#a80030}.distro-ubuntu{background:#a83b15}.distro-fedora{background:#294a90}.distro-opensuse{background:#417c19}.distro-almalinux{background:#326b6d}.distro-rocky{background:#087a5a}.distro-rhel{background:#9c2727}
 </style></head><body><main>
 <header><div><div class="eyebrow">VERSIONARY · PRIVATE BETA</div><h1>Agent Fleet</h1><p class="sub">Infrastructure monitoring · Observer mode</p></div><a href="/admin/settings">Settings</a></header>
 <section class="controls" aria-label="Administrator controls">
@@ -55,6 +65,15 @@ function node(tag,text,className){
   if(className)element.className=className;
   return element;
 }
+function formatTimestamp(value){
+  if(!value)return 'Never';
+  const parsed=new Date(value);
+  if(Number.isNaN(parsed.getTime()))return 'Invalid timestamp';
+  return new Intl.DateTimeFormat(undefined,{
+    year:'numeric',month:'short',day:'numeric',
+    hour:'numeric',minute:'2-digit',timeZoneName:'short'
+  }).format(parsed);
+}
 function render(agents){
   $('fleet').replaceChildren();
   $('total').textContent=agents.length;
@@ -78,7 +97,7 @@ function render(agents){
     const identity=node('div','', 'agent-identity');
     const distro=String(a.distro_id||a.platform||'linux').toLowerCase();
     const distroName=String(a.distro_name||a.platform||'Linux');
-    const logos={arch:'A',debian:'D',ubuntu:'U',fedora:'F',opensuse:'S',almalinux:'Al',rocky:'R',rhel:'RH'};
+    const logos={cachyos:'C',arch:'A',debian:'D',ubuntu:'U',fedora:'F',opensuse:'S',almalinux:'Al',rocky:'R',rhel:'RH'};
     const mark=node('span',logos[distro]||'L','distro-mark distro-'+(Object.hasOwn(logos,distro)?distro:'linux'));
     mark.setAttribute('role','img');mark.setAttribute('aria-label',distroName+' distribution');
     const info=node('div','', 'agent-labels');
@@ -87,11 +106,18 @@ function render(agents){
     const meta=node('div','', 'meta');
     for(const [key,value] of [
       ['Connection',a.health==='online'?'Online':a.health==='stale'?'Stale (>30 min)':a.health==='no_contact'?'No heartbeat':a.health==='unknown'?'Unknown':a.health],
-      ['Last contact',a.last_seen||'Never'],
-      ['Last scan',a.scan_at||'Never'],
+      ['Last contact',formatTimestamp(a.last_seen)],
+      ['Last scan',formatTimestamp(a.scan_at)],
       ['Scan status',a.scan_status||'No report'],
       ['Updates',a.scan_status==='success'&&a.updates!==null?String(a.updates):'Unknown']
-    ]){meta.append(node('span',key),node('span',value));}
+    ]){
+      const label=node('span',key);
+      const detail=node('span',value);
+      if((key==='Last contact'&&a.last_seen)||(key==='Last scan'&&a.scan_at)){
+        detail.title=key==='Last contact'?String(a.last_seen):String(a.scan_at);
+      }
+      meta.append(label,detail);
+    }
     card.append(meta,node('span',a.status,'tag '+a.status));
     if(a.scan_status==='error') card.append(node('p','Latest scan failed','error'));
     $('fleet').append(card);

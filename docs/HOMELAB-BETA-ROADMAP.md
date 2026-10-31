@@ -119,3 +119,17 @@ or production agent changes are authorized by this checkpoint.
 - All eleven targeted CA tests passed.
 
 **Remaining Phase VII-B gates:** live service execution, authenticated HTTPS agent-to-server integration in a disposable environment, browser dashboard verification, recovery/removal acceptance, and a reviewed homelab deployment plan requiring explicit approval.
+
+## Future dashboard enhancement — Distribution icons
+
+Replace temporary distribution-letter badges with recognizable
+distribution logos/icons.
+
+- Support CachyOS, Arch Linux, Debian, Ubuntu, Fedora and other
+  supported distributions.
+- Use local bundled assets rather than external icon services.
+- Preserve accessible text labels and a generic Linux fallback.
+- Keep icons consistent with Versionary's dark dashboard theme.
+- Verify safe asset handling, responsive layouts and browser rendering.
+
+Deferred until after the homelab observer beta is operational.
