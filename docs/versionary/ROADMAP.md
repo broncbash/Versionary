@@ -191,3 +191,21 @@ Remaining before production eligibility:
 - Trusted release authentication and provenance integration into the decision path.
 - Coordinated, authorized recovery and service lifecycle.
 - Explicit production acceptance and approval.
+
+## Mission 5E — Concurrency hardening
+
+Status: local implementation and regression validation complete; awaiting commit.
+
+Completed:
+- Pre-read and post-read module metadata comparisons.
+- End-of-verification module metadata checks.
+- Release-directory identity rechecks.
+- Persistent directory-entry change detection.
+- Five additional adversarial regression tests.
+
+Future security work:
+- Define an immutable-release lifecycle and threat model.
+- Evaluate snapshot or other filesystem-backed consistency mechanisms.
+- Bind verified release identity to the subsequent authorized operation.
+- Integrate trusted authenticity and provenance into that decision.
+- Preserve explicit production approval and fail-closed recovery behavior.

@@ -97,6 +97,45 @@ def check_cache(stack, release_fd):
         read_file(cache_fd, name)
 
 
+def descriptor_identity(fd):
+    info = os.fstat(fd)
+    return (info.st_dev, info.st_ino)
+
+
+def check_directory_identity(parent_fd, name, opened_fd):
+    current = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+    opened = os.fstat(opened_fd)
+
+    if (
+        not stat.S_ISDIR(current.st_mode)
+        or current.st_dev != opened.st_dev
+        or current.st_ino != opened.st_ino
+    ):
+        raise RuntimeError(f"Release directory replaced: {name}")
+
+
+def file_fingerprint(info):
+    return (
+        info.st_dev,
+        info.st_ino,
+        info.st_mode,
+        info.st_uid,
+        info.st_gid,
+        info.st_nlink,
+        info.st_size,
+        info.st_mtime_ns,
+        info.st_ctime_ns,
+    )
+
+
+def check_file_unchanged(parent_fd, name, expected):
+    current = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+    if not stat.S_ISREG(current.st_mode):
+        raise RuntimeError(f"Release module replaced: {name}")
+    if file_fingerprint(current) != expected:
+        raise RuntimeError(f"Release module changed: {name}")
+
+
 def read_pointer(app_fd):
     info = os.stat("agent", dir_fd=app_fd, follow_symlinks=False)
 
@@ -163,6 +202,7 @@ def verify_integrity(root):
 
         release_before = os.fstat(release_fd)
         modules = {}
+        module_fingerprints = {}
 
         for name in os.listdir(release_fd):
             if name == "__pycache__":
@@ -176,7 +216,16 @@ def verify_integrity(root):
             ):
                 raise ValueError("Unexpected release entry")
 
+            before = os.stat(
+                name, dir_fd=release_fd, follow_symlinks=False
+            )
+            if not stat.S_ISREG(before.st_mode):
+                raise RuntimeError(f"Unsafe release module: {name}")
+
             modules[name] = read_file(release_fd, name)
+            expected = file_fingerprint(before)
+            check_file_unchanged(release_fd, name, expected)
+            module_fingerprints[name] = expected
 
         if not modules:
             raise ValueError("Empty release")
@@ -191,6 +240,26 @@ def verify_integrity(root):
             or release_before.st_ctime_ns != release_after.st_ctime_ns
         ):
             raise RuntimeError("Release directory changed during inspection")
+
+        # Check all previously inspected module paths again.
+        for name, expected in module_fingerprints.items():
+            check_file_unchanged(release_fd, name, expected)
+
+        # Reject additions or removals that persist to the final check.
+        final_entries = set(os.listdir(release_fd))
+        expected_entries = set(modules)
+        if "__pycache__" in final_entries:
+            expected_entries.add("__pycache__")
+        if final_entries != expected_entries:
+            raise RuntimeError("Release directory entries changed")
+
+        # Verify that every opened release-directory path still refers
+        # to the same object. Descriptor pinning alone is insufficient.
+        check_directory_identity(root_fd, "opt", opt_fd)
+        check_directory_identity(opt_fd, "versionary-agent", app_fd)
+        check_directory_identity(app_fd, "releases", releases_fd)
+        check_directory_identity(releases_fd, identifier, version_fd)
+        check_directory_identity(version_fd, "agent", release_fd)
 
         if read_pointer(app_fd) != pointer_before:
             raise ValueError("Active release pointer changed during inspection")

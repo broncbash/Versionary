@@ -165,3 +165,14 @@ Status: Implementation complete; local regression passed.
 - Validation: 39 focused tests passed; 1,282 full-suite tests run, one skipped, zero failures.
 - Rollback remains read-only and unauthorized; production deployment remains blocked.
 - Limitations: not an atomic filesystem snapshot; concurrent in-place writes and ABA-style replacements are not conclusively excluded; integrity is not authenticity or provenance.
+
+## Mission 5E — Release concurrency detection
+
+- Added pre-read module metadata capture and immediate post-read comparison.
+- Rechecks module metadata after the complete release content hash.
+- Rechecks release-directory path identities against opened descriptors.
+- Detects persistent unexpected release-directory entries.
+- Added five adversarial concurrency regression tests.
+- Validation: 44 focused tests passed; 1,287 full-suite tests run, one skipped, zero failures.
+- Production deployment and rollback execution remain disabled.
+- Limitations: detection is not filesystem immutability or an atomic snapshot. Transient changes, metadata-preserving modification, and post-verification changes remain outside the guarantee.

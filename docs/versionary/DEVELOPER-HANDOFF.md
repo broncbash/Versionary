@@ -260,3 +260,19 @@ The verifier uses directory-relative descriptors, no-follow opens, `fstat` check
 Security boundaries: these checks reduce pathname substitution risks but do not establish a race-free atomic snapshot. In-place modification, ABA-style pointer changes, and adversarial mutation beyond the checked metadata remain outside the guarantee. No release authenticity, provenance, rollback authorization, production installation, or service activation is established by this verifier.
 
 Protected untracked local artifacts must remain untouched. No CT104, CT102, or production modifications without explicit approval.
+
+## Mission 5E handoff — Release concurrency hardening
+
+Implementation: `installer/active-release-integrity.py`.
+
+New tests: `tests/test_active_release_concurrency.py`.
+
+Local validation: compilation passed; 44 focused tests passed; full regression ran 1,287 tests with one skip and zero failures; diff validation passed.
+
+The verifier now captures module metadata before reading, compares it after reading, and rechecks it after content hashing. It also compares release-directory pathname identities with opened descriptors and detects persistent changes to release-directory entries.
+
+These defenses reduce observable race windows but are not a transaction, atomic snapshot, or immutable-release guarantee. Metadata checks do not establish continuous immutability. The verifier does not authorize deployment, rollback, service activation, or production use.
+
+The next development phase should define a filesystem-independent immutable-release contract before choosing optional Btrfs-specific enhancements.
+
+Protected untracked artifacts remain untouched. No CT104, CT102, or production changes without explicit approval.
