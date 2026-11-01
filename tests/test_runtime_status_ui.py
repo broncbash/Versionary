@@ -36,7 +36,7 @@ class RuntimeStatusUITests(unittest.TestCase):
         with TestClient(app) as client:
             response = client.get('/admin/settings')
         self.assertIn('STAGING MODE', response.text)
-        self.assertIn('changes are saved but not applied', response.text)
+        self.assertIn('settings are saved only', response.text)
         self.assertNotIn('localStorage', response.text)
         self.assertNotIn('sessionStorage', response.text)
 

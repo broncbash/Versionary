@@ -6,7 +6,7 @@ router = APIRouter()
 
 PAGE = r'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Patch Command | Settings</title>
+<title>Versionary | Settings</title>
 <style>
 :root{color-scheme:dark;font-family:system-ui,sans-serif;background:#0f172a;color:#e2e8f0}
 body{margin:0 auto;max-width:800px;padding:2rem 1rem;background:#0f172a}
@@ -15,8 +15,8 @@ h1{letter-spacing:.1em;color:#93c5fd}h2{font-size:1.1rem;color:#93c5fd}
 label{display:block;margin:1rem 0 .35rem}input,select,button{font:inherit;border-radius:7px;padding:.65rem;background:#1e293b;color:#fff;border:1px solid #475569;box-sizing:border-box}
 input:not([type=checkbox]),select{width:100%}input[type=checkbox]{width:1.1rem;height:1.1rem}button{cursor:pointer;border-color:#93c5fd;margin:.75rem .5rem .25rem 0}button:hover,button:focus-visible{outline:2px solid #93c5fd}
 .note{color:#a6b8c9;font-size:.9rem}#status{white-space:pre-wrap;min-height:2em} .warn{color:#ffce7d}
-</style></head><body><h1>Patch Command | Settings</h1>
-<p class="warn">STAGING MODE — changes are saved but not applied to running services.</p>
+</style></head><body><h1>Versionary | Settings</h1>
+<p class="warn">STAGING MODE — settings are saved only. Nothing here changes the active HTTPS proxy, agent routes, or running services.</p>
 <main class="panel"><h2>Administrator access</h2>
 <label for="token">Admin bearer token (kept in this tab's memory only)</label><input id="token" type="password" autocomplete="off" spellcheck="false">
 <button id="load" type="button">Load settings</button>
@@ -28,11 +28,12 @@ input:not([type=checkbox]),select{width:100%}input[type=checkbox]{width:1.1rem;h
 <label for="public_url">Public HTTPS origin</label><input id="public_url" placeholder="https://patch.example.org" autocomplete="off">
 <label for="scan_interval_minutes">Scan interval (minutes)</label><input id="scan_interval_minutes" type="number" min="5" max="10080" required>
 <label for="appearance">Appearance</label><select id="appearance"><option value="cyberpunk">Classic (legacy compatibility)</option><option value="dark">Dark</option><option value="light">Light</option></select>
-<label for="tls_mode">TLS mode</label><select id="tls_mode"><option value="external">External proxy</option><option value="local_ca">Local CA</option><option value="provided">Provided certificate</option></select>
+<label for="tls_mode">Planned TLS mode (not applied)</label><select id="tls_mode"><option value="external">External proxy</option><option value="local_ca">Local CA (manual setup required)</option><option value="provided">Provided certificate (manual import required)</option></select>
+<p class="note" id="tls-guidance" role="note">TLS mode is a saved preference only. Certificates must be prepared separately using the offline certificate CLI. No private key is uploaded through this page.</p>
 <label><input id="enrollment_enabled" type="checkbox"> Enable agent enrollment (staged)</label>
 <label><input id="reporting_enabled" type="checkbox"> Enable agent reporting (staged)</label>
 <button type="submit">Save staged settings</button></form>
-<p id="status" role="status" aria-live="polite"></p><p class="note">No automatic deployments, service restarts, or certificate changes.</p></main>
+<p id="status" role="status" aria-live="polite"></p><p class="note">Certificate operations: installer/manage-certificates.py check, inspect, import, or renew. These are offline operations and do not reload the proxy. See docs/versionary/BETA09-SETTINGS-CERTIFICATES.md. No automatic deployments, service restarts, or certificate changes.</p></main>
 <script>
 'use strict';
 const $ = id => document.getElementById(id);
@@ -87,7 +88,7 @@ $('settings').addEventListener('submit',async event=>{
   event.preventDefault();
   const changes={};
   for(const key of keys){const element=$(key);changes[key]=element.type==='checkbox'?element.checked:key==='scan_interval_minutes'?Number(element.value):key==='public_url'?(element.value.trim()||null):element.value;}
-  try{const result=await request('PATCH',changes);populate(result.settings);status('Saved successfully. Not applied to running services.');}
+  try{const result=await request('PATCH',changes);populate(result.settings);status('Settings saved as a staged preference only. TLS, agent routes and running services were not changed.');}
   catch(error){status(error.message);}
 });
 </script></body></html>'''
