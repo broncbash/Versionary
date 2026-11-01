@@ -175,3 +175,19 @@ Next security priorities:
 2. Independently authenticated trust for installed release identities.
 3. Coordinated rollback transaction design and fault-injection testing.
 4. Production deployment remains blocked pending explicit approval.
+
+## Mission 5D — Descriptor-based verification
+
+Status: local implementation and regression validation complete; awaiting commit.
+
+Completed:
+- Descriptor-relative module and bytecode inspection.
+- Symlink and hardlink defenses.
+- Active-pointer identity recheck.
+- Additional security regression coverage.
+
+Remaining before production eligibility:
+- Stronger immutable-release or snapshot guarantees.
+- Trusted release authentication and provenance integration into the decision path.
+- Coordinated, authorized recovery and service lifecycle.
+- Explicit production acceptance and approval.

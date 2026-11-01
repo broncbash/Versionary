@@ -246,3 +246,17 @@ Developer workflow:
 - Preserve protected untracked files and local beta artifacts.
 - Do not use hosted CI.
 - Commit and push only after staged validation.
+
+## Mission 5D handoff — Descriptor-based active-release integrity
+
+Implementation: `installer/active-release-integrity.py`.
+
+Tests: `tests/test_active_release_descriptor_security.py`, plus existing integrity and rollback integration tests.
+
+Local verification: compilation passed; 39 focused tests passed; full regression ran 1,282 tests with one skip and zero failures; diff validation passed.
+
+The verifier uses directory-relative descriptors, no-follow opens, `fstat` checks, content-addressed hashing, and active-pointer identity checks. It remains read-only.
+
+Security boundaries: these checks reduce pathname substitution risks but do not establish a race-free atomic snapshot. In-place modification, ABA-style pointer changes, and adversarial mutation beyond the checked metadata remain outside the guarantee. No release authenticity, provenance, rollback authorization, production installation, or service activation is established by this verifier.
+
+Protected untracked local artifacts must remain untouched. No CT104, CT102, or production modifications without explicit approval.

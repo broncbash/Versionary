@@ -154,3 +154,14 @@ Status: Implementation complete; local regression passed.
   one skipped, zero failures/errors.
 - Remaining hardening: race-resistant filesystem inspection,
   independently authenticated release trust, and coordinated recovery.
+
+## Mission 5D — Descriptor-based release verification
+
+- Replaced pathname-based module reads with descriptor-relative reads.
+- Added `O_NOFOLLOW` protections for release directories, modules, and bytecode cache entries.
+- Validates opened objects using `fstat`, including ownership, permissions, file type, and hardlink count.
+- Rechecks file metadata and the active-release pointer during verification.
+- Added seven descriptor-security regression tests.
+- Validation: 39 focused tests passed; 1,282 full-suite tests run, one skipped, zero failures.
+- Rollback remains read-only and unauthorized; production deployment remains blocked.
+- Limitations: not an atomic filesystem snapshot; concurrent in-place writes and ABA-style replacements are not conclusively excluded; integrity is not authenticity or provenance.
