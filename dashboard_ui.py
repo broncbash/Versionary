@@ -124,7 +124,7 @@ async function manageAgent(agent,action,button){
   let mutationSucceeded=false;
   try{
     const response=await fetch(
-      '/api/v1/agents/'+encodeURIComponent(agent.id)+'/'+action,{
+      '/api/v1/admin/agents/'+encodeURIComponent(agent.id)+'/'+action,{
         method:'POST',
         headers:{Authorization:'Bearer '+actionCredential},
         cache:'no-store',
