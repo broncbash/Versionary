@@ -209,3 +209,15 @@ Future security work:
 - Bind verified release identity to the subsequent authorized operation.
 - Integrate trusted authenticity and provenance into that decision.
 - Preserve explicit production approval and fail-closed recovery behavior.
+
+## Beta 0.9 localhost acceptance checkpoint — 2026-11-01
+
+### Beta 0.9 acceptance milestone (2026-11-01)
+- [x] Persistent localhost HTTPS server and actual approved CachyOS agent.
+- [x] Actual update inventory reported and displayed: 24 via `checkupdates`.
+- [x] Local launcher uses project virtual environment without manual interpreter prefix.
+- [x] Dashboard remembers bearer token across refresh in the same tab and offers Log out.
+- [ ] Portable release installer; current launcher wrapper contains a developer checkout path.
+- [ ] Proper server-side admin sessions with secure cookies, CSRF protection, expiry and invalidation.
+- [ ] Restart persistence, upgrades, backups, installer rollback and multi-distro release acceptance.
+- [ ] Formal production security review and deployment approval.

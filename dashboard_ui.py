@@ -41,7 +41,7 @@ footer{margin-top:28px;color:#93aabd;font-size:.85rem}
 <header><div><div class="eyebrow">VERSIONARY · PRIVATE BETA</div><h1>Agent Fleet</h1><p class="sub">Infrastructure monitoring · Observer mode</p></div><a href="/admin/settings">Settings</a></header>
 <section class="controls" aria-label="Administrator controls">
 <input id="token" type="password" autocomplete="off" spellcheck="false" aria-label="Admin bearer token" placeholder="Admin bearer token (memory only)">
-<button id="refresh" type="button">Refresh fleet</button><button id="clear" type="button">Clear access</button>
+<button id="refresh" type="button">Refresh fleet</button><button id="clear" type="button">Log out</button>
 </section><p id="message" role="status" aria-live="polite">Enter an admin token to load the fleet.</p>
 <section class="stats" aria-label="Fleet totals">
 <div class="stat"><span>Registered</span><strong id="total">—</strong></div>
@@ -53,7 +53,11 @@ footer{margin-top:28px;color:#93aabd;font-size:.85rem}
 </main><script>
 'use strict';
 const $=id=>document.getElementById(id);
+const SESSION_KEY='versionary-beta09-admin-token';
 let credential='';
+try {
+  credential=sessionStorage.getItem(SESSION_KEY)||'';
+} catch (_) {}
 let inventory=[];
 let sessionGeneration=0;
 let inventoryGeneration=0;
@@ -62,7 +66,9 @@ function clear(){
   sessionGeneration++;
   inventoryGeneration++;
   inventoryTrusted=false;
-  credential='';inventory=[];$('token').value='';$('fleet').replaceChildren();$('results').textContent='';
+  credential='';inventory=[];$('token').value='';
+  try { sessionStorage.removeItem(SESSION_KEY); } catch (_) {}
+  $('fleet').replaceChildren();$('results').textContent='';
   for(const id of ['total','approved','pending','updates','online','attention']) $(id).textContent='—';
 }
 function node(tag,text,className){
@@ -244,6 +250,9 @@ $('refresh').addEventListener('click',async()=>{
     render(inventory);
   }
   credential=entered||credential;
+  try {
+    if(credential) sessionStorage.setItem(SESSION_KEY,credential);
+  } catch (_) {}
   if(!credential){$('message').textContent='Enter an admin token.';return;}
   const generation=sessionGeneration;
   const request=++inventoryGeneration;
@@ -269,6 +278,10 @@ $('refresh').addEventListener('click',async()=>{
     $('message').textContent=error.message;
   }
 });
+if(credential){
+  $('message').textContent='Restoring administrator access...';
+  $('refresh').click();
+}
 </script></body></html>'''
 
 @router.get("/admin/dashboard", response_class=HTMLResponse, include_in_schema=False)

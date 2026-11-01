@@ -176,3 +176,20 @@ Status: Implementation complete; local regression passed.
 - Validation: 44 focused tests passed; 1,287 full-suite tests run, one skipped, zero failures.
 - Production deployment and rollback execution remain disabled.
 - Limitations: detection is not filesystem immutability or an atomic snapshot. Transient changes, metadata-preserving modification, and post-verification changes remain outside the guarantee.
+
+## Beta 0.9 localhost acceptance checkpoint — 2026-11-01
+
+### Verified on actual CachyOS desktop
+- Persistent local HTTPS endpoint: `https://localhost:8769/admin/dashboard`.
+- Actual desktop agent registered, approved, activated, authenticated, heartbeated, and reported updates to SQLite-backed server.
+- `checkupdates` returned 24 available repository updates, and Versionary dashboard displayed 24. `pacman -Qu` had returned 0 because its local sync metadata was not refreshed; never interpret scanner errors as zero updates.
+- Local launcher `~/.local/bin/versionary-beta09` now runs through the repository `.venv` without manual Python invocation; `status` verified local state and agent present.
+- Dashboard page refresh restored administrator access in the same tab; Log out cleared access. This uses browser `sessionStorage`, **not** a server-side session or HttpOnly cookie. Do not call it production-ready authentication.
+- Server was restarted after the dashboard change; user confirmed refresh and logout work.
+- No package installation, update execution, reboot, live homelab CT change, or hosted CI was performed.
+
+### Outstanding before release
+- Integrate the local launcher and `checkupdates` scanner into a tested, distributable installer, without embedding checkout-specific absolute paths.
+- Replace tab-scoped bearer-token storage with proper server-side sessions, HttpOnly/Secure/SameSite cookies, CSRF protection, expiry, and logout invalidation.
+- Verify restart persistence, backup/restore, safe upgrades, cross-distro scanning, error reporting, and installer rollback.
+- The latest local edits have not been confirmed committed/pushed at the time of this checkpoint.

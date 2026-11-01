@@ -152,3 +152,18 @@ service start
 certificate rotate
 
 These are roadmap items, not current CLI functionality.
+
+## Beta 0.9 localhost acceptance checkpoint — 2026-11-01
+
+### Local Beta 0.9 trial commands (not the portable agent CLI)
+
+```bash
+~/.local/bin/versionary-beta09 --help
+~/.local/bin/versionary-beta09 status
+~/.local/bin/versionary-beta09 server
+~/.local/bin/versionary-beta09 register
+~/.local/bin/versionary-beta09 activate
+~/.local/bin/versionary-beta09 report
+```
+
+These commands operate on the local trial's persistent state, separate from the portable agent CLI documented above. Do not rerun `register` or `activate` for an already approved/activated agent without a specific reason. `server` binds the local HTTPS trial endpoint at `https://localhost:8769/admin/dashboard`. Stop the existing foreground server with Ctrl+C before launching another. The local launcher currently depends on the developer checkout and `.venv`.

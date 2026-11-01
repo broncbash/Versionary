@@ -276,3 +276,24 @@ These defenses reduce observable race windows but are not a transaction, atomic 
 The next development phase should define a filesystem-independent immutable-release contract before choosing optional Btrfs-specific enhancements.
 
 Protected untracked artifacts remain untouched. No CT104, CT102, or production changes without explicit approval.
+
+## Beta 0.9 localhost acceptance checkpoint — 2026-11-01
+
+### Live local Beta 0.9 trial
+- Checkout: `~/Projects/arby-patch-command`; branch expected `feature/versionary-agent-rename`.
+- Dashboard: `https://localhost:8769/admin/dashboard` (local self-signed certificate; browser exception used for testing only).
+- Launcher: `~/.local/bin/versionary-beta09` (shell wrapper invokes checkout `.venv/bin/python` and `installer/versionary-beta09-local.py`). This is development-only and NOT portable.
+- `versionary-beta09 status` showed state directory present and agent present.
+- `versionary-beta09 report` successfully reported 24 actual CachyOS repo updates after changing scanner from `pacman -Qu` to `checkupdates` (0=updates, 2=no updates; other codes must be errors).
+- `dashboard_ui.py` locally patched: tab-scoped `sessionStorage` token restore on reload and `Log out` clears it; user confirmed both after server restart. This is not an HttpOnly server-side session.
+- Preserve persistent state at `~/.local/state/versionary-beta09`, especially SQLite DB, certificates, admin token, and approved agent credentials. Do not print or commit secrets.
+- Preserve existing untracked `.versionary-local-beta/`, `.versionary-timer-preview/`, `installer/setup-config.py.pre-batch8`, `return-prompt.md`, and any other local trial files. Inspect before staging.
+- Local backup files include `~/.local/bin/versionary-beta09.pre-batch-usability`, `dashboard_ui.py.pre-tab-login`, and possibly scanner backups. Do not commit backups.
+- No live CT104/CT102/CT103 changes without explicit approval. No hosted CI. No production deployment.
+
+### Next engineering batch
+1. Inspect actual working tree, last commit, and git diff; never assume previous commit hashes are current.
+2. Convert checkout-specific launcher into relocatable, tested package/install logic; include `checkupdates` and honest error handling.
+3. Implement server-managed administrator sessions, secure cookies, CSRF protection, expiry and invalidation; add targeted regression tests and migration plan.
+4. Validate real desktop restart persistence and avoid damaging existing local trial state.
+5. Refresh documentation, run appropriate local tests, commit and push only with user approval.
