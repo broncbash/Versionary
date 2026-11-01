@@ -29,6 +29,11 @@ def plan(root, snapshot_dir):
         raise ValueError("Production or overlapping paths forbidden")
     snapshots.verify(snapshot_dir)
     current = inventory.inspect(root)
+    release_inspector = _load(
+        "active-release-inspection.py",
+        "versionary_rollback_release_inspection",
+    )
+    release = release_inspector.inspect(root)
     # Manifest was verified; still explicitly reject any changed metadata.
     manifest = json.loads((snapshot_dir / "manifest.json").read_bytes())
     if (manifest.get("version") != 1 or set(manifest.get("assets", {})) != set(inventory.FILES)):
@@ -59,6 +64,10 @@ def plan(root, snapshot_dir):
     return {
         "product": "Versionary", "status": "planned", "mode": "read-only-isolated-rollback-plan",
         "changes": changes, "change_count": sum(item["action"] != "unchanged" for item in changes),
+        "active_release": release["active_release"],
+        "active_release_present": release["active_present"],
+        "active_release_integrity_verified": False,
+        "release_rollback_planned": False,
         "blockers": blockers, "apply_allowed": False, "changes_made": False,
         "credential_contents_read": False, "production_installed": False,
         "systemd_started": False, "agent_enrolled": False,

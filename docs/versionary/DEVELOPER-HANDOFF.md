@@ -179,3 +179,34 @@ It does not:
 - Contact the server.
 
 Maintain that separation.
+
+## KDE Klipper Clipboard Workflow
+
+The developer uses CachyOS/Arch Linux, KDE Plasma, and Konsole.
+
+For future Versionary development sessions, use KDE Klipper to copy
+terminal diagnostic output automatically into the clipboard.
+
+Verified command:
+
+    qdbus6 org.kde.klipper /klipper org.kde.klipper.klipper.setClipboardContents "$(cat "$LOG")"
+
+Recommended workflow:
+
+1. Create a temporary log using mktemp.
+2. Capture command output and errors into that log.
+3. Include exit statuses for important verification commands.
+4. Copy the completed log using the Klipper D-Bus command above.
+5. Tell the user to press Ctrl+V in ChatGPT.
+6. Preserve the log path as a backup.
+
+Security and usability rules:
+
+- Never copy passwords, tokens, private keys, or enrollment secrets.
+- Prefer complete, copy-paste-ready terminal commands.
+- Do not use set -e or exit 1 in pasted Konsole command blocks.
+- Do not overwrite protected local development artifacts.
+- Do not modify CT104, CT102, or disposable beta machines without approval.
+- Keep changes local until testing and review are complete.
+
+This workflow was verified on 2026-11-01.

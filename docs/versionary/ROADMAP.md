@@ -31,7 +31,7 @@ Remaining:
 
 ## Phase 2 — Portable agent setup
 
-Status: Foundation implemented at commit 681e8b4.
+Status: Foundation implemented; further development verified through commit 80a8217.
 
 Completed:
 - Interactive and unattended connection setup.
@@ -107,3 +107,55 @@ An installer is not production-ready until it:
 - Agent discovery mechanism and its security model.
 - Long-term database backend and migration policy.
 - Final product branding and repository rename.
+
+
+## November 2026 engineering checkpoint
+
+Verified repository checkpoint: 80a8217.
+
+- Dashboard lifecycle controls use the isolated HTTPS beta administrator
+  route namespace.
+- Explicit revocation confirmation and stale-response protection are
+  covered by browser behavior tests.
+- Dashboard regression: 27 tests passed.
+- Route compatibility: 2 tests passed.
+- Full local unittest discovery completed successfully (exit status 0).
+- Disposable HTTPS beta enrollment/reporting demonstrated previously.
+- No authorization for production deployment or automatic patching.
+
+### Next implementation batch: coordinated transaction planning
+
+Implement a read-only planner based on
+docs/COORDINATED-ROLLBACK-DESIGN.md.
+
+The planner must:
+
+- Never modify installed assets.
+- Reject unsafe roots and symlinked inputs.
+- Inventory versioned releases, configuration, CA trust and unit files.
+- Identify missing assets, unsafe permissions and incompatible layouts.
+- Report planned changes and recovery blockers in structured output.
+- Require explicit operator-selected paths.
+- Never enable systemd services or contact production servers.
+
+Follow with disposable fault-injection tests before designing an
+authorized apply/rollback workflow.
+
+Production approval remains NOT GRANTED.
+
+## Mission 5B — Release-aware rollback planning
+
+Status: **Implementation complete; full regression passed (2026-11-01).**
+
+Delivered:
+- Read-only active-release inspection.
+- Integration with the existing rollback planner.
+- Partial-installation and unsafe-path regression coverage.
+- Backward-compatible four-asset snapshot schema.
+
+Remaining before coordinated rollback can be considered:
+- Authenticate trusted release contents and rollback targets.
+- Design race-resistant filesystem inspection and transaction locking.
+- Coordinate code, configuration, CA trust, and systemd lifecycle recovery.
+- Expand disposable fault-injection and interruption testing.
+- Obtain explicit approval before any deployment or rollback execution.

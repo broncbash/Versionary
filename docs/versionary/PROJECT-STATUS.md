@@ -1,9 +1,9 @@
 # Versionary — Project Status
 
-Updated: 2026-10-31
+Updated: 2026-11-01
 Repository: broncbash/arby-patch-command
 Development branch: feature/versionary-agent-rename
-Last confirmed commit: 681e8b4
+Last confirmed commit: 80a8217
 
 ## Purpose
 
@@ -25,7 +25,7 @@ The initial product is observer-only:
 - Agent registration, approval, revocation, heartbeat, and reporting.
 - Ed25519-based enrollment challenge/proof workflow.
 - Credential-based agent authentication.
-- Read-only administrator dashboard prototype.
+- Administrator dashboard with inventory, filtering, agent approval, and explicitly confirmed irreversible revocation.
 - Isolated HTTPS beta tooling and acceptance tests.
 
 ### Agent
@@ -59,14 +59,13 @@ Not yet supported:
 
 ## Verification
 
-Last confirmed selected regression:
-- 68 tests passing.
-- Python compilation successful.
-- SQLite connection leak warnings addressed.
-- Real disposable HTTPS agent lifecycle covered.
-
-The 68-test result refers to the selected agent/HTTPS regression suite,
-not necessarily every test in the repository.
+Latest verified checkpoint (2026-11-01):
+- Full local unittest discovery completed with exit status 0.
+- Dashboard regression suite: 27 tests passed.
+- Dashboard/HTTPS beta route compatibility: 2 tests passed.
+- Exact full-suite test count was not captured in the checkpoint summary.
+- Previous HTTPS lifecycle and security regression coverage retained.
+- Commit 80a8217 pushed to feature/versionary-agent-rename.
 
 A Starlette/httpx deprecation warning remains in the test environment.
 It did not fail the verified regression suite.
@@ -109,3 +108,33 @@ arby-patch-command / ARBY naming.
 
 Complete the rename deliberately; do not break compatibility or
 rename the repository without explicit approval.
+
+
+## Current development priorities (2026-11-01)
+
+1. Maintain the verified dashboard lifecycle API compatibility.
+2. Implement a read-only coordinated transaction planner.
+3. Expand disposable fault-injection and recovery validation.
+4. Continue portable installer and certificate-management development.
+5. Keep production deployment disabled until explicitly approved.
+
+The disposable beta VM has demonstrated approved agent enrollment,
+trusted HTTPS communication, and update reporting. Its reporting timer
+remains intentionally disabled. Do not change the VM without approval.
+
+The coordinated rollback design remains a design gate, not an implemented
+production-safe rollback mechanism.
+
+## Mission 5B — Release-aware rollback planning
+
+Verified 2026-11-01.
+
+- Added read-only inspection of the active agent release symlink.
+- Integrated active-release metadata into the existing rollback planner.
+- Preserved the four-asset snapshot format and partial-installation compatibility.
+- Added security tests for unsafe release pointers and filesystem layouts.
+- Release contents are not authenticated by the inspector.
+- Rollback execution remains disabled; `apply_allowed` is false.
+- Full repository regression: 1,262 tests, zero failures/errors, one skipped.
+- `git diff --check`: passed.
+- Production deployment remains unauthorized.
