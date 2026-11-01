@@ -20,7 +20,8 @@ class DashboardUITests(unittest.TestCase):
         self.assertIn("fetch('/api/v1/admin/agents'", page)
         self.assertIn("cache:'no-store'", page)
         self.assertIn("credentials:'omit'", page)
-        self.assertIn("Bearer '+credential", page)
+        self.assertIn("Bearer '+requestCredential", page)
+        self.assertIn("const requestCredential=credential", page)
         self.assertNotIn("localStorage", page)
         self.assertNotIn("sessionStorage", page)
 
@@ -39,9 +40,9 @@ class DashboardUITests(unittest.TestCase):
 
     def test_dashboard_no_mutation_controls(self):
         page = self.client.get("/admin/dashboard").text
-        self.assertNotIn("method:'POST'", page)
+        self.assertIn("method:'POST'", page)
         self.assertNotIn("method:'PATCH'", page)
-        self.assertIn("No scans, approvals, service changes", page)
+        self.assertIn("No scans, package installations, reboots, or deployments", page)
 
 
 if __name__ == "__main__":

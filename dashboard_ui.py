@@ -1,4 +1,4 @@
-"""Read-only administrative beta dashboard. No production actions or persistent credentials."""
+"""Administrative beta dashboard with authenticated agent lifecycle controls."""
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
 
@@ -30,7 +30,7 @@ input{min-width:180px;flex:1}select{font:inherit;border:1px solid #475569;border
   .agent{padding:16px}
   .meta{grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:10px}
 }
-.approved,.online{color:#86efac}.pending,.stale,.no_contact,.unknown{color:#fbbf24}.revoked{color:#fda4af}.error{color:#fda4af}
+.agent-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.agent-actions button{font-size:.85rem;padding:9px 12px}.agent-actions button:disabled{opacity:.55;cursor:wait}.agent-actions .danger{border-color:#fb7185;color:#fecdd3}.approved,.online{color:#86efac}.pending,.stale,.no_contact,.unknown{color:#fbbf24}.revoked{color:#fda4af}.error{color:#fda4af}
 #message{min-height:24px;color:#ffcf91}#fleet:empty:after{content:'No agents to display.';color:#9db5c7}
 footer{margin-top:28px;color:#93aabd;font-size:.85rem}
 .agent-identity{display:flex;align-items:center;gap:14px;margin-bottom:16px}
@@ -49,13 +49,19 @@ footer{margin-top:28px;color:#93aabd;font-size:.85rem}
 <div class="stat"><span>Pending</span><strong id="pending">—</strong></div>
 <div class="stat"><span>Reported updates</span><strong id="updates">—</strong></div><div class="stat"><span>Online</span><strong id="online">—</strong></div><div class="stat"><span>Needs attention</span><strong id="attention">—</strong></div>
 </section><section class="panel"><h2>Registered agents</h2><div class="filters" aria-label="Fleet filters"><input id="search" type="search" aria-label="Search agents" placeholder="Search hostname or platform"><select id="status-filter" aria-label="Filter by approval status"><option value="all">All statuses</option><option value="approved">Approved</option><option value="pending">Pending</option><option value="revoked">Revoked</option></select><select id="sort" aria-label="Sort agents"><option value="name">Hostname</option><option value="updates">Most updates</option><option value="contact">Recent contact</option></select></div><p id="results" class="muted" role="status" aria-live="polite"></p><div class="grid" id="fleet" aria-live="polite"></div></section>
-<footer>Read-only dashboard. No scans, approvals, service changes, or deployments are initiated here. Online means an approved agent reported a heartbeat within 30 minutes. Update totals reflect latest successful reports, not live scans.</footer>
+<footer>Administrator-approved agent lifecycle actions are available. Revocation is permanent for the selected agent identity. No scans, package installations, reboots, or deployments are initiated here. Online means an approved agent reported a heartbeat within 30 minutes. Update totals reflect latest successful reports, not live scans.</footer>
 </main><script>
 'use strict';
 const $=id=>document.getElementById(id);
 let credential='';
 let inventory=[];
+let sessionGeneration=0;
+let inventoryGeneration=0;
+let inventoryTrusted=false;
 function clear(){
+  sessionGeneration++;
+  inventoryGeneration++;
+  inventoryTrusted=false;
   credential='';inventory=[];$('token').value='';$('fleet').replaceChildren();$('results').textContent='';
   for(const id of ['total','approved','pending','updates','online','attention']) $(id).textContent='—';
 }
@@ -73,6 +79,89 @@ function formatTimestamp(value){
     year:'numeric',month:'short',day:'numeric',
     hour:'numeric',minute:'2-digit',timeZoneName:'short'
   }).format(parsed);
+}
+let lifecycleBusy=false;
+async function manageAgent(agent,action,button){
+  if(lifecycleBusy)return;
+  if(!['approve','revoke'].includes(action))return;
+  if(!inventoryTrusted){
+    $('message').textContent='Refresh fleet before managing agents.';
+    return;
+  }
+  const current=inventory.find(a=>a.id===agent.id);
+  if(!current||current.status!==agent.status||
+     (action==='approve'&&current.status!=='pending')||
+     (action==='revoke'&&!['pending','approved'].includes(current.status))){
+    $('message').textContent='Agent status changed. Refresh fleet before continuing.';
+    return;
+  }
+  if(!credential){
+    $('message').textContent='Administrator authentication required.';
+    return;
+  }
+  const revoke=action==='revoke';
+  const warning=revoke
+    ? 'PERMANENTLY revoke '+agent.hostname+' ('+agent.id+')? This identity cannot be approved again.'
+    : 'Approve pending agent '+agent.hostname+' ('+agent.id+')?';
+  if(revoke){
+    const typed=window.prompt(
+      warning+'\\n\\nType REVOKE to confirm permanent revocation:'
+    );
+    if(typed!=='REVOKE'){
+      $('message').textContent='Revocation cancelled.';
+      return;
+    }
+  }else if(!window.confirm(warning)){
+    return;
+  }
+  if(lifecycleBusy)return;
+  lifecycleBusy=true;
+  inventoryTrusted=false;
+  const generation=sessionGeneration;
+  const actionCredential=credential;
+  button.disabled=true;
+  $('message').textContent=(revoke?'Revoking ':'Approving ')+agent.hostname+'...';
+  let mutationSucceeded=false;
+  try{
+    const response=await fetch(
+      '/api/v1/agents/'+encodeURIComponent(agent.id)+'/'+action,{
+        method:'POST',
+        headers:{Authorization:'Bearer '+actionCredential},
+        cache:'no-store',
+        credentials:'omit'
+      }
+    );
+    if(generation!==sessionGeneration)return;
+    if(!response.ok){
+      throw Error('Action rejected (HTTP '+response.status+'). Refresh and check agent status.');
+    }
+    mutationSucceeded=true;
+    const updated=await fetch('/api/v1/admin/agents',{
+      headers:{Authorization:'Bearer '+actionCredential},
+      cache:'no-store',
+      credentials:'omit'
+    });
+    if(!updated.ok)throw Error('Action completed, but fleet refresh failed.');
+    const data=await updated.json();
+    if(generation!==sessionGeneration)return;
+    if(!Array.isArray(data.agents))throw Error('Unexpected fleet response.');
+    inventory=data.agents;
+    inventoryTrusted=true;
+    render(inventory);
+    $('message').textContent=agent.hostname+
+      (revoke?' revoked.':' approved.')+' Fleet refreshed.';
+  }catch(error){
+    if(generation!==sessionGeneration)return;
+    inventoryTrusted=false;
+    $('message').textContent=mutationSucceeded
+      ? 'Agent action succeeded, but fleet refresh failed. Refresh fleet before another action.'
+      : 'Agent action outcome may be uncertain. Refresh fleet and verify status before retrying. '+error.message;
+    inventory=[];
+    render(inventory);
+  }finally{
+    lifecycleBusy=false;
+    button.disabled=false;
+  }
 }
 function render(agents){
   $('fleet').replaceChildren();
@@ -119,6 +208,20 @@ function render(agents){
       meta.append(label,detail);
     }
     card.append(meta,node('span',a.status,'tag '+a.status));
+    if(a.status==='pending'||a.status==='approved'){
+      const actions=node('div','','agent-actions');
+      if(a.status==='pending'){
+        const approve=node('button','Approve agent');
+        approve.type='button';
+        approve.addEventListener('click',()=>manageAgent(a,'approve',approve));
+        actions.append(approve);
+      }
+      const revoke=node('button','Revoke identity','danger');
+      revoke.type='button';
+      revoke.addEventListener('click',()=>manageAgent(a,'revoke',revoke));
+      actions.append(revoke);
+      card.append(actions);
+    }
     if(a.scan_status==='error') card.append(node('p','Latest scan failed','error'));
     $('fleet').append(card);
   }
@@ -128,20 +231,43 @@ for(const id of ['search','status-filter','sort']){
 }
 $('clear').addEventListener('click',()=>{clear();$('message').textContent='Access cleared.';});
 $('refresh').addEventListener('click',async()=>{
-  credential=$('token').value||credential;
+  if(lifecycleBusy){
+    $('message').textContent='Wait for the current agent action to finish.';
+    return;
+  }
+  const entered=$('token').value;
   $('token').value='';
+  if(entered&&entered!==credential){
+    sessionGeneration++;
+    inventoryTrusted=false;
+    inventory=[];
+    render(inventory);
+  }
+  credential=entered||credential;
   if(!credential){$('message').textContent='Enter an admin token.';return;}
+  const generation=sessionGeneration;
+  const request=++inventoryGeneration;
+  const requestCredential=credential;
+  inventoryTrusted=false;
   $('message').textContent='Loading fleet...';
   try{
     const response=await fetch('/api/v1/admin/agents',{
-      headers:{Authorization:'Bearer '+credential},cache:'no-store',credentials:'omit'
+      headers:{Authorization:'Bearer '+requestCredential},cache:'no-store',credentials:'omit'
     });
+    if(generation!==sessionGeneration||request!==inventoryGeneration)return;
     if(!response.ok)throw Error('Inventory request failed (HTTP '+response.status+').');
     const data=await response.json();
+    if(generation!==sessionGeneration||request!==inventoryGeneration)return;
+    if(!Array.isArray(data.agents))throw Error('Unexpected fleet response.');
     inventory=data.agents;
+    inventoryTrusted=true;
     render(inventory);
-    $('message').textContent='Fleet loaded. Read-only snapshot.';
-  }catch(error){clear();$('message').textContent=error.message;}
+    $('message').textContent='Fleet loaded. Administrator controls available.';
+  }catch(error){
+    if(generation!==sessionGeneration||request!==inventoryGeneration)return;
+    clear();
+    $('message').textContent=error.message;
+  }
 });
 </script></body></html>'''
 

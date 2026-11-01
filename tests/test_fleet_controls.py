@@ -30,7 +30,15 @@ class FleetControlsTests(unittest.TestCase):
         self.assertNotIn("innerHTML", page)
         self.assertNotIn("localStorage", page)
         self.assertNotIn("sessionStorage", page)
-        self.assertNotIn("method:'POST'", page)
+        self.assertIn("method:'POST'", page)
+        self.assertIn("window.confirm(warning)", page)
+        self.assertIn("Authorization:'Bearer '+actionCredential", page)
+        self.assertIn("const actionCredential=credential", page)
+        self.assertIn("Authorization:'Bearer '+requestCredential", page)
+        self.assertIn("const requestCredential=credential", page)
+        self.assertIn("encodeURIComponent(agent.id)", page)
+        self.assertIn("credentials:'omit'", page)
+        self.assertIn("PERMANENTLY revoke", page)
         self.assertNotIn("method:'PATCH'", page)
 
 

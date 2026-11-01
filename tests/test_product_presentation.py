@@ -27,7 +27,11 @@ class ProductPresentationTests(unittest.TestCase):
         with TestClient(app) as client:
             response = client.get("/admin/dashboard")
         self.assertIn("Observer mode", response.text)
-        self.assertIn("Read-only dashboard", response.text)
+        self.assertIn("Administrator-approved agent lifecycle actions", response.text)
+        self.assertIn(
+            "No scans, package installations, reboots, or deployments",
+            response.text,
+        )
 
 
 if __name__ == "__main__":

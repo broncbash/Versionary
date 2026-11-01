@@ -32,7 +32,7 @@ class DashboardTimestampLayoutTests(unittest.TestCase):
         self.assertNotIn("innerHTML", self.page)
         self.assertNotIn("localStorage", self.page)
         self.assertNotIn("sessionStorage", self.page)
-        self.assertNotIn("method:'POST'", self.page)
+        self.assertIn("method:'POST'", self.page)
         self.assertNotIn("method:'PATCH'", self.page)
 
 
