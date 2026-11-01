@@ -159,3 +159,19 @@ Remaining before coordinated rollback can be considered:
 - Coordinate code, configuration, CA trust, and systemd lifecycle recovery.
 - Expand disposable fault-injection and interruption testing.
 - Obtain explicit approval before any deployment or rollback execution.
+
+## Mission 5C — Release Integrity Milestone
+
+Completed locally on 2026-11-01:
+
+- Read-only active release content integrity verification.
+- Fail-closed rollback planning when active release integrity fails.
+- Explicit separation of integrity, authenticity, provenance and authorization.
+- Full local regression: 1,275 tests, zero failures, one skipped.
+
+Next security priorities:
+
+1. Race-resistant release inspection and file-descriptor-based verification.
+2. Independently authenticated trust for installed release identities.
+3. Coordinated rollback transaction design and fault-injection testing.
+4. Production deployment remains blocked pending explicit approval.

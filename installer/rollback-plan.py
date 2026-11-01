@@ -34,6 +34,23 @@ def plan(root, snapshot_dir):
         "versionary_rollback_release_inspection",
     )
     release = release_inspector.inspect(root)
+    integrity = {
+        "integrity_verified": False,
+        "status": "absent",
+    }
+
+    if release["active_present"]:
+        verifier = _load(
+            "active-release-integrity.py",
+            "versionary_rollback_release_integrity",
+        )
+        try:
+            integrity = verifier.verify_integrity(root)
+        except (OSError, ValueError, RuntimeError) as exc:
+            raise ValueError(
+                f"Active release integrity verification failed: {exc}"
+            ) from exc
+
     # Manifest was verified; still explicitly reject any changed metadata.
     manifest = json.loads((snapshot_dir / "manifest.json").read_bytes())
     if (manifest.get("version") != 1 or set(manifest.get("assets", {})) != set(inventory.FILES)):
@@ -66,7 +83,10 @@ def plan(root, snapshot_dir):
         "changes": changes, "change_count": sum(item["action"] != "unchanged" for item in changes),
         "active_release": release["active_release"],
         "active_release_present": release["active_present"],
-        "active_release_integrity_verified": False,
+        "active_release_integrity_verified": integrity["integrity_verified"],
+        "active_release_integrity_status": integrity["status"],
+        "active_release_authenticity_verified": False,
+        "active_release_provenance_verified": False,
         "release_rollback_planned": False,
         "blockers": blockers, "apply_allowed": False, "changes_made": False,
         "credential_contents_read": False, "production_installed": False,

@@ -210,3 +210,39 @@ Security and usability rules:
 - Keep changes local until testing and review are complete.
 
 This workflow was verified on 2026-11-01.
+
+## Mission 5C — Developer Handoff (2026-11-01)
+
+Branch: feature/versionary-agent-rename
+Previous pushed baseline: 203412d
+
+Mission 5C implementation:
+
+- installer/active-release-integrity.py (new)
+- installer/rollback-plan.py (updated)
+- tests/test_active_release_integrity.py (new)
+- tests/test_rollback_integrity_integration.py (new)
+- tests/test_rollback_release_awareness.py (fixture updated)
+
+Verification:
+
+- 49 focused security tests passed.
+- Full suite: 1,275 tests, zero failures/errors, one skipped.
+- Compilation and git diff --check passed.
+
+Security rules:
+
+- Integrity verification is not signature authentication.
+- Signature authentication is not rollback authorization.
+- All rollback planning remains read-only.
+- Production installation and deployment remain prohibited.
+- Pathname-based integrity reads are not yet race-resistant.
+- Do not modify CT104, CT102, or disposable beta systems without approval.
+
+Developer workflow:
+
+- Use local development and full heredoc commands.
+- Use KDE Klipper D-Bus clipboard transfer for terminal logs.
+- Preserve protected untracked files and local beta artifacts.
+- Do not use hosted CI.
+- Commit and push only after staged validation.

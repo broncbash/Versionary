@@ -14,6 +14,13 @@ SPEC = importlib.util.spec_from_file_location(
 rollback = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(rollback)
 
+ATOMIC_SPEC = importlib.util.spec_from_file_location(
+    "versionary_release_aware_atomic",
+    HERE / "atomic-release.py",
+)
+atomic = importlib.util.module_from_spec(ATOMIC_SPEC)
+ATOMIC_SPEC.loader.exec_module(atomic)
+
 
 class ReleaseAwareRollbackTests(unittest.TestCase):
     def setUp(self):
@@ -29,8 +36,16 @@ class ReleaseAwareRollbackTests(unittest.TestCase):
         self.releases = self.app / "releases"
         self.releases.mkdir()
 
-        self.identifier = "a" * 64
-        (self.releases / self.identifier / "agent").mkdir(parents=True)
+        self.modules = {
+            "__main__.py": b"print('versionary')\n",
+            "identity.py": b"IDENTITY = True\n",
+        }
+        self.identifier = atomic.release_id(self.modules)
+        release = self.releases / self.identifier / "agent"
+        release.mkdir(parents=True)
+
+        for name, data in self.modules.items():
+            (release / name).write_bytes(data)
 
         self.snapshot = Path(temporary.name) / "snapshot"
         self.snapshot.mkdir(mode=0o700)
@@ -94,7 +109,13 @@ class ReleaseAwareRollbackTests(unittest.TestCase):
 
         self.assertEqual(result["active_release"], self.identifier)
         self.assertTrue(result["active_release_present"])
-        self.assertFalse(result["active_release_integrity_verified"])
+        self.assertTrue(result["active_release_integrity_verified"])
+        self.assertEqual(
+            result["active_release_integrity_status"],
+            "verified",
+        )
+        self.assertFalse(result["active_release_authenticity_verified"])
+        self.assertFalse(result["active_release_provenance_verified"])
         self.assertFalse(result["release_rollback_planned"])
         self.assertFalse(result["apply_allowed"])
         self.assertFalse(result["changes_made"])

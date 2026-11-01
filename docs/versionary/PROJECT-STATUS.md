@@ -138,3 +138,19 @@ Verified 2026-11-01.
 - Full repository regression: 1,262 tests, zero failures/errors, one skipped.
 - `git diff --check`: passed.
 - Production deployment remains unauthorized.
+
+## Mission 5C — Active Release Integrity (2026-11-01)
+
+Status: Implementation complete; local regression passed.
+
+- Added read-only active release content integrity verification.
+- Reused the atomic release SHA-256 module digest algorithm.
+- Detects tampered, missing, unexpected, symlinked and hardlinked modules.
+- Integrated fail-closed integrity checks into read-only rollback planning.
+- Reports integrity separately from authenticity and provenance.
+- Rollback authorization remains false; no production deployment permitted.
+- Updated legacy release fixtures to use genuine content-addressed releases.
+- Validation: 49 focused tests passed; 1,275 full tests passed,
+  one skipped, zero failures/errors.
+- Remaining hardening: race-resistant filesystem inspection,
+  independently authenticated release trust, and coordinated recovery.
