@@ -20,6 +20,10 @@ app = FastAPI(
 app.include_router(agent_router)
 app.include_router(enrollment_router)
 
+# Existing v2 enrollment protocol, disabled by default behind its feature gate.
+from enrollment_v2_api import router as enrollment_v2_router
+app.include_router(enrollment_v2_router)
+
 @app.get("/health")
 def health():
     return {
