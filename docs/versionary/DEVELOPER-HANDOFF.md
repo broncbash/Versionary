@@ -297,3 +297,23 @@ Protected untracked artifacts remain untouched. No CT104, CT102, or production c
 3. Implement server-managed administrator sessions, secure cookies, CSRF protection, expiry and invalidation; add targeted regression tests and migration plan.
 4. Validate real desktop restart persistence and avoid damaging existing local trial state.
 5. Refresh documentation, run appropriate local tests, commit and push only with user approval.
+
+---
+
+<!-- VERSIONARY_RC2_ACCEPTANCE_20261102 -->
+## RC2 real installation handoff
+
+The 2026-11-02 real installation and reboot acceptance passed.
+
+Read:
+- RC2-REAL-INSTALL-ACCEPTANCE.md
+- RC2-ACCEPTANCE-OPERATIONS.md
+- NEXT-SESSION-RC2-HANDOFF.md
+
+Do not confuse the working local repository with the GitHub remote:
+many development files remain modified or untracked.
+
+The known-good acceptance VM is 192.168.122.92.
+Preserve it while testing destructive recovery elsewhere.
+
+Production approval: NO.

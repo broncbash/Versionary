@@ -193,3 +193,20 @@ Status: Implementation complete; local regression passed.
 - Replace tab-scoped bearer-token storage with proper server-side sessions, HttpOnly/Secure/SameSite cookies, CSRF protection, expiry, and logout invalidation.
 - Verify restart persistence, backup/restore, safe upgrades, cross-distro scanning, error reporting, and installer rollback.
 - The latest local edits have not been confirmed committed/pushed at the time of this checkpoint.
+
+---
+
+<!-- VERSIONARY_RC2_ACCEPTANCE_20261102 -->
+## 2026-11-02 — RC2 real installation milestone
+
+Versionary RC2 passed full regression (1390 passed, 1 skipped),
+release validation, real installation on cloned Arch Linux VM
+192.168.122.92, verified HTTPS, and reboot persistence.
+
+Production approval remains NO.
+
+See RC2-REAL-INSTALL-ACCEPTANCE.md for the complete evidence and
+RC2-ACCEPTANCE-OPERATIONS.md for the VM operating reference.
+
+Next gate: destructive installation failure-recovery acceptance on a
+separate disposable target.

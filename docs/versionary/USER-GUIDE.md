@@ -159,3 +159,23 @@ From a configured desktop with the local trial already installed:
 Open `https://localhost:8769/admin/dashboard` on the same machine. Enter the admin bearer token and choose **Refresh fleet**. The page can now restore access on reload within the same tab. Choose **Log out** to clear tab access. Closing the tab normally clears its `sessionStorage`; browser session restore behavior may vary. Avoid shared devices: the token is stored in browser-accessible tab storage, not an HttpOnly cookie. Do not mistake this trial for production authentication.
 
 For Arch/CachyOS, update detection uses `checkupdates`, which queries refreshed package metadata without installing updates. A `pacman -Qu` count can differ. The reported count is a snapshot, not a command to install packages.
+
+---
+
+<!-- VERSIONARY_RC2_ACCEPTANCE_20261102 -->
+## RC2 beta installation status
+
+The RC2 installer has been tested successfully on a disposable
+Arch Linux VM, including HTTPS and reboot persistence.
+
+This is a development/beta acceptance milestone, not a declaration
+of production readiness.
+
+The installer creates a dedicated service account and protected state
+directory. The generated CA certificate is stored within protected state.
+
+See RC2-ACCEPTANCE-OPERATIONS.md for verified service and HTTPS
+diagnostic commands.
+
+Do not weaken certificate directory permissions or publish private
+administrative credentials.

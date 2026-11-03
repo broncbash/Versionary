@@ -221,3 +221,19 @@ Future security work:
 - [ ] Proper server-side admin sessions with secure cookies, CSRF protection, expiry and invalidation.
 - [ ] Restart persistence, upgrades, backups, installer rollback and multi-distro release acceptance.
 - [ ] Formal production security review and deployment approval.
+
+---
+
+<!-- VERSIONARY_RC2_ACCEPTANCE_20261102 -->
+## RC2 acceptance roadmap update
+
+Completed: full regression, hardened release verification, real installer
+execution, systemd startup, trusted HTTPS, IP certificate validation,
+and automatic service startup after reboot.
+
+Next: preserve known-good VM; test destructive installer failure recovery
+on another disposable target; harden cleanup exception handling; rerun
+regression; rebuild release if necessary; complete beta acceptance review.
+
+Future: portable installers, GUI/CLI configuration parity, certificate
+management, agent trust workflows, and controlled GitHub integration.
