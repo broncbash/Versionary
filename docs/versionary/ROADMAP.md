@@ -237,3 +237,18 @@ regression; rebuild release if necessary; complete beta acceptance review.
 
 Future: portable installers, GUI/CLI configuration parity, certificate
 management, agent trust workflows, and controlled GitHub integration.
+
+## 2026-11-03 — Beta fleet milestone
+
+Completed:
+- Secure enrollment and authenticated reporting on Arch Linux and Debian 13.
+- Two-agent fleet visibility in the HTTPS dashboard.
+
+Next priorities:
+- Portable, dependency-complete agent packaging and installation.
+- Automatic heartbeat and periodic package-update reporting.
+- Improved agent setup diagnostics and consistent state-directory handling.
+- Disposable VM failure-recovery acceptance for the hardened server installer.
+- Release candidate rebuilding and validation before broader deployment.
+
+Production deployment remains unapproved.

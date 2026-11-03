@@ -210,3 +210,21 @@ RC2-ACCEPTANCE-OPERATIONS.md for the VM operating reference.
 
 Next gate: destructive installation failure-recovery acceptance on a
 separate disposable target.
+
+## 2026-11-03 — Multi-distribution beta fleet acceptance
+
+PASS — Real HTTPS beta server at 192.168.122.202:8766.
+
+- Arch Linux agent: approved, enrolled, online, successful scan and report.
+- Debian 13 agent: approved, enrolled, online, successful scan and report.
+- Dashboard verified: 2 registered, 2 approved, 0 pending,
+  2 online, 0 needing attention, 0 reported updates.
+- Debian enrollment used the V2 registration and enrollment protocol.
+- Both agents reported zero available updates.
+- Agent operations were manually invoked; automatic periodic reporting
+  has not yet been verified.
+- Production approval remains NO.
+
+Installer recovery hardening and two new regression test modules were
+completed locally. The previously reported full regression result was
+1,398 tests, 1 skipped, no failures.

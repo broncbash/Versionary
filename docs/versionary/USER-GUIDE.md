@@ -179,3 +179,22 @@ diagnostic commands.
 
 Do not weaken certificate directory permissions or publish private
 administrative credentials.
+
+## Multi-distribution beta notes — 2026-11-03
+
+Versionary's controlled HTTPS beta successfully monitored an Arch Linux
+client and a Debian 13 client from one server dashboard.
+
+The verified manual agent workflow is:
+1. Configure the HTTPS server and trusted CA certificate.
+2. Register the agent using register-v2.
+3. Approve the pending agent in the administrator dashboard.
+4. Complete enrollment using enroll-v2.
+5. Run heartbeat, scan, and report.
+6. Refresh the dashboard to confirm online status and scan results.
+
+During this beta, Debian required additional Python dependencies and
+system-level configuration. The portable agent installation experience
+is not yet finalized. Automatic periodic reporting is still pending.
+
+Successful beta operation does not constitute production approval.

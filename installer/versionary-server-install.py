@@ -26,6 +26,28 @@ def run(*command, **kwargs):
     subprocess.run(command, check=True, **kwargs)
 
 
+
+def recovery_systemctl(*arguments):
+    """Best-effort cleanup without masking the installation failure."""
+    try:
+        result = subprocess.run(
+            ["systemctl", *arguments], check=False
+        )
+        if result.returncode != 0:
+            print(
+                "RECOVERY_CLEANUP_ERROR=systemctl "
+                + " ".join(arguments)
+                + " exited " + str(result.returncode),
+                file=sys.stderr,
+            )
+    except OSError as cleanup_error:
+        print(
+            "RECOVERY_CLEANUP_ERROR=systemctl "
+            + " ".join(arguments) + ": " + str(cleanup_error),
+            file=sys.stderr,
+        )
+
+
 def safe_directory(value):
     path = Path(value)
     if not path.is_absolute() or ".." in path.parts:
@@ -348,10 +370,7 @@ def install(args, digest):
         print("INSTALL_FAILED=RECOVERY_REQUIRED", file=sys.stderr)
 
         if unit.exists():
-            subprocess.run(
-                ["systemctl", "disable", "--now", SERVICE],
-                check=False,
-            )
+            recovery_systemctl("disable", "--now", SERVICE)
 
         # Preserve application, certificates, state, and diagnostics.
         # A partial installation must be inspected before retrying.
@@ -373,7 +392,7 @@ def install(args, digest):
 
         # Keep the service account so preserved state retains its owner.
         # Do not remove the application or state directories.
-        subprocess.run(["systemctl", "daemon-reload"], check=False)
+        recovery_systemctl("daemon-reload")
 
         print(
             "RECOVERY_REQUIRED=YES",

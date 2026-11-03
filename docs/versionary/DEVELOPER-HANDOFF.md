@@ -317,3 +317,34 @@ The known-good acceptance VM is 192.168.122.92.
 Preserve it while testing destructive recovery elsewhere.
 
 Production approval: NO.
+
+## 2026-11-03 — Real multi-distribution beta handoff
+
+Development branch: feature/versionary-agent-rename
+
+Working disposable beta environment:
+- Server: Arch Linux, 192.168.122.202, HTTPS port 8766.
+- Arch agent: 192.168.122.96.
+- Debian 13 agent: 192.168.122.6.
+- Dashboard: /admin/dashboard.
+
+Verified lifecycle on both agents:
+registration, administrator approval, secure enrollment, heartbeat,
+package scan, authenticated report, and dashboard visibility.
+
+Debian installation observations:
+- Agent archive required the separate versionary_agent_cli.py module.
+- Debian required python3-cryptography, python3-bcrypt, and
+  python3-cffi-backend.
+- Agent module defaults use /etc/versionary-agent and
+  /var/lib/versionary-agent, while portable setup supports a user
+  state directory. The mismatch caused permission errors.
+- System-directory configuration was used to complete beta acceptance.
+- These are portability and installer-usability issues to address,
+  not evidence that unattended agent installation is complete.
+
+Pending development:
+- Automate agent setup, dependencies, service installation, and reporting.
+- Complete disposable installer failure-recovery acceptance.
+- Preserve all known-good VMs, backups, and local beta state.
+- Do not trigger hosted CI or approve production deployment.
