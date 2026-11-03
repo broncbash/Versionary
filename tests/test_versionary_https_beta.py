@@ -16,8 +16,27 @@ class IsolatedHTTPSBetaTests(unittest.TestCase):
         self.assertNotIn('".versionary-local-beta"', SOURCE)
 
     def test_loopback_only(self):
-        self.assertIn('host="127.0.0.1"', SOURCE)
-        self.assertIn('port=8766', SOURCE)
+        self.assertIn(
+            "host=server_bind_address()",
+            SOURCE,
+        )
+        self.assertIn(
+            'os.environ.get("VERSIONARY_BIND_ADDRESS", "127.0.0.1")',
+            SOURCE,
+        )
+        self.assertIn(
+            'if value in ("0.0.0.0", "::"):',
+            SOURCE,
+        )
+        self.assertIn(
+            'VERSIONARY_ALLOW_NETWORK_BIND',
+            SOURCE,
+        )
+        self.assertIn("port=server_port()", SOURCE)
+        self.assertIn(
+            'os.environ.get("VERSIONARY_HTTPS_PORT", "8766")',
+            SOURCE,
+        )
 
     def test_https_required(self):
         self.assertIn("ssl_certfile=", SOURCE)

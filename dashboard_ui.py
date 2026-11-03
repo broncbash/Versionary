@@ -41,7 +41,7 @@ footer{margin-top:28px;color:#93aabd;font-size:.85rem}
 <header><div><div class="eyebrow">VERSIONARY · PRIVATE BETA</div><h1>Agent Fleet</h1><p class="sub">Infrastructure monitoring · Observer mode</p></div><a href="/admin/settings">Settings</a></header>
 <section class="controls" aria-label="Administrator controls">
 <input id="token" type="password" autocomplete="off" spellcheck="false" aria-label="Admin bearer token" placeholder="Admin bearer token (memory only)">
-<button id="refresh" type="button">Refresh fleet</button><button id="clear" type="button">Log out</button>
+<button id="refresh" type="button">Refresh fleet</button><button id="clear" type="button">Clear access</button>
 </section><p id="message" role="status" aria-live="polite">Enter an admin token to load the fleet.</p>
 <section class="stats" aria-label="Fleet totals">
 <div class="stat"><span>Registered</span><strong id="total">—</strong></div>
@@ -56,7 +56,7 @@ const $=id=>document.getElementById(id);
 const SESSION_KEY='versionary-beta09-admin-token';
 let credential='';
 try {
-  credential=sessionStorage.getItem(SESSION_KEY)||'';
+
 } catch (_) {}
 let inventory=[];
 let sessionGeneration=0;
@@ -67,7 +67,7 @@ function clear(){
   inventoryGeneration++;
   inventoryTrusted=false;
   credential='';inventory=[];$('token').value='';
-  try { sessionStorage.removeItem(SESSION_KEY); } catch (_) {}
+
   $('fleet').replaceChildren();$('results').textContent='';
   for(const id of ['total','approved','pending','updates','online','attention']) $(id).textContent='—';
 }
@@ -130,7 +130,7 @@ async function manageAgent(agent,action,button){
   let mutationSucceeded=false;
   try{
     const response=await fetch(
-      '/api/v1/agents/'+encodeURIComponent(agent.id)+'/'+action,{
+      '/api/v1/admin/agents/'+encodeURIComponent(agent.id)+'/'+action,{
         method:'POST',
         headers:{Authorization:'Bearer '+actionCredential},
         cache:'no-store',
@@ -251,7 +251,7 @@ $('refresh').addEventListener('click',async()=>{
   }
   credential=entered||credential;
   try {
-    if(credential) sessionStorage.setItem(SESSION_KEY,credential);
+
   } catch (_) {}
   if(!credential){$('message').textContent='Enter an admin token.';return;}
   const generation=sessionGeneration;

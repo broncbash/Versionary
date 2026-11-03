@@ -7,7 +7,12 @@ import stat
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-STATE = ROOT / ".versionary-https-beta"
+STATE = Path(os.path.abspath(os.path.expanduser(
+    os.environ.get(
+        "VERSIONARY_STATE_DIR",
+        str(ROOT / ".versionary-https-beta"),
+    )
+)))
 CERTS = STATE / "certs"
 DB = STATE / "agents.db"
 AUTH = STATE / "admin-token"
@@ -95,6 +100,7 @@ def create_app():
     from admin_agents_api import router as inventory
     from versionary_https_beta_admin import router as administration
     from dashboard_ui import router as dashboard
+    from versionary_browser_sessions import router as browser_sessions
     from agent_reporting_api import router as reporting
     from enrollment_v2_api import router as enrollment
 
@@ -104,6 +110,7 @@ def create_app():
         redoc_url=None,
         openapi_url=None,
     )
+    app.include_router(browser_sessions)
     for router in (inventory, administration, dashboard, reporting, enrollment):
         app.include_router(router)
 
@@ -138,10 +145,10 @@ def main():
         spec = importlib.util.spec_from_file_location("versionary_certgen", source)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
-        module.generate("127.0.0.1", CERTS)
+        module.generate(server_tls_identity(), CERTS)
         configure()
         print("[OK] Isolated HTTPS beta initialized")
-        print("Server URL: https://127.0.0.1:8766")
+        print(f"Server URL: https://{server_tls_identity()}:{server_port()}")
         print("CA certificate:", CERTS / "ca.crt")
         print("Admin token stored privately:", AUTH)
         return
@@ -150,17 +157,121 @@ def main():
         raise SystemExit("Run init before serve")
 
     validate_certificates()
+    validate_server_identity()
     app = create_app()
 
     import uvicorn
     uvicorn.run(
         app,
-        host="127.0.0.1",
-        port=8766,
+        host=server_bind_address(),
+        port=server_port(),
         ssl_certfile=str(CERTS / "server.crt"),
         ssl_keyfile=str(CERTS / "server.key"),
         log_level="info",
     )
+
+
+
+
+def server_tls_identity():
+    """Validate the hostname or IP used by HTTPS clients."""
+    import ipaddress
+
+    value = os.environ.get("VERSIONARY_TLS_IDENTITY", "127.0.0.1")
+
+    if (
+        not value
+        or len(value) > 253
+        or any(c in value for c in ("/", "\\", "\x00"))
+    ):
+        raise ValueError("Invalid VERSIONARY_TLS_IDENTITY")
+
+    try:
+        ipaddress.ip_address(value)
+        return value
+    except ValueError:
+        pass
+
+    labels = value.split(".")
+    if not all(
+        label
+        and len(label) <= 63
+        and label[0].isalnum()
+        and label[-1].isalnum()
+        and all(c.isascii() and (c.isalnum() or c == "-") for c in label)
+        for label in labels
+    ):
+        raise ValueError("Invalid VERSIONARY_TLS_IDENTITY")
+
+    return value
+
+
+
+def validate_server_identity():
+    """Ensure the existing certificate covers the configured client identity."""
+    import ipaddress
+    from cryptography import x509
+
+    identity = server_tls_identity()
+    cert = x509.load_pem_x509_certificate(
+        (CERTS / "server.crt").read_bytes()
+    )
+    sans = cert.extensions.get_extension_for_class(
+        x509.SubjectAlternativeName
+    ).value
+
+    try:
+        address = ipaddress.ip_address(identity)
+    except ValueError:
+        matches = identity.lower() in (
+            name.lower() for name in sans.get_values_for_type(x509.DNSName)
+        )
+    else:
+        matches = address in sans.get_values_for_type(x509.IPAddress)
+
+    if not matches:
+        raise RuntimeError(
+            "Configured TLS identity is not present in server certificate SAN"
+        )
+
+    bind = server_bind_address()
+    if bind not in ("127.0.0.1", "::1") and identity == "127.0.0.1":
+        raise RuntimeError(
+            "Network listening requires an explicitly configured TLS identity"
+        )
+
+
+def server_bind_address():
+    """Validate the explicitly configured HTTPS listening address."""
+    import ipaddress
+
+    value = os.environ.get("VERSIONARY_BIND_ADDRESS", "127.0.0.1")
+    try:
+        ipaddress.ip_address(value)
+    except ValueError as exc:
+        raise ValueError("VERSIONARY_BIND_ADDRESS must be a valid IP address") from exc
+
+    if value in ("0.0.0.0", "::"):
+        if os.environ.get("VERSIONARY_ALLOW_NETWORK_BIND") != "true":
+            raise ValueError(
+                "Wildcard binding requires VERSIONARY_ALLOW_NETWORK_BIND=true"
+            )
+
+    return value
+
+
+def server_port():
+    """Validate the HTTPS listening port."""
+    raw = os.environ.get("VERSIONARY_HTTPS_PORT", "8766")
+    try:
+        value = int(raw)
+    except ValueError as exc:
+        raise ValueError("VERSIONARY_HTTPS_PORT must be an integer") from exc
+
+    if not 1 <= value <= 65535:
+        raise ValueError("VERSIONARY_HTTPS_PORT must be between 1 and 65535")
+
+    return value
 
 
 if __name__ == "__main__":

@@ -1,3 +1,4 @@
+from versionary_agent_distribution import router as distribution_router
 from agent_reporting_api import router as reporting_router
 from datetime import datetime, timezone
 
@@ -96,3 +97,5 @@ app.include_router(admin_agents_router)
 # Read-only cyberpunk agent fleet dashboard.
 from dashboard_ui import router as dashboard_router
 app.include_router(dashboard_router)
+
+app.include_router(distribution_router)
