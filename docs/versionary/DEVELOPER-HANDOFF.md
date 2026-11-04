@@ -528,3 +528,8 @@ Regression: 1,534 tests passed, one skipped.
 
 Preserve all local untracked artifacts and backup files.
 No hosted CI. No commits, pushes, or merges without user approval.
+
+
+## Batch 72 — Journal integrity checkpoint
+
+Batch 72: finalization_assessment now checks the exact journal filename inventory before reading manifest snapshots. It remains advisory and never authorizes cleanup.

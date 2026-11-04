@@ -276,3 +276,8 @@ Agent installation has passed disposable-filesystem acceptance.
 
 Real server installation, enrollment, and production deployment
 remain separate approval-gated milestones.
+
+
+## Batch 72 — Journal integrity checkpoint
+
+Batch 72: recovery journal anomalies require investigation. Do not manually delete the journal or retry installation.

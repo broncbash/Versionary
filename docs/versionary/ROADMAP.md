@@ -386,3 +386,8 @@ Next:
 5. Obtain explicit approval before production deployment.
 
 Production deployment remains blocked.
+
+
+## Batch 72 — Journal integrity checkpoint
+
+Batch 72 checkpoint: journal inventory hardening is implemented; race-resistant recovery and durable finalization remain open.

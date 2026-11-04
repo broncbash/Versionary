@@ -121,3 +121,8 @@ installation, or production deployment is enabled.
 
 Further work is required for durable cleanup, concurrent
 filesystem mutation safety, and crash recovery.
+
+
+## Batch 72 — Journal integrity checkpoint
+
+Batch 72: added fail-closed inventory prechecks and isolated-root journal-integrity regression coverage. Production installation and journal cleanup remain disabled.

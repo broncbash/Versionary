@@ -472,18 +472,34 @@ def finalization_assessment(root):
             "cleanup_authorized": False,
         }
 
-    manifest = read_manifest(root)
-    states = classify(root, manifest)
-
+    # Check journal inventory before trusting the manifest or
+    # reading snapshot contents. Unexpected entries are evidence
+    # requiring investigation, never automatic cleanup.
     tx = transaction_path(root)
     expected = {MANIFEST_NAME}
 
-    for entry in manifest["files"].values():
-        expected.add(entry["old"])
-        expected.add(entry["new"])
+    for index, _name in enumerate(
+        sorted(coordinator.MODES)
+    ):
+        expected.add(f"old-{index:03d}")
+        expected.add(f"new-{index:03d}")
 
     actual = {entry.name for entry in tx.iterdir()}
     unexpected = sorted(actual - expected)
+    missing = sorted(expected - actual)
+
+    if unexpected or missing:
+        return {
+            "status": "recovery_or_investigation_required",
+            "eligible_for_review": False,
+            "cleanup_authorized": False,
+            "unexpected_entries": unexpected,
+            "missing_entries": missing,
+            "files": {},
+        }
+
+    manifest = read_manifest(root)
+    states = classify(root, manifest)
 
     restored = all(
         state == "old" for state in states.values()

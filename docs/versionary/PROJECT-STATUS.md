@@ -375,3 +375,8 @@ Status: PASSED — three disposable Linux VMs.
 - Production approval: NO.
 - Production deployment: NOT PERMITTED.
 - Live homelab containers: UNCHANGED.
+
+
+## Batch 72 — Journal integrity checkpoint
+
+Batch 72: isolated upgrade journal inventory prechecks reject unexpected or missing entries before manifest interpretation.
