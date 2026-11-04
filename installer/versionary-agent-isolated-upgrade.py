@@ -232,7 +232,13 @@ def read_manifest(root):
     ):
         raise ValueError("Unsafe upgrade manifest")
 
-    manifest = json.loads(manifest_path.read_bytes())
+    try:
+        manifest = json.loads(manifest_path.read_bytes())
+    except (ValueError, UnicodeError) as exc:
+        raise ValueError("Invalid upgrade manifest JSON") from exc
+
+    if not isinstance(manifest, dict):
+        raise ValueError("Upgrade manifest must be an object")
 
     if (
         manifest.get("version") != 1
