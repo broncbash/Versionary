@@ -304,3 +304,57 @@ Remaining:
 - Controlled-beta authorization
 
 Production deployment remains disabled.
+
+
+## 2026-11-04 — Disposable VM acceptance and portability checkpoint
+
+Completed in the current disposable VM acceptance phase:
+
+- Installed Versionary server on a disposable Arch VM.
+- Verified CA-trusted HTTPS from Arch and Debian agent VMs.
+- Completed both agent preflight checks.
+- Completed both disposable-root agent installations.
+- Added missing-cryptography guidance for Debian/Arch.
+- Fixed atomic release creation under umask 0002.
+- Passed 1,446 local regression tests with one skipped.
+
+Next milestone: end-to-end live agent acceptance in disposable VMs.
+
+Required acceptance criteria:
+- Explicitly gated server enrollment and reporting.
+- Secure agent installation with protected private state.
+- Administrator-controlled enrollment and approval.
+- Authenticated heartbeat and update inventory submission.
+- Verified visibility in the server dashboard.
+- Safe restart, reinstall, and rollback behavior.
+- No unattended package upgrades or reboots.
+- No impact on live homelab systems.
+
+The existing disposable-root agent installer does not activate
+services or enroll agents. A separate, reviewed, explicitly
+authorized real-system VM workflow is required.
+
+Before any distribution or GitHub integration, rebuild the kit
+with current local fixes and rerun acceptance checks.
+
+Production deployment remains prohibited without explicit approval.
+
+
+## Completed Milestone — Multi-Distribution Controlled Beta
+
+Completed 2026-11-04:
+- Real HTTPS beta server installation.
+- Real Arch and Debian 13 agent installations.
+- Administrator approval and agent enrollment.
+- Authenticated heartbeats and package reporting.
+- Scheduled daily reporting.
+- Authenticated two-agent dashboard verification.
+
+Next:
+1. Review and integrate staged installer hardening.
+2. Verify upgrade, rollback, and recovery behavior.
+3. Review TLS, credentials, and administrator security controls.
+4. Complete release documentation and packaging.
+5. Obtain explicit approval before production deployment.
+
+Production deployment remains blocked.

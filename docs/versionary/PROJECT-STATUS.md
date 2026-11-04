@@ -281,3 +281,65 @@ The next deployment gate is an explicitly approved disposable
 VM server installation.
 
 See INSTALLATION-GUIDE.md.
+
+
+## 2026-11-04 — Disposable VM acceptance and portability checkpoint
+
+The controlled-beta disposable VM lab consists of:
+
+- Arch Server: 192.168.122.249
+- Arch Agent: 192.168.122.81
+- Debian 13 Agent: 192.168.122.34
+
+The Arch Server is installed and running over CA-verified HTTPS.
+The server health endpoint and dashboard HTTP response were
+verified. Both agent VMs reached the HTTPS health endpoint.
+
+Arch and Debian agent disposable-root installations succeeded.
+The Debian installation required python3-cryptography and revealed
+a default-umask portability issue. Both issues have local fixes
+and regression coverage.
+
+Local changes:
+- installer/atomic-release.py
+- installer/install-versionary-agent
+- tests/test_versionary_release_umask.py
+- tests/test_versionary_crypto_dependency.py
+
+Regression checkpoint:
+- 2026-11-04, Batch 43D
+- 1,446 tests executed
+- 1 skipped
+- 0 failures/errors
+- git diff --check clean
+
+The fixes are not yet committed or pushed. Existing untracked
+local files and backups must be preserved.
+
+The disposable server's enrollment, reporting, and distribution
+gates remain disabled. Agent enrollment, approval, heartbeat,
+reporting, and systemd activation are not yet completed in
+this lab.
+
+No live homelab containers were modified. Production deployment
+remains disabled and unauthorized.
+
+
+## Controlled Beta Milestone — 2026-11-04
+
+Status: PASSED — three disposable Linux VMs.
+
+- Arch Linux beta server: 192.168.122.249
+- Arch Linux agent: 192.168.122.81
+- Debian 13 agent: 192.168.122.34
+- HTTPS beta server and authenticated dashboard operational.
+- Both agents registered, approved, and enrolled successfully.
+- Both agents completed authenticated heartbeats.
+- Both agents submitted successful package reports.
+- Both agents appeared online in the authenticated dashboard.
+- Both reporting timers enabled for 06:00 daily.
+- Automatic package installation remains disabled.
+- Local regression: 1,534 tests passed, one skipped.
+- Production approval: NO.
+- Production deployment: NOT PERMITTED.
+- Live homelab containers: UNCHANGED.

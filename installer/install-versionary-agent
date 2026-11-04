@@ -2,6 +2,7 @@
 """Friendly Versionary agent installation entry point."""
 
 import argparse
+import importlib.util
 import subprocess
 import sys
 from pathlib import Path
@@ -9,6 +10,30 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 BACKEND = HERE / "install-agent-offline.py"
+
+
+def require_cryptography():
+    """Report the missing CA-validation dependency before installation."""
+    if importlib.util.find_spec("cryptography") is not None:
+        return True
+
+    print(
+        "[FAIL] Missing Python dependency: cryptography",
+        file=sys.stderr,
+    )
+    print(
+        "[NEXT] Debian/Ubuntu: sudo apt install python3-cryptography",
+        file=sys.stderr,
+    )
+    print(
+        "[NEXT] Arch Linux: sudo pacman -S python-cryptography",
+        file=sys.stderr,
+    )
+    print(
+        "[NEXT] Install for the Python interpreter running this installer.",
+        file=sys.stderr,
+    )
+    return False
 
 
 def ask(label, default=None):
@@ -119,8 +144,11 @@ def main():
     print("CA certificate:", ca_cert)
     print("Production installation: DISABLED")
 
+    if args.dry_run or args.execute_disposable:
+        if not require_cryptography():
+            return 1
+
     if args.dry_run:
-        import importlib.util
 
         def load_helper(filename, name):
             spec = importlib.util.spec_from_file_location(

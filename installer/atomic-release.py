@@ -171,7 +171,11 @@ def stage_release(app, modules):
     if releases.is_symlink():
         raise RuntimeError("Symlinked releases directory")
 
-    releases.mkdir(exist_ok=True)
+    # Create the release directory with safe permissions regardless
+    # of the invoking user's umask. Never relax an existing directory.
+    if not releases.exists() and not releases.is_symlink():
+        releases.mkdir(mode=0o700)
+
     require_safe_path(releases)
 
     if target.is_symlink():

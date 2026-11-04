@@ -131,3 +131,70 @@ not a comprehensive inspection of nested archive contents.
 7. Explicit controlled-beta deployment authorization
 
 Passing local tests does not constitute production approval.
+
+
+## 2026-11-04 — Disposable VM acceptance and portability checkpoint
+
+The unified installation kit was exercised in three disposable NAT VMs:
+Arch Server (192.168.122.249), Arch Agent (192.168.122.81),
+and Debian 13 Agent (192.168.122.34).
+
+The Arch Server installation succeeded with CA-verified HTTPS on
+port 8766. Both agent VMs successfully verified the HTTPS health
+endpoint using the server's public CA certificate.
+
+Both agents passed the installation preflight and completed
+disposable-root installation. This does not mean the agents have
+been enrolled, activated, or configured to report automatically.
+
+On Debian 13, the installer initially encountered a missing Python
+cryptography dependency. Install it with:
+
+    sudo apt install python3-cryptography
+
+On Arch Linux, the equivalent package is:
+
+    sudo pacman -S python-cryptography
+
+Use the package appropriate to the Python interpreter running the
+installer. The agent launcher now provides actionable dependency
+guidance for dry-run and disposable execution modes.
+
+Debian's default umask of 0002 also exposed a release-directory
+permission issue. The atomic release installer now creates new
+release directories with mode 0700, independent of the caller's
+umask, and continues to reject unsafe existing directories.
+
+These fixes passed the complete local regression suite:
+1,446 tests executed, one skipped, zero failures or errors.
+
+The fixes are currently local source changes. The previously built
+unified installation kit does not automatically include them.
+Rebuild and revalidate the kit before distributing an updated
+installer.
+
+Production installation remains unauthorized. Live agent
+registration, enrollment, service activation, and reporting have
+not yet been accepted in this three-VM lab.
+
+
+## Verified Beta Installation — 2026-11-04
+
+A three-VM disposable environment successfully validated the
+Versionary HTTPS server and agent installation workflow.
+
+Validated operating systems:
+- Arch Linux: beta server and agent.
+- Debian 13: agent.
+
+Validated agent lifecycle:
+registration, administrator approval, enrollment, heartbeat,
+package reporting, and scheduled systemd reporting.
+
+Both agents were visible in the authenticated dashboard.
+Daily reporting timers were enabled for 06:00 local time.
+Automatic patch installation was not enabled.
+
+This is controlled-beta evidence, not production certification.
+Do not reuse disposable beta credentials or private CA keys
+for production deployments.

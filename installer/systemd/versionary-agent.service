@@ -8,7 +8,7 @@ Type=oneshot
 User=root
 Group=root
 WorkingDirectory=/opt/versionary-agent
-ExecStart=/usr/bin/python3 -m agent report
+ExecStart=/usr/bin/python3 /opt/versionary-agent/versionary_agent_cli.py --system report
 
 NoNewPrivileges=yes
 PrivateTmp=yes

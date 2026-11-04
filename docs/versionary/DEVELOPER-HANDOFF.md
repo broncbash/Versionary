@@ -414,3 +414,79 @@ Constraints:
 - Maintain documentation and coordinate GitHub integration
 
 Next: Complete regression checkpoint and prepare Git review.
+
+
+## 2026-11-04 — Disposable VM acceptance and portability checkpoint
+
+Current desktop checkout:
+~/Projects/arby-patch-command
+
+Branch: feature/versionary-agent-rename
+Latest confirmed pushed commit before this checkpoint: 47556cf
+Local changes are not yet committed or pushed.
+
+Use .venv/bin/python for all regression runs. Running the suite
+with /usr/bin/python3 causes import failures because system Python
+lacks FastAPI and other project dependencies.
+
+Verified full-suite command:
+
+    .venv/bin/python -m unittest discover -s tests -p 'test_*.py'
+
+Batch 43D result: 1,446 tests, one skipped, zero failures/errors.
+
+Current local fixes:
+- atomic-release.py creates new release directories with secure
+  permissions even under Debian's umask 0002.
+- install-versionary-agent reports missing cryptography with
+  distro-specific package guidance.
+- Each fix has three passing regression tests.
+
+Disposable VM lab:
+- Arch Server: 192.168.122.249
+- Arch Agent: 192.168.122.81
+- Debian 13 Agent: 192.168.122.34
+
+Server HTTPS is operational. Agent preflight and disposable-root
+installations succeeded. Live agent enrollment and service
+activation have not been performed in this lab.
+
+Next engineering work:
+1. Review existing real-system disposable-VM agent deployment
+   tooling before implementing anything new.
+2. Define explicit safety gates and reversible installation.
+3. Validate enrollment, approval, heartbeat, and reporting.
+4. Rebuild the unified kit to incorporate the local fixes.
+5. Run targeted and full regression suites.
+6. Update documentation and prepare a reviewed GitHub change set.
+
+Preserve all untracked files and backups. Do not modify live
+homelab containers without approval. Do not commit, push, merge,
+or use hosted CI without explicit authorization.
+
+
+## Verified Three-VM Beta — 2026-11-04
+
+The disposable beta environment passed real-system installation,
+enrollment, approval, heartbeat, reporting, and dashboard verification.
+
+Server: Arch Linux, 192.168.122.249:8766.
+Agents: Arch Linux 192.168.122.81 and Debian 13 192.168.122.34.
+
+Agent IDs:
+- Arch: 541e1a5f-f742-40da-9908-52c655b4ddf2
+- Debian: 6b6ba671-56fb-40ab-a9d1-465dbb61b8fb
+
+Both agents are approved, online, and reporting successfully.
+Both systemd reporting timers are enabled for 06:00 daily.
+
+The server and agents are disposable beta systems, not production.
+Do not deploy to live homelab containers without explicit approval.
+Do not enable automatic package installation.
+
+Local development branch: feature/versionary-agent-rename.
+Last synchronized commit before documentation integration: 47556cf.
+Regression: 1,534 tests passed, one skipped.
+
+Preserve all local untracked artifacts and backup files.
+No hosted CI. No commits, pushes, or merges without user approval.
