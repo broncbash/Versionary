@@ -85,6 +85,15 @@ def prepare(distribution, server, ca_cert):
 def install_payloads_isolated(root, payloads, fail_after=None):
     root = validate_root(root)
 
+    # Installation and upgrade share one recovery boundary.
+    # Any upgrade transaction, even a malformed one, requires
+    # explicit review before installation can proceed.
+    upgrade_tx = root / ".versionary-upgrade-transaction"
+    if upgrade_tx.exists() or upgrade_tx.is_symlink():
+        raise RuntimeError(
+            "Pending upgrade transaction requires review"
+        )
+
     if not isinstance(payloads, dict) or set(payloads) != set(MODES):
         raise ValueError("Unexpected installation payload inventory")
 

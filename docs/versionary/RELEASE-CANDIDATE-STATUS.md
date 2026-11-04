@@ -6,12 +6,17 @@ Updated: 2026-11-04
 
 feature/versionary-agent-rename
 
-Last confirmed pushed baseline:
+Last confirmed pushed milestone:
 
-20c9606 — feat: harden Versionary agent installation
-and document multi-VM beta
+b580cc4 — feat: integrate isolated installer upgrade
+and release readiness
 
-Subsequent local development is pending review and commit.
+GitHub draft pull request:
+https://github.com/broncbash/arby-patch-command/pull/2
+
+The draft targets main and is not approved for merge.
+The cumulative branch contains 296 commits beyond main
+as of the initial pull request comparison.
 
 ## Verified beta environment
 
