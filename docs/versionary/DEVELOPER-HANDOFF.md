@@ -1,5 +1,43 @@
 # Versionary — Developer Handoff
 
+## Current developer handoff — 2026-11-04
+
+This is the authoritative current checkpoint. Earlier sections
+document historical implementation steps and are not current
+instructions when they conflict with this section.
+
+Repository: `broncbash/arby-patch-command`
+Branch: `feature/versionary-agent-rename`
+Last confirmed pushed commit before Batch 70: `f290fb3`
+Draft PR: https://github.com/broncbash/arby-patch-command/pull/2
+
+Latest local validation: 1,577 tests, one skipped.
+
+Batch 70 local pending work:
+- `tests/test_versionary_upgrade_sync_failure_70.py`
+- `docs/versionary/RELEASE-CANDIDATE-STATUS.md`
+- Current documentation reconciliation in core documents.
+
+Next: verify full regression, review exact staged inventory,
+commit and push only intended files, then continue isolated
+upgrade recovery hardening.
+
+Assistant responsibilities:
+- Manage GitHub branch and draft PR integration.
+- Maintain documentation alongside significant code changes.
+- Verify documentation accuracy before each milestone push.
+- Provide complete paste-ready terminal batches.
+- Avoid hosted CI and unnecessary user GitHub operations.
+- Preserve all untracked local artifacts and secrets.
+- Never merge, publish a release, or deploy to live systems
+  without explicit authorization.
+
+Safety: real-system agent installation remains disabled;
+isolated upgrade is not guaranteed crash-safe or race-safe.
+
+---
+
+
 ## Resume point
 
 Date: 2026-10-31

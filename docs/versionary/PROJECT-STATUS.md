@@ -1,5 +1,37 @@
 # Versionary — Project Status
 
+## Current engineering checkpoint — 2026-11-04
+
+The historical milestones below are retained for traceability.
+This section supersedes earlier descriptions of the current
+implementation, test totals, and next engineering priorities.
+
+- Branch: `feature/versionary-agent-rename`.
+- Last confirmed pushed commit before Batch 70: `f290fb3`.
+- Draft GitHub PR: https://github.com/broncbash/arby-patch-command/pull/2
+- Latest local regression: 1,577 tests, one skipped, zero failures.
+- Three disposable beta VMs demonstrated HTTPS server operation,
+  approved Arch and Debian agents, reporting, and daily timers.
+- Unified installation kit and isolated-root agent installation
+  and upgrade prototypes exist.
+- Isolated upgrade recovery includes strict manifest validation,
+  installation/upgrade recovery exclusion, snapshot verification,
+  journal parent synchronization, and fault-injection tests.
+- Real-system agent installation remains disabled.
+- Automatic patch installation remains disabled.
+- Production deployment and release publication are not approved.
+
+Remaining: crash consistency, transaction finalization,
+concurrent filesystem mutation safety, release provenance,
+administrative security, and controlled installation acceptance.
+
+Local beta state, certificates, credentials, databases,
+backups, and untracked files must be preserved.
+No hosted CI or live homelab changes are authorized.
+
+---
+
+
 Updated: 2026-11-01
 Repository: broncbash/arby-patch-command
 Development branch: feature/versionary-agent-rename

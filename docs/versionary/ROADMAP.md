@@ -1,5 +1,33 @@
 # Versionary — Development Roadmap
 
+## Current roadmap checkpoint — 2026-11-04
+
+This checkpoint supersedes earlier next-batch statements.
+Historical phase and mission records remain below.
+
+**Implemented and verified in development:**
+- Agent enrollment, approval, heartbeat, and inventory reporting.
+- Disposable HTTPS multi-distribution beta.
+- Unified installation kit and isolated-root installer prototype.
+- Isolated upgrade preparation and explicit original-file recovery.
+- Recovery-boundary, manifest, and durability regression tests.
+- Full local regression: 1,577 tests, one skipped.
+
+**Next engineering gates:**
+1. Strengthen transaction durability and recovery semantics.
+2. Review concurrent filesystem changes and descriptor safety.
+3. Define and test explicit transaction finalization.
+4. Reconcile release authenticity and provenance requirements.
+5. Validate installation and upgrade on approved disposable VMs.
+6. Review administrator sessions, credentials, and certificate UX.
+7. Complete documentation and release acceptance.
+
+**Not authorized:** production installation, unattended patching,
+merging to main, or public release publication.
+
+---
+
+
 ## Product principles
 
 1. Observer-only by default.

@@ -1,5 +1,35 @@
 # Versionary — Agent User Guide
 
+## Current user-facing status — 2026-11-04
+
+This section supersedes older statements about what has
+or has not been packaged or tested. Historical beta
+instructions below are retained for reference.
+
+Versionary is an observer-focused Linux patch visibility
+product in controlled beta development.
+
+A unified installation kit exists, and disposable Arch and
+Debian beta agents have demonstrated HTTPS reporting and
+daily timers. These are controlled development milestones.
+
+The isolated-root agent installer and upgrade engine are
+prototypes. They are not approved real-system installers.
+Upgrade recovery is not yet guaranteed safe against power
+loss or concurrent filesystem modification.
+
+Do not interpret historical source-checkout instructions as
+a supported production installation procedure.
+
+Automatic patch installation, unattended upgrades, and
+reboots are not part of the current approved behavior.
+
+Production installation and public release remain blocked
+pending additional security and acceptance work.
+
+---
+
+
 Status: Development preview, not a production installation guide.
 
 ## What Versionary does

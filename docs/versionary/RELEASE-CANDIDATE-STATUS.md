@@ -6,17 +6,26 @@ Updated: 2026-11-04
 
 feature/versionary-agent-rename
 
-Last confirmed pushed milestone:
+Last confirmed pushed milestone before this batch:
 
-b580cc4 — feat: integrate isolated installer upgrade
-and release readiness
+f290fb3 — fix: persist isolated upgrade journal
+before replacement
+
+Recent hardening milestones:
+
+- 90f36d4 — coordinate installation and upgrade recovery
+- 777b9ad — validate upgrade snapshot identities
+- 9f65e89 — reject malformed upgrade manifests
+- f290fb3 — synchronize journal parent before replacement
 
 GitHub draft pull request:
 https://github.com/broncbash/arby-patch-command/pull/2
 
 The draft targets main and is not approved for merge.
-The cumulative branch contains 296 commits beyond main
-as of the initial pull request comparison.
+The cumulative branch contained 299 commits beyond main,
+zero behind, at the comparison following 9f65e89.
+This is historical comparison data, not a live mergeability
+or approval determination.
 
 ## Verified beta environment
 
@@ -48,6 +57,10 @@ Completed local development:
 - Original-payload recovery
 - Private agent-state preservation tests
 - Fresh-process recovery tests
+- Shared installation/upgrade recovery boundary
+- Strict snapshot identity and manifest JSON validation
+- Journal parent-directory synchronization before replacement
+- Simulated synchronization-failure recovery tests
 
 The isolated upgrade prototype does not establish
 power-loss-safe recovery or atomic multi-file upgrades.
