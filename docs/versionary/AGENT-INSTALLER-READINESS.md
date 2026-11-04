@@ -80,3 +80,42 @@ Beta deployment authorized: NO
 - Do not commit, push, or merge without approval.
 - Review source, tests, and documentation together.
 - Maintain comprehensive handoff documentation.
+
+## Batch 27E — Early CA Certificate Validation
+
+The offline installer now validates X.509 CA certificate
+content before executing installation helpers.
+
+The coordinator reuses the existing CA validator,
+including certificate parsing, CA authorization,
+validity-period checks, and private-key rejection.
+
+Verified:
+- Full regression: 1,434 tests, one skipped, zero failures.
+- Malformed CA rejected before installation helpers execute.
+- Private-key input rejected before installation helpers execute.
+- Disposable installation root remains unchanged in these tests.
+
+Remaining limitations:
+- Complete destination preflight is not implemented.
+- Installation is not transactional.
+- Distribution integrity does not establish publisher authenticity.
+- Production deployment is not authorized.
+
+Production approved: NO
+Hosted CI used: NO
+
+
+## Portable agent installation — November 4, 2026
+
+Batch 30C completed installation from an extracted portable
+agent kit outside the development repository.
+
+Batch 32 completed installation from the unified kit.
+
+Installed components included 13 agent modules, configuration,
+public CA certificate, and systemd service/timer files.
+
+No enrollment, registration, or service activation occurred.
+
+See INSTALLATION-GUIDE.md.

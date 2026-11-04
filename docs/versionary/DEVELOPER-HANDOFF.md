@@ -382,3 +382,35 @@ Outstanding:
 Production deployment remains unauthorized.
 
 See AGENT-INSTALLER-READINESS.md for details.
+
+
+## Unified kit handoff — November 4, 2026
+
+Repository: broncbash/arby-patch-command
+Branch: feature/versionary-agent-rename
+Last confirmed commit: e0a825a
+
+Relevant files:
+- installer/build-installation-kit.py
+- installer/build-unified-installation-kit.py
+- installer/install-versionary-server
+- installer/install-versionary-agent
+- installer/install-agent-offline.py
+- docs/versionary/INSTALLATION-GUIDE.md
+
+Batch 32 acceptance passed:
+- Server release verified: 137 files
+- Server installer dry run passed
+- Agent installed into disposable filesystem
+- No enrollment or service activation
+
+Constraints:
+- Preserve all existing untracked data and local changes
+- No CT 102 or CT 104 modifications without approval
+- No production deployment without approval
+- No Git staging, commits, pushes, or merges without approval
+- No hosted CI
+- Use local regression tests and paste-ready terminal batches
+- Maintain documentation and coordinate GitHub integration
+
+Next: Complete regression checkpoint and prepare Git review.

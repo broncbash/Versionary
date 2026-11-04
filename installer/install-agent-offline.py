@@ -82,6 +82,14 @@ def install(root, bundle, server, ca_cert):
     if ca_cert.stat().st_size > 1024 * 1024:
         raise ValueError("CA file exceeds size limit")
 
+    # Validate X.509 CA semantics before any installation helper runs.
+    # Reuse the CA installer's existing certificate trust checks.
+    ca_installer = helper(
+        "install-ca.py",
+        "versionary_offline_ca_preflight",
+    )
+    ca_installer.validate_ca(ca_cert.read_bytes())
+
     print("[OK] Distribution and inputs validated", flush=True)
 
     with tempfile.TemporaryDirectory() as temporary:

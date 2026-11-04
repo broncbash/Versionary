@@ -232,3 +232,17 @@ Outstanding:
 Production deployment remains unauthorized.
 
 See AGENT-INSTALLER-READINESS.md for details.
+
+
+## Installation kit — controlled-beta preview
+
+Versionary now has a unified installation kit containing
+both server and agent installers.
+
+See INSTALLATION-GUIDE.md for instructions.
+
+Server installation has passed verified dry-run acceptance.
+Agent installation has passed disposable-filesystem acceptance.
+
+Real server installation, enrollment, and production deployment
+remain separate approval-gated milestones.

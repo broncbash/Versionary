@@ -286,3 +286,21 @@ Outstanding:
 Production deployment remains unauthorized.
 
 See AGENT-INSTALLER-READINESS.md for details.
+
+
+## Unified installation milestone
+
+Completed:
+- Portable agent installation acceptance
+- Verified server release packaging
+- Server installer dry-run acceptance
+- Unified server-and-agent installation kit
+
+Remaining:
+- Automated unified-kit integration acceptance
+- Approved disposable-VM server installation
+- Server-to-agent enrollment and connectivity
+- Production installer and certificate workflow
+- Controlled-beta authorization
+
+Production deployment remains disabled.

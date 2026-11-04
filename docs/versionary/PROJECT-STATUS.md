@@ -262,3 +262,22 @@ Outstanding:
 Production deployment remains unauthorized.
 
 See AGENT-INSTALLER-READINESS.md for details.
+
+
+## Batch 32 — Unified installation kit
+
+The unified Versionary installation kit passed local acceptance
+on November 4, 2026. It contains both installer entry points,
+the verified 137-file server release, the agent distribution,
+and the required installer resources.
+
+The server passed release verification and dry-run acceptance.
+The agent completed installation into a disposable filesystem.
+
+Production deployment, enrollment, and service activation
+were not performed.
+
+The next deployment gate is an explicitly approved disposable
+VM server installation.
+
+See INSTALLATION-GUIDE.md.
