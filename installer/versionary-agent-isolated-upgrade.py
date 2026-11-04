@@ -205,6 +205,18 @@ def prepare(root, old, new):
         finally:
             os.close(fd)
 
+        # Persist the transaction directory entry in its parent
+        # before allowing any installed payload to be replaced.
+        # If this fails, retain the journal and abort the upgrade.
+        fd = os.open(
+            root,
+            os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW,
+        )
+        try:
+            os.fsync(fd)
+        finally:
+            os.close(fd)
+
         return tx
 
     except BaseException:
