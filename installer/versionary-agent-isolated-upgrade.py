@@ -455,3 +455,48 @@ def review_complete(root):
         ),
         "files": states,
     }
+
+
+def finalization_assessment(root):
+    """Read-only assessment; never remove or authorize journal cleanup.
+
+    This is an advisory result, not an authorization to delete
+    transaction evidence or resume installation.
+    """
+    root = validate_root(root)
+
+    if inspect_pending(root)["status"] == "clear":
+        return {
+            "status": "no_transaction",
+            "eligible_for_review": False,
+            "cleanup_authorized": False,
+        }
+
+    manifest = read_manifest(root)
+    states = classify(root, manifest)
+
+    tx = transaction_path(root)
+    expected = {MANIFEST_NAME}
+
+    for entry in manifest["files"].values():
+        expected.add(entry["old"])
+        expected.add(entry["new"])
+
+    actual = {entry.name for entry in tx.iterdir()}
+    unexpected = sorted(actual - expected)
+
+    restored = all(
+        state == "old" for state in states.values()
+    )
+
+    return {
+        "status": (
+            "review_candidate"
+            if restored and not unexpected
+            else "recovery_or_investigation_required"
+        ),
+        "eligible_for_review": restored and not unexpected,
+        "cleanup_authorized": False,
+        "unexpected_entries": unexpected,
+        "files": states,
+    }

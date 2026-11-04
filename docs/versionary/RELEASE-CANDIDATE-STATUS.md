@@ -99,3 +99,25 @@ No live homelab modifications are authorized.
 
 Preserve local beta data, certificates, credentials,
 databases, backups, and other untracked artifacts.
+
+
+## Batch 71 — Read-only finalization assessment
+
+Development checkpoint: 2026-11-04.
+
+Added a conservative advisory assessment of isolated upgrade
+recovery state.
+
+The assessment verifies original payload restoration and
+identifies unexpected journal entries.
+
+A review candidate is NOT cleanup authorization.
+
+The transaction journal remains present and blocks
+subsequent installation or upgrade attempts.
+
+No journal deletion, transaction finalization, real-system
+installation, or production deployment is enabled.
+
+Further work is required for durable cleanup, concurrent
+filesystem mutation safety, and crash recovery.
