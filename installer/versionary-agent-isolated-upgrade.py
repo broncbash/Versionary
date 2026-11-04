@@ -241,10 +241,33 @@ def read_manifest(root):
     ):
         raise ValueError("Invalid upgrade manifest")
 
-    for name, entry in manifest["files"].items():
+    # The manifest must reference exactly the snapshot names
+    # produced by prepare(). Never accept aliases, traversal,
+    # duplicate references, or reordered snapshot identities.
+    expected_snapshots = set()
+
+    for index, name in enumerate(sorted(coordinator.MODES)):
+        entry = manifest["files"][name]
+
         if not isinstance(entry, dict):
             raise ValueError("Invalid manifest entry")
 
+        for kind in ("old", "new"):
+            filename = f"{kind}-{index:03d}"
+
+            if entry.get(kind) != filename:
+                raise ValueError(
+                    "Unexpected snapshot filename"
+                )
+
+            if filename in expected_snapshots:
+                raise ValueError(
+                    "Duplicate snapshot reference"
+                )
+
+            expected_snapshots.add(filename)
+
+    for name, entry in manifest["files"].items():
         for kind in ("old", "new"):
             filename = entry.get(kind)
             expected = entry.get(kind + "_sha256")
