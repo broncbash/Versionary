@@ -8,7 +8,7 @@ import stat
 import sys
 from pathlib import Path
 
-from agent.config import validate_server
+from agent.config import validate_server, load_config
 from agent.credentials import load_credential, prepare_directory, validate_directory
 from agent.enrollment_client import register_v2, complete_v2
 from agent.enrollment_http import post_json
@@ -18,6 +18,8 @@ from agent.reporting import send_report
 from agent.versionary_agent import detect_platform, scan
 
 DEFAULT_STATE = Path.home() / ".local" / "state" / "versionary-agent"
+SYSTEM_STATE = Path("/var/lib/versionary-agent")
+SYSTEM_CONFIG = Path("/etc/versionary-agent/config.json")
 
 
 def state_paths(root):
@@ -50,6 +52,19 @@ def read_config(paths):
             "CA certificate must be an existing regular file, not a symlink"
         )
     return server, ca
+
+
+def read_system_config(paths):
+    """Read installed configuration without creating or replacing state."""
+    validate_directory(paths["root"])
+
+    config = load_config(SYSTEM_CONFIG)
+    ca = Path(config["ca_cert"])
+
+    if not ca.is_absolute() or ca.is_symlink() or not ca.is_file():
+        raise RuntimeError("Installed CA certificate is missing or unsafe")
+
+    return config["server"], ca
 
 
 def setup(paths, server, ca_cert):
@@ -105,7 +120,17 @@ def validate_identity_file(path):
 
 
 def run(args):
+    # Preserve compatibility with existing callers that construct
+    # argument objects directly without the newer --system flag.
+    system_mode = getattr(args, "system", False)
     paths = state_paths(args.state_dir)
+
+    if system_mode and args.command == "setup":
+        raise RuntimeError(
+            "System configuration is managed by the installer; "
+            "CLI setup is disabled in system mode"
+        )
+
     if args.command == "setup":
         server = args.server
         ca_cert = args.ca_cert
@@ -118,7 +143,11 @@ def run(args):
         print("No agent registered and no background service installed.")
         return 0
 
-    server, ca = read_config(paths)
+    server, ca = (
+        read_system_config(paths)
+        if system_mode
+        else read_config(paths)
+    )
     if args.command == "status":
         if paths["identity"].exists() or paths["identity"].is_symlink():
             validate_identity_file(paths["identity"])
@@ -177,8 +206,16 @@ def run(args):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Versionary agent: manual secure enrollment and reporting")
-    parser.add_argument("--state-dir", default=str(DEFAULT_STATE),
-                        help="Private agent state directory (default: ~/.local/state/versionary-agent)")
+    parser.add_argument(
+        "--state-dir",
+        default=None,
+        help="Private state directory; incompatible with --system",
+    )
+    parser.add_argument(
+        "--system",
+        action="store_true",
+        help="Use installed /etc configuration and /var/lib agent state",
+    )
     sub = parser.add_subparsers(dest="command", required=True)
     setup_parser = sub.add_parser("setup", help="Save HTTPS origin and CA path; never overwrite")
     setup_parser.add_argument("--server")
@@ -187,6 +224,14 @@ def main(argv=None):
     for name in ("status", "register", "enroll", "heartbeat", "report"):
         sub.add_parser(name)
     args = parser.parse_args(argv)
+
+    if args.system:
+        if args.state_dir is not None:
+            parser.error("--system cannot be combined with --state-dir")
+        args.state_dir = str(SYSTEM_STATE)
+    else:
+        args.state_dir = args.state_dir or str(DEFAULT_STATE)
+
     try:
         return run(args)
     except (RuntimeError, OSError, ValueError, json.JSONDecodeError) as exc:

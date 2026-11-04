@@ -228,3 +228,37 @@ PASS — Real HTTPS beta server at 192.168.122.202:8766.
 Installer recovery hardening and two new regression test modules were
 completed locally. The previously reported full regression result was
 1,398 tests, 1 skipped, no failures.
+
+
+## Agent Installer Checkpoint — Batch 26U
+
+The consolidated offline agent installer has passed
+permanent end-to-end regression testing.
+
+Verified:
+- 1,432 regression tests executed successfully (1 skipped).
+- Seven permanent installer integration tests passed.
+- Complete installation into an isolated filesystem.
+- Idempotent reinstallation.
+- Preservation of existing identity and credentials.
+- Rejection of conflicting CLI and CA destinations.
+- Recovery from a simulated interrupted installation.
+- No automatic registration or service activation.
+
+Current implementation:
+- Verified agent distribution archive.
+- Administrative CLI with system-mode support.
+- Offline installation coordinator.
+- Agent modules, CA, configuration, and systemd units.
+
+Outstanding:
+- Complete destination preflight.
+- Publisher authenticity verification.
+- Comprehensive rollback/recovery policy.
+- Stable distribution artifact naming.
+- Clean Arch and Debian installer validation.
+- Controlled beta deployment acceptance.
+
+Production deployment remains unauthorized.
+
+See AGENT-INSTALLER-READINESS.md for details.

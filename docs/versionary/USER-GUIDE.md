@@ -198,3 +198,37 @@ system-level configuration. The portable agent installation experience
 is not yet finalized. Automatic periodic reporting is still pending.
 
 Successful beta operation does not constitute production approval.
+
+
+## Agent Installer Checkpoint — Batch 26U
+
+The consolidated offline agent installer has passed
+permanent end-to-end regression testing.
+
+Verified:
+- 1,432 regression tests executed successfully (1 skipped).
+- Seven permanent installer integration tests passed.
+- Complete installation into an isolated filesystem.
+- Idempotent reinstallation.
+- Preservation of existing identity and credentials.
+- Rejection of conflicting CLI and CA destinations.
+- Recovery from a simulated interrupted installation.
+- No automatic registration or service activation.
+
+Current implementation:
+- Verified agent distribution archive.
+- Administrative CLI with system-mode support.
+- Offline installation coordinator.
+- Agent modules, CA, configuration, and systemd units.
+
+Outstanding:
+- Complete destination preflight.
+- Publisher authenticity verification.
+- Comprehensive rollback/recovery policy.
+- Stable distribution artifact naming.
+- Clean Arch and Debian installer validation.
+- Controlled beta deployment acceptance.
+
+Production deployment remains unauthorized.
+
+See AGENT-INSTALLER-READINESS.md for details.
