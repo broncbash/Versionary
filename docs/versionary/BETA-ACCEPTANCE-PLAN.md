@@ -178,3 +178,45 @@ Next acceptance milestone:
 - Review the actual fresh-install implementation boundary.
 - Prepare a separately authorized disposable-VM installation trial.
 - Do not claim Gate 2 accepted until that trial succeeds.
+
+<!-- VERSIONARY_BATCH_76_FRESH_EXECUTION -->
+## Batch 76 — Controlled fresh-install execution
+
+The initial controlled-beta installation scope remains
+fresh installations only. In-place upgrades are deferred.
+
+The new fresh-install coordinator connects the Batch 75
+readiness planner to the existing isolated-root transaction
+writer.
+
+Default mode performs a read-only installation preview.
+
+Execution requires both:
+- `--execute-isolated`
+- `--authorize-isolated I_AUTHORIZE_ISOLATED_VERSIONARY_BETA_INSTALL`
+
+The isolated root must be an absolute, safe directory other
+than `/`. The existing installer rejects live-system roots.
+
+Before execution, the coordinator repeats the fresh-install
+readiness checks. Existing payloads and pending installation
+or upgrade recovery state block installation.
+
+Successful isolated execution installs the five existing
+coordinator payloads. It does not enable services, enroll
+agents, install patches, or authorize production deployment.
+
+The existing transaction writer handles ordinary exceptions
+with rollback and preserves a journal when recovery requires
+review. It does not guarantee crash-safe or power-loss-safe
+atomic installation.
+
+This is an internal controlled-beta implementation milestone,
+not an accepted production or disposable-VM deployment.
+
+Remaining Gate 2 work:
+- Validate the actual release artifact and full agent payload.
+- Complete the separately gated real-system fresh-install path.
+- Perform an explicitly authorized disposable-VM acceptance test.
+- Verify Arch and Debian 13 agent behavior after installation.
+- Document manual recovery and clean-install limitations.
