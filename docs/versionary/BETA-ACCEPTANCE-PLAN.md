@@ -150,3 +150,31 @@ end-to-end beta acceptance.
 Do not introduce additional release blockers
 without documenting the concrete risk and why
 it cannot reasonably be deferred.
+
+<!-- VERSIONARY_BATCH_75_FRESH_INSTALL_SCOPE -->
+## Batch 75 — Initial controlled-beta installation scope
+
+Decision: the first controlled beta supports fresh installations only.
+
+In-place upgrades are deferred. No automatic patch installation,
+automatic reboot, or production deployment is authorized.
+
+The beta fresh-install planner provides read-only readiness
+checks for isolated installation roots. It reuses existing
+payload inventory, destination-conflict, and recovery checks.
+
+A passing readiness plan does not install files, authorize
+installation into `/`, activate systemd services, or enroll agents.
+
+Existing payload files, including matching files, block a
+fresh-install plan. Existing private agent state must be preserved.
+
+Pending installation or upgrade recovery state blocks planning.
+
+The real-system agent installation coordinator remains disabled.
+
+Next acceptance milestone:
+- Verify the planner and permanent regression tests.
+- Review the actual fresh-install implementation boundary.
+- Prepare a separately authorized disposable-VM installation trial.
+- Do not claim Gate 2 accepted until that trial succeeds.
