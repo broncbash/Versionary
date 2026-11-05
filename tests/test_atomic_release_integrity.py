@@ -22,7 +22,7 @@ class TestAtomicReleaseIntegrity(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
 
-        self.app = Path(self.temp.name) / "arby-patch-agent"
+        self.app = Path(self.temp.name) / "versionary-agent"
         self.app.mkdir()
 
         self.modules = {
@@ -78,6 +78,43 @@ class TestAtomicReleaseIntegrity(unittest.TestCase):
             atomic.activate_release(
                 self.app, self.identifier
             )
+
+    def test_safe_bytecode_cache_allows_reinstall(self):
+        cache = self.agent / "__pycache__"
+        cache.mkdir()
+        (cache / "identity.cpython-314.pyc").write_bytes(b"bytecode")
+        self.assertEqual(atomic.stage_release(self.app, self.modules),
+                         self.identifier)
+        atomic.activate_release(self.app, self.identifier)
+        self.assertTrue((self.app / "agent").is_symlink())
+
+    def test_symlinked_bytecode_cache_rejected(self):
+        (self.agent / "__pycache__").symlink_to(self.app)
+        with self.assertRaises(RuntimeError):
+            atomic.stage_release(self.app, self.modules)
+        with self.assertRaises(RuntimeError):
+            atomic.activate_release(self.app, self.identifier)
+
+    def test_unexpected_cache_file_rejected(self):
+        cache = self.agent / "__pycache__"
+        cache.mkdir()
+        (cache / "unexpected.txt").write_text("tamper")
+        with self.assertRaises(RuntimeError):
+            atomic.stage_release(self.app, self.modules)
+        with self.assertRaises(RuntimeError):
+            atomic.activate_release(self.app, self.identifier)
+
+    def test_hardlinked_bytecode_rejected(self):
+        import os
+        cache = self.agent / "__pycache__"
+        cache.mkdir()
+        bytecode = cache / "identity.cpython-314.pyc"
+        bytecode.write_bytes(b"bytecode")
+        os.link(bytecode, self.app / "hardlink.pyc")
+        with self.assertRaises(RuntimeError):
+            atomic.stage_release(self.app, self.modules)
+        with self.assertRaises(RuntimeError):
+            atomic.activate_release(self.app, self.identifier)
 
     def test_empty_release_blocks_activation(self):
         for module in self.agent.iterdir():

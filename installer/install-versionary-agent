@@ -1,0 +1,221 @@
+#!/usr/bin/env python3
+"""Friendly Versionary agent installation entry point."""
+
+import argparse
+import importlib.util
+import subprocess
+import sys
+from pathlib import Path
+
+
+HERE = Path(__file__).resolve().parent
+BACKEND = HERE / "install-agent-offline.py"
+
+
+def require_cryptography():
+    """Report the missing CA-validation dependency before installation."""
+    if importlib.util.find_spec("cryptography") is not None:
+        return True
+
+    print(
+        "[FAIL] Missing Python dependency: cryptography",
+        file=sys.stderr,
+    )
+    print(
+        "[NEXT] Debian/Ubuntu: sudo apt install python3-cryptography",
+        file=sys.stderr,
+    )
+    print(
+        "[NEXT] Arch Linux: sudo pacman -S python-cryptography",
+        file=sys.stderr,
+    )
+    print(
+        "[NEXT] Install for the Python interpreter running this installer.",
+        file=sys.stderr,
+    )
+    return False
+
+
+def ask(label, default=None):
+    suffix = f" [{default}]" if default is not None else ""
+    value = input(f"{label}{suffix}: ").strip()
+    return value or default
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Guided Versionary agent installation"
+    )
+    parser.add_argument("--distribution", type=Path)
+    parser.add_argument("--server")
+    parser.add_argument("--ca-cert", type=Path)
+    parser.add_argument("--root", type=Path)
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Verify distribution and CA without installing",
+    )
+    parser.add_argument(
+        "--execute-disposable",
+        action="store_true",
+        help="Install only into an explicitly selected disposable root",
+    )
+    parser.add_argument(
+        "--yes",
+        action="store_true",
+        help="Confirm disposable execution without prompting",
+    )
+    args = parser.parse_args()
+
+    if args.dry_run and args.execute_disposable:
+        parser.error(
+            "--dry-run cannot be combined with --execute-disposable"
+        )
+
+    if args.execute_disposable and not args.yes:
+        parser.error(
+            "--execute-disposable requires --yes"
+        )
+
+    default_bundle = (
+        HERE / "dist/versionary-agent-distribution-26l.tar.gz"
+    )
+    default_ca = (
+        HERE.parent / ".versionary-https-beta/certs/ca.crt"
+    )
+
+    if not sys.stdin.isatty() and (
+        args.server is None
+        or (args.distribution is None and not default_bundle.is_file())
+        or (args.ca_cert is None and not default_ca.is_file())
+    ):
+        parser.error(
+            "Noninteractive use requires --distribution, "
+            "--server and --ca-cert"
+        )
+
+    print("\nVERSIONARY AGENT SETUP")
+    print("======================")
+
+    distribution = args.distribution
+    if distribution is None and default_bundle.is_file():
+        distribution = default_bundle
+        print("[OK] Found agent distribution:", distribution)
+    if distribution is None:
+        distribution = ask("Agent distribution archive")
+
+    server = args.server or ask(
+        "Versionary server URL"
+    )
+
+    ca_cert = args.ca_cert
+    if ca_cert is None and default_ca.is_file():
+        ca_cert = default_ca
+        print("[OK] Found development CA:", ca_cert)
+    if ca_cert is None:
+        ca_cert = ask("Trusted CA certificate path")
+
+    if not distribution or not server or not ca_cert:
+        parser.error(
+            "Distribution, server URL and CA certificate are required"
+        )
+
+    root = args.root
+
+    if args.execute_disposable:
+        if root is None:
+            if not sys.stdin.isatty():
+                parser.error(
+                    "--execute-disposable requires --root"
+                )
+            selected = ask("Disposable installation root")
+            if not selected:
+                parser.error("Disposable root required")
+            root = Path(selected)
+
+        if root.resolve() == Path("/"):
+            parser.error(
+                "Production root is forbidden"
+            )
+
+    print("\nConfiguration summary")
+    print("Distribution:", distribution)
+    print("Server:", server)
+    print("CA certificate:", ca_cert)
+    print("Production installation: DISABLED")
+
+    if args.dry_run or args.execute_disposable:
+        if not require_cryptography():
+            return 1
+
+    if args.dry_run:
+
+        def load_helper(filename, name):
+            spec = importlib.util.spec_from_file_location(
+                name, HERE / filename
+            )
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            return module
+
+        try:
+            cli = load_helper(
+                "install-agent-cli.py", "versionary_preview_cli"
+            )
+            ca_module = load_helper(
+                "install-ca.py", "versionary_preview_ca"
+            )
+            config = load_helper(
+                "../agent/config.py", "versionary_preview_config"
+            )
+            cli.verified_cli(Path(distribution).expanduser())
+            config.validate_server(server)
+            ca_module.validate_ca(
+                Path(ca_cert).expanduser().read_bytes()
+            )
+        except Exception as exc:
+            print("[FAIL] Agent preflight:", exc, file=sys.stderr)
+            return 1
+
+        print("\n[OK] Distribution verified")
+        print("[OK] Server URL validated")
+        print("[OK] CA certificate validated")
+        print("[OK] No installation performed")
+        return 0
+
+    if not args.execute_disposable:
+        print("\n[OK] Agent installation plan prepared")
+        print("[OK] No files installed")
+        print("[NEXT] Use --execute-disposable --yes "
+              "--root PATH for an isolated installation")
+        return 0
+
+    command = [
+        sys.executable,
+        str(BACKEND),
+        "--root", str(root),
+        "--distribution", str(Path(distribution).expanduser()),
+        "--server", server,
+        "--ca-cert", str(Path(ca_cert).expanduser()),
+    ]
+
+    print("\nMode: CONFIRMED DISPOSABLE INSTALLATION",
+          flush=True)
+
+    result = subprocess.run(command, check=False)
+
+    if result.returncode:
+        print("\n[FAIL] Agent installation did not complete")
+        return result.returncode
+
+    print("\n[OK] Agent installation completed")
+    print("[OK] Enrollment and service activation not requested")
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except (EOFError, KeyboardInterrupt):
+        print("\n[CANCELLED] No installation requested")
+        raise SystemExit(130)

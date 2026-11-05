@@ -1,10 +1,10 @@
-"""Tests for the standalone ARBY PATCH AGENT scanner."""
+"""Tests for the standalone VERSIONARY AGENT scanner."""
 
 import subprocess
 import unittest
 from unittest.mock import patch
 
-from agent.arby_patch_agent import (
+from agent.versionary_agent import (
     detect_platform,
     scan,
     scan_arch,
@@ -23,9 +23,9 @@ def command_result(stdout="", stderr="", returncode=0):
 
 class TestPatchAgent(unittest.TestCase):
 
-    @patch("agent.arby_patch_agent.shutil.which",
+    @patch("agent.versionary_agent.shutil.which",
            return_value="/usr/bin/checkupdates")
-    @patch("agent.arby_patch_agent.run_command")
+    @patch("agent.versionary_agent.run_command")
     def test_arch_updates(self, run, _which):
         run.return_value = command_result(
             "linux 6.11 -> 6.12\n"
@@ -38,31 +38,31 @@ class TestPatchAgent(unittest.TestCase):
         self.assertEqual(packages[0]["name"], "linux")
         self.assertEqual(packages[0]["available"], "6.12")
 
-    @patch("agent.arby_patch_agent.shutil.which",
+    @patch("agent.versionary_agent.shutil.which",
            return_value="/usr/bin/checkupdates")
-    @patch("agent.arby_patch_agent.run_command")
+    @patch("agent.versionary_agent.run_command")
     def test_arch_no_updates(self, run, _which):
         run.return_value = command_result(returncode=2)
         self.assertEqual(scan_arch(), [])
 
-    @patch("agent.arby_patch_agent.shutil.which",
+    @patch("agent.versionary_agent.shutil.which",
            return_value=None)
     def test_arch_missing_checkupdates(self, _which):
         with self.assertRaises(RuntimeError):
             scan_arch()
 
-    @patch("agent.arby_patch_agent.shutil.which",
+    @patch("agent.versionary_agent.shutil.which",
            return_value="/usr/bin/checkupdates")
-    @patch("agent.arby_patch_agent.run_command")
+    @patch("agent.versionary_agent.run_command")
     def test_arch_unexpected_output(self, run, _which):
         run.return_value = command_result("invalid output")
 
         with self.assertRaises(RuntimeError):
             scan_arch()
 
-    @patch("agent.arby_patch_agent.shutil.which",
+    @patch("agent.versionary_agent.shutil.which",
            return_value="/usr/bin/apt")
-    @patch("agent.arby_patch_agent.run_command")
+    @patch("agent.versionary_agent.run_command")
     def test_debian_updates(self, run, _which):
         run.return_value = command_result(
             "Listing...\n"
@@ -76,25 +76,25 @@ class TestPatchAgent(unittest.TestCase):
         self.assertEqual(packages[0]["name"], "curl")
         self.assertEqual(packages[0]["repository"], "stable")
 
-    @patch("agent.arby_patch_agent.shutil.which",
+    @patch("agent.versionary_agent.shutil.which",
            return_value="/usr/bin/apt")
-    @patch("agent.arby_patch_agent.run_command")
+    @patch("agent.versionary_agent.run_command")
     def test_debian_no_updates(self, run, _which):
         run.return_value = command_result("Listing...\n")
         self.assertEqual(scan_debian(), [])
 
-    @patch("agent.arby_patch_agent.shutil.which",
+    @patch("agent.versionary_agent.shutil.which",
            return_value="/usr/bin/apt")
-    @patch("agent.arby_patch_agent.run_command")
+    @patch("agent.versionary_agent.run_command")
     def test_debian_unexpected_output(self, run, _which):
         run.return_value = command_result("unexpected")
 
         with self.assertRaises(RuntimeError):
             scan_debian()
 
-    @patch("agent.arby_patch_agent.detect_platform",
+    @patch("agent.versionary_agent.detect_platform",
            return_value="arch")
-    @patch("agent.arby_patch_agent.scan_arch")
+    @patch("agent.versionary_agent.scan_arch")
     def test_successful_scan(self, arch, _platform):
         arch.return_value = [{
             "name": "linux",
@@ -108,9 +108,9 @@ class TestPatchAgent(unittest.TestCase):
         self.assertEqual(len(report["packages"]), 1)
         self.assertIsNone(report["error"])
 
-    @patch("agent.arby_patch_agent.detect_platform",
+    @patch("agent.versionary_agent.detect_platform",
            return_value="arch")
-    @patch("agent.arby_patch_agent.scan_arch")
+    @patch("agent.versionary_agent.scan_arch")
     def test_failed_scan(self, arch, _platform):
         arch.side_effect = RuntimeError("scanner failed")
 

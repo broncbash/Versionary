@@ -1,11 +1,11 @@
-"""ARBY PATCH AGENT command-line application."""
+"""VERSIONARY AGENT command-line application."""
 
 import argparse
 import json
 import socket
 import sys
 
-from agent.arby_patch_agent import detect_platform, scan
+from agent.versionary_agent import detect_platform, scan
 from agent.credentials import CredentialError, load_credential
 from agent.enrollment_client import register_v2, complete_v2
 from agent.heartbeat import HeartbeatError, send_heartbeat
@@ -16,8 +16,8 @@ from agent.reporting import ReportingError, send_report
 
 def main(argv=None):
     parser = argparse.ArgumentParser(
-        prog="arby-patch-agent",
-        description="ARBY PATCH AGENT — observer-only monitoring",
+        prog="versionary-agent",
+        description="VERSIONARY AGENT — observer-only monitoring",
     )
 
     parser.add_argument(
@@ -85,7 +85,7 @@ def main(argv=None):
         KeyError,
     ) as exc:
         print(
-            f"ARBY PATCH AGENT: {exc}",
+            f"VERSIONARY AGENT: {exc}",
             file=sys.stderr,
         )
         return 1

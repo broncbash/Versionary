@@ -1,4 +1,4 @@
-"""Integration tests for the ARBY PATCH AGENT CLI."""
+"""Integration tests for the VERSIONARY AGENT CLI."""
 
 import contextlib
 import io

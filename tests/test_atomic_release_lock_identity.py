@@ -23,7 +23,7 @@ class TestAtomicReleaseLockIdentity(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
 
-        self.app = Path(self.temp.name) / "arby-patch-agent"
+        self.app = Path(self.temp.name) / "versionary-agent"
         self.app.mkdir()
 
     def test_lock_path_identity_preserved(self):

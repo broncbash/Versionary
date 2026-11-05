@@ -1,4 +1,4 @@
-"""Verified HTTPS transport for ARBY PATCH AGENT enrollment v2."""
+"""Verified HTTPS transport for VERSIONARY AGENT enrollment v2."""
 
 import json
 import ssl
@@ -99,7 +99,7 @@ def post_json(path, payload, server=None,
 
     except (urllib.error.URLError, OSError, ssl.SSLError):
         raise EnrollmentHTTPError(
-            "Secure connection to PATCH COMMAND failed"
+            "Secure connection to Versionary failed"
         ) from None
 
     except (ValueError, UnicodeError, TypeError):

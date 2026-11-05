@@ -29,7 +29,7 @@ class TestAncestorSecurity(unittest.TestCase):
         parent.mkdir(mode=0o755)
 
         installer.require_secure_ancestors(
-            self.root / "opt/arby-patch-agent",
+            self.root / "opt/versionary-agent",
             self.root,
         )
 
@@ -40,7 +40,7 @@ class TestAncestorSecurity(unittest.TestCase):
 
         with self.assertRaises(RuntimeError):
             installer.require_secure_ancestors(
-                self.root / "opt/arby-patch-agent",
+                self.root / "opt/versionary-agent",
                 self.root,
             )
 
@@ -51,7 +51,7 @@ class TestAncestorSecurity(unittest.TestCase):
 
         with self.assertRaises(RuntimeError):
             installer.require_secure_ancestors(
-                self.root / "opt/arby-patch-agent",
+                self.root / "opt/versionary-agent",
                 self.root,
             )
 
@@ -64,7 +64,7 @@ class TestAncestorSecurity(unittest.TestCase):
 
         with self.assertRaises(RuntimeError):
             installer.require_secure_ancestors(
-                self.root / "opt/arby-patch-agent",
+                self.root / "opt/versionary-agent",
                 self.root,
             )
 
@@ -74,13 +74,13 @@ class TestAncestorSecurity(unittest.TestCase):
 
         with self.assertRaises(RuntimeError):
             installer.require_secure_ancestors(
-                self.root / "opt/arby-patch-agent",
+                self.root / "opt/versionary-agent",
                 self.root,
             )
 
     def test_missing_parent_allowed(self):
         installer.require_secure_ancestors(
-            self.root / "opt/arby-patch-agent",
+            self.root / "opt/versionary-agent",
             self.root,
         )
 

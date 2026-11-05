@@ -1,0 +1,65 @@
+"""Read-only administrator inventory for beta dashboard; no agent activation."""
+import sqlite3
+from datetime import datetime, timedelta, timezone
+from contextlib import closing
+
+from fastapi import APIRouter, Depends, HTTPException
+from admin_auth import require_admin
+import agent_registry
+
+router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
+
+HEARTBEAT_STALE_AFTER = timedelta(minutes=30)
+
+
+def agent_health(status: str, last_seen: str | None, now: datetime) -> str:
+    """Conservative state classification; unknown timestamps are never healthy."""
+    if status == "revoked":
+        return "revoked"
+    if status == "pending":
+        return "pending"
+    if status != "approved" or not last_seen:
+        return "no_contact"
+    try:
+        seen = datetime.fromisoformat(last_seen.replace("Z", "+00:00"))
+        if seen.tzinfo is None:
+            return "unknown"
+        age = now - seen.astimezone(timezone.utc)
+        if age < timedelta(0):
+            return "unknown"
+        return "online" if age <= HEARTBEAT_STALE_AFTER else "stale"
+    except (ValueError, TypeError, OverflowError):
+        return "unknown"
+
+
+@router.get("/agents")
+def list_agents(_: None = Depends(require_admin)):
+    """List registered agents and their latest reports without exposing secrets."""
+    path = agent_registry.DB_PATH
+    if not path.is_file():
+        return {"agents": [], "count": 0}
+    try:
+        # Read-only URI avoids accidentally creating or modifying the database.
+        with closing(sqlite3.connect(path.as_uri() + "?mode=ro", uri=True)) as db:
+            db.row_factory = sqlite3.Row
+            rows = db.execute("""
+                SELECT a.id, a.hostname, a.platform, a.status,
+                       a.registered_at, a.last_seen,
+                       (SELECT r.timestamp FROM scan_reports r
+                        WHERE r.agent_id = a.id
+                        ORDER BY r.timestamp DESC, r.id DESC LIMIT 1) AS scan_at,
+                       (SELECT r.status FROM scan_reports r
+                        WHERE r.agent_id = a.id
+                        ORDER BY r.timestamp DESC, r.id DESC LIMIT 1) AS scan_status,
+                       (SELECT r.count FROM scan_reports r
+                        WHERE r.agent_id = a.id
+                        ORDER BY r.timestamp DESC, r.id DESC LIMIT 1) AS updates
+                FROM agents a ORDER BY a.hostname COLLATE NOCASE, a.id
+            """).fetchall()
+    except (sqlite3.DatabaseError, OSError):
+        raise HTTPException(status_code=503, detail="Agent inventory unavailable") from None
+    now = datetime.now(timezone.utc)
+    agents = [dict(row) for row in rows]
+    for agent in agents:
+        agent['health'] = agent_health(agent['status'], agent['last_seen'], now)
+    return {"agents": agents, "count": len(agents)}

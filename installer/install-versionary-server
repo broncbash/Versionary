@@ -1,0 +1,125 @@
+#!/usr/bin/env python3
+"""Friendly Versionary server installation entry point."""
+
+import argparse
+import subprocess
+import sys
+from pathlib import Path
+
+
+HERE = Path(__file__).resolve().parent
+BACKEND = HERE / "versionary-server-install.py"
+
+
+def ask(label, default=None):
+    suffix = f" [{default}]" if default is not None else ""
+    value = input(f"{label}{suffix}: ").strip()
+    return value or default
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Guided Versionary server installation"
+    )
+    parser.add_argument("--archive", type=Path)
+    parser.add_argument("--manifest", type=Path)
+    parser.add_argument("--tls-identity")
+    parser.add_argument("--bind-address", default="127.0.0.1")
+    parser.add_argument("--port", type=int, default=8766)
+    parser.add_argument("--app-dir", default="/opt/versionary")
+    parser.add_argument("--state-dir", default="/var/lib/versionary")
+    parser.add_argument(
+        "--execute-disposable",
+        action="store_true",
+        help="Run the existing disposable installer; never production",
+    )
+    parser.add_argument(
+        "--yes",
+        action="store_true",
+        help="Confirm disposable execution without prompting",
+    )
+    args = parser.parse_args()
+
+    if args.execute_disposable and not args.yes:
+        parser.error(
+            "--execute-disposable requires --yes; "
+            "production installation remains disabled"
+        )
+
+    if not sys.stdin.isatty() and (
+        args.archive is None
+        or args.manifest is None
+        or args.tls_identity is None
+    ):
+        parser.error(
+            "Noninteractive use requires --archive, --manifest "
+            "and --tls-identity"
+        )
+
+    print("\nVERSIONARY SERVER SETUP")
+    print("=======================")
+
+    archive = args.archive or ask("Release archive")
+    manifest = args.manifest
+    if manifest is None and archive:
+        candidate = Path(archive).expanduser()
+        candidates = (
+            candidate.with_suffix(".json"),
+            Path(str(candidate) + ".json"),
+            candidate.parent / "manifest.json",
+        )
+        manifest = next(
+            (p for p in candidates if p.is_file()), None
+        )
+    if manifest is None:
+        manifest = ask("Release manifest")
+    else:
+        print("[OK] Release manifest:", manifest)
+    identity = args.tls_identity or ask(
+        "TLS hostname or IP", "127.0.0.1"
+    )
+
+    if not archive or not manifest or not identity:
+        parser.error("Archive, manifest and TLS identity are required")
+
+    command = [
+        sys.executable,
+        str(BACKEND),
+        "--archive", str(Path(archive).expanduser()),
+        "--manifest", str(Path(manifest).expanduser()),
+        "--tls-identity", identity,
+        "--bind-address", args.bind_address,
+        "--port", str(args.port),
+        "--app-dir", args.app_dir,
+        "--state-dir", args.state_dir,
+    ]
+
+    if args.execute_disposable:
+        command += [
+            "--mode", "install",
+            "--confirm-disposable",
+        ]
+        print("\nMode: CONFIRMED DISPOSABLE INSTALLATION")
+    else:
+        command += ["--mode", "dry-run"]
+        print("\nMode: VERIFIED DRY RUN")
+
+    print("Production installation: DISABLED", flush=True)
+    result = subprocess.run(command, check=False)
+
+    if result.returncode:
+        print("\n[FAIL] Server setup did not complete")
+        return result.returncode
+
+    print("\n[OK] Server workflow completed")
+    if not args.execute_disposable:
+        print("[OK] No installation performed")
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except (EOFError, KeyboardInterrupt):
+        print("\n[CANCELLED] No installation requested")
+        raise SystemExit(130)

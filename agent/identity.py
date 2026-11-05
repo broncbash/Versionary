@@ -1,4 +1,4 @@
-"""Persistent identity for ARBY PATCH AGENT."""
+"""Persistent identity for VERSIONARY AGENT."""
 
 import json
 import os
@@ -7,7 +7,7 @@ import uuid
 
 
 DEFAULT_IDENTITY_PATH = Path(
-    "/var/lib/arby-patch-agent/identity.json"
+    "/var/lib/versionary-agent/identity.json"
 )
 
 

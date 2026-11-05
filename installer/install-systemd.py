@@ -13,8 +13,8 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 
 UNITS = (
-    "arby-patch-agent.service",
-    "arby-patch-agent.timer",
+    "versionary-agent.service",
+    "versionary-agent.timer",
 )
 
 

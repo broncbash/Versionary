@@ -1,0 +1,44 @@
+# Versionary — Session Handoff and Beta 0.9 Launch Plan
+**Checkpoint:** 2026-10-30. **Source of evidence:** operator's local CachyOS/Arch desktop test output and code excerpts shared in chat. **Remote source caveat:** the GitHub feature branch may lag the local working tree; verify before syncing.
+
+## Product, intent and hard safety boundaries
+- **Versionary** is the chosen professional product name (previously ARBY PATCH COMMAND / Patch Command). Legacy identifiers, paths, Python modules, env vars and service units remain until a deliberate backward-compatible migration; do not bulk rename.
+- Human-directed, substantially AI-authored experimental self-hosted Linux patch visibility platform. Preserve the README's explicit AI disclosure. Observer-only: no unattended updates, automatic reboot or unattended agent enrollment.
+- Local development: CachyOS/Arch desktop, `~/Projects/arby-patch-command`, `./.venv/bin/python`; zsh sometimes autocorrects unknown commands, so prefix with `nocorrect` when needed. User prefers larger coordinated batches, reliable copy-paste commands, concise interaction, and test logs rather than terminal floods.
+- **Never touch CT104 (live Patch Command), CT102 (monitoring), or any production homelab services without explicit approval.** No production deployment, live agent install/enrollment, systemd activation, timer activation, service restart, or merge to develop/main. Do not expose development services publicly.
+- GitHub repo: `broncbash/arby-patch-command`, feature branch `feature/runtime-visibility`; `develop` is integration target, `main` baseline. GitHub connector can edit remote independently of desktop. Inspect remote head AND local status first; do not reset/overwrite the desktop's newer/uncommitted files. Never commit `.versionary-local-beta/`, credentials, private keys, databases, tokens or local logs.
+- User authorized documentation commit/push at this session end, **not** an indiscriminate source-code push from an inaccessible desktop.
+
+## Operator-verified local results (authoritative for local checkout only)
+1. Beta 0.5: `versionary_release.py` release preview/preflight passed; earlier full suite 958 tests, 1 skipped.
+2. Beta 0.6: `versionary_archive_audit.py` audited source tarball: passed, 287 regular files, 998572 unpacked bytes, zero issues; disposable extraction and compileall passed. Offline readiness report passed with 969 regression tests; no deployment permission.
+3. Beta 0.7: `tests/test_disposable_trial_contract.py` four tests passed (initial erroneous `parents[2]` corrected to `parents[1]`). Real `installer/disposable-install-trial.py` run with freshly generated local CA and existing `installer/dist/versionary-agent.tar.gz` returned `status: passed`, `staging: verified`, production_installed/systemd_started/agent_enrolled/external_network_requests_made all false, workspace cleaned. Full regression: **973 tests in 15.060s, OK (skipped=1)**.
+4. Beta 0.8: `installer/beta-selftest.py --protocol-check` returned `status: passed`, fresh package, disposable CA, stage/re-stage/integrity verified, `tls_protocol_check: passed`, `network_requests_made: true` **loopback-only**, `external_network_requests_made: false`, no production install/systemd activation/retained artifacts. Existing `tests.test_beta_tls_journey` 5/5 passed in 1.639s.
+5. Added **one local test** `test_cross_agent_credentials_rejected_over_tls` to `tests/test_beta_tls_journey.py`: enrolls two disposable agents over real loopback HTTPS, verifies Agent A token cannot heartbeat or report as Agent B, rejected report leaves B's scan_reports empty, B's own credential works. Focused HTTPS suite **6/6 passed in 2.248s**. Final full regression **974 tests in 16.039s, OK (skipped=1)**: 973 passed, one skipped, zero failures. **These local source changes are NOT presumed pushed to GitHub.**
+6. `versionary_doctor.py` earlier passed 15/15 local checks; background runner `versionary_background.py` observer-only, `versionary_timer_integration.py` inactive timer preview. Local beta dashboard `http://127.0.0.1:8765/admin/dashboard` via `./.venv/bin/python versionary_local_beta.py serve`; `~/.local/bin/versionary --start|--stop|--status`; `versionary-token` displays private token locally. Do not paste tokens or archive private state.
+
+## HTTPS integration details
+`tests/test_beta_tls_journey.py` uses a disposable SQLite DB (patches `agent_registry.DB_PATH`), temp CA and cert generated with `installer/generate-certificates.py`, a Uvicorn TLS server bound by OS socket to `127.0.0.1` on an ephemeral port, and actual `agent.enrollment_client.register_v2/complete_v2`, `agent.heartbeat.send_heartbeat`, `agent.reporting.send_report`. The original five tests cover enrollment approval/completion, authenticated heartbeat/report/revocation, reporting disabled gate, untrusted CA rejection, and disabled enrollment gate. Cross-agent HTTPS isolation is the sixth local test. Other tests already cover enrollment replay, wrong identity cryptographic signature, malformed reports, and hostname certificate inspection. Do not claim these constitute independent penetration testing or production readiness.
+
+## Existing local commands (run from repository root)
+```bash
+nocorrect ./.venv/bin/python -m unittest discover -s tests -v > "$HOME/versionary-beta09-full-tests.log" 2>&1; echo "Exit code: $?"; grep -E '^Ran |^OK|^FAILED' "$HOME/versionary-beta09-full-tests.log" | tail -n 5
+nocorrect ./.venv/bin/python installer/beta-selftest.py --protocol-check > "$HOME/versionary-beta09-protocol.log" 2>&1; echo "Exit code: $?"; tail -n 30 "$HOME/versionary-beta09-protocol.log"
+```
+Do not enable `--smoke-scan` without asking: it may query local package repositories.
+
+## Beta 0.9 — next work
+**Release candidate READINESS, not declaration of production readiness.** Prioritize:
+1. Inspect actual local branch, status, untracked/modified files and compare with remote. Do not blindly `git pull`, checkout, reset, force-push, or `git add -A`. The remote README/PROJECT-STATUS were substantially older than local test evidence when this handoff was written.
+2. Inventory existing tests and code for rollback/recovery, installation portability, source/archive auditing, secret exclusion, CA SAN/trust and permissions; reuse rather than duplicate.
+3. Design and implement substantial **disposable-only** fault-injection/negative-path tests for interrupted installation/recovery, config/CA/systemd asset handling and idempotence. Do not enable `installer/install-agent.sh --install`.
+4. Review source packaging and gitignore for secret leakage and reproducibility. Document what is verified vs only intended.
+5. Run targeted tests, then full regression, then optional disposable protocol test. Record exact test counts and skipped count. Never claim results not actually run.
+6. Update user manual, README and status with new verified checkpoint; only commit reviewed safe files. No production actions.
+7. Future: support interactive and scriptable CLI installers, equivalent web GUI Settings administration, certificate upload or automatic generation, CA trust distribution, hostname/IP SAN validation, no hardcoded homelab IPs. Plan backward-compatible Versionary naming migration, not a breaking global replacement.
+
+## Operator's next-session prompt
+> Continue Versionary Beta 0.9 in my connected GitHub repository `broncbash/arby-patch-command` and my local CachyOS checkout `~/Projects/arby-patch-command`. Start by reading `docs/VERSIONARY-SESSION-HANDOFF-2026-10-30.md`, `PROJECT-STATUS.md`, `README.md` and `docs/USER-MANUAL.md`. Our last local verification was 974 tests, OK (1 skipped), plus six real-loopback-HTTPS tests and a passing disposable self-test. The local checkout has recent Beta 0.5–0.8 files and a cross-agent HTTPS security test that may not be on GitHub. Check both histories and working-tree state before editing or syncing; do not overwrite my local changes. Focus on large, well-tested Beta 0.9 release-readiness batches: disposable recovery/fault injection, portability, packaging and secret-handling audits. Preserve observer-only and disabled deployment gates. Do not touch CT104, CT102 or any live host; do not install/start timers or services; do not merge or push unreviewed local files. Use minimal back-and-forth, log tests, and provide exact commands. First give me a safe reconciliation/status command and a concise plan, then proceed.
+
+## Important epistemic boundary
+This handoff captures **user-reported local output and snippets**, not a fresh checkout or an independent remote CI run. Remote docs committed by GitHub connector cannot capture local-only source/test changes until operator deliberately reconciles them. Do not treat the remote branch's old test counts as a contradiction of local verification.

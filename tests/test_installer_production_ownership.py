@@ -1,4 +1,4 @@
-"""Production ownership policy for ARBY PATCH AGENT installer."""
+"""Production ownership policy for VERSIONARY AGENT installer."""
 
 import importlib.util
 import os
@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
-ARCHIVE = ROOT / "installer/dist/arby-patch-agent.tar.gz"
+ARCHIVE = ROOT / "installer/dist/versionary-agent.tar.gz"
 
 spec = importlib.util.spec_from_file_location(
     "arby_production_ownership_installer",
@@ -40,7 +40,7 @@ class TestProductionOwnership(unittest.TestCase):
             installer.require_production_root(self.root)
 
     def test_group_writable_app_rejected(self):
-        app = self.root / "opt/arby-patch-agent"
+        app = self.root / "opt/versionary-agent"
         app.mkdir(parents=True)
         app.chmod(0o775)
 
@@ -48,7 +48,7 @@ class TestProductionOwnership(unittest.TestCase):
             installer.require_secure_app_directory(app)
 
     def test_world_writable_app_rejected(self):
-        app = self.root / "opt/arby-patch-agent"
+        app = self.root / "opt/versionary-agent"
         app.mkdir(parents=True)
         app.chmod(0o777)
 
@@ -56,7 +56,7 @@ class TestProductionOwnership(unittest.TestCase):
             installer.require_secure_app_directory(app)
 
     def test_safe_app_accepted(self):
-        app = self.root / "opt/arby-patch-agent"
+        app = self.root / "opt/versionary-agent"
         app.mkdir(parents=True)
         app.chmod(0o755)
 

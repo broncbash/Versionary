@@ -24,7 +24,7 @@ class TestAtomicReleaseTransaction(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
 
-        self.app = Path(self.temp.name) / "arby-patch-agent"
+        self.app = Path(self.temp.name) / "versionary-agent"
         self.app.mkdir()
 
         self.modules = {
@@ -68,6 +68,48 @@ class TestAtomicReleaseTransaction(unittest.TestCase):
             (self.app / "agent").readlink().as_posix(),
             f"releases/{original}/agent",
         )
+
+    def test_reinstall_rejects_tampered_source_without_switching(self):
+        original = atomic.install_release(self.app, self.modules)
+        active = self.app / "agent"
+        (active / "identity.py").write_bytes(b"TAMPERED\\n")
+        before = active.readlink()
+        with self.assertRaises(RuntimeError):
+            atomic.install_release(self.app, self.modules)
+        self.assertEqual(active.readlink(), before)
+        self.assertEqual(original, atomic.release_id(self.modules))
+
+    def test_reinstall_rejects_unsafe_cache_without_switching(self):
+        original = atomic.install_release(self.app, self.modules)
+        active = self.app / "agent"
+        (active / "__pycache__").symlink_to(self.app)
+        with self.assertRaises(RuntimeError):
+            atomic.install_release(self.app, self.modules)
+        self.assertEqual(active.readlink().as_posix(),
+                         f"releases/{original}/agent")
+
+    def test_failed_upgrade_activation_preserves_previous_release(self):
+        original = atomic.install_release(self.app, self.modules)
+        updated = {"__main__.py": b"print('updated')\\n"}
+        with patch.object(atomic, "activate_release",
+                          side_effect=RuntimeError("simulated activation failure")):
+            with self.assertRaises(RuntimeError):
+                atomic.install_release(self.app, updated)
+        self.assertEqual((self.app / "agent").readlink().as_posix(),
+                         f"releases/{original}/agent")
+        self.assertEqual((self.app / "agent/identity.py").read_bytes(),
+                         self.modules["identity.py"])
+
+    def test_reinstall_rejects_extra_cache_file_without_switching(self):
+        original = atomic.install_release(self.app, self.modules)
+        active = self.app / "agent"
+        cache = active / "__pycache__"
+        cache.mkdir()
+        (cache / "unexpected.txt").write_text("unsafe")
+        with self.assertRaises(RuntimeError):
+            atomic.install_release(self.app, self.modules)
+        self.assertEqual(active.readlink().as_posix(),
+                         f"releases/{original}/agent")
 
     def test_transaction_holds_lock_through_activation(self):
         entered = threading.Event()

@@ -1,0 +1,214 @@
+# Deployment beta gate
+
+The portable agent's **production installer is still disabled**. This
+checkpoint command reports prerequisites without installing, enrolling,
+starting systemd units, modifying certificates, or contacting the server.
+
+Run from the repository checkout after building the agent package:
+
+```sh
+python3 installer/build-agent-package.py
+python3 installer/deployment-readiness.py \
+  --server https://patch.example.test \
+  --ca-cert /path/to/trusted-ca.crt
+```
+
+The JSON report distinguishes `ready_for_isolated_test` from
+`ready_for_production`. Production readiness is **always false** until
+a reviewed deployment workflow and approved end-to-end enrollment test
+exist. Exit code 0 means only that the read-only prerequisites for an
+isolated test are met; it is **not** permission to deploy.
+
+## First controlled beta acceptance criteria
+
+1. A disposable fresh Arch or Debian test container passes preflight.
+2. The isolated installation and repeat-installation integrity audit pass.
+3. A separate approved beta installer safely installs without touching CT104.
+4. A test agent enrolls with explicit approval and trusted TLS.
+5. Agent scan results appear on the server dashboard, with failure states.
+6. No unattended upgrades, automatic reboots, or unapproved enrollment.
+7. Reinstall and failed-install recovery preserve state, CA, and config.
+
+## Cost policy
+
+Feature-branch and draft PR pushes do not trigger hosted CI. Group work into
+large development batches and schedule full Python 3.13/3.14 CI at intentional
+integration checkpoints. Account billing caps must be configured by the owner.
+
+## Persistent isolated beta staging (new)
+
+The `installer/stage-beta.py` command creates an **inert installation**
+inside an already-existing, administrator-selected test directory. It is
+not a production installer and does not enable services, contact the
+server, or enroll agents. The directory is retained after staging.
+
+Example (only in a disposable test environment, with an explicit CA):
+
+```sh
+python3 installer/build-agent-package.py
+mkdir -m 700 /tmp/arby-beta-root
+python3 installer/stage-beta.py \
+  --root /tmp/arby-beta-root \
+  --server https://patch.example.test \
+  --ca-cert /path/to/trusted-ca.crt
+```
+
+The command rejects `/`, missing roots, symlinked roots, and unsafe
+ownership/permissions. It validates the package, HTTPS origin, and CA
+certificate before staging, then performs a read-only installation audit.
+
+**Important limitation:** staging is not an atomic transaction across all
+files. If a later step fails, the test root may contain partial changes;
+do not reuse a failed root as if it were a verified deployment. This is
+an offline staging milestone, not a production deployment authorization.
+
+## Integration validation checkpoint
+
+The beta staging regression suite now includes a real package-to-filesystem
+integration test. In a disposable root, it generates a test-only CA, stages
+the validated distribution, verifies the agent release, config, CA and
+systemd unit files, then stages the same package again and checks that all
+those bytes and the active release target are unchanged.
+
+This test does **not** start systemd, enroll an agent, or validate live
+server communication. The complete end-to-end enrollment and reporting
+trial remains a separate, explicitly approved beta milestone. CI runs
+only at deliberate checkpoints to minimize GitHub Actions usage.
+
+## Recheck a staged beta without modifying it
+
+After staging, run the same command with `--verify-only`. This validates
+the package and supplied CA, runs the read-only installation integrity audit,
+and compares the persisted server configuration and installed CA against the
+explicit inputs. It returns `status: verified` and `changes_made: false` on
+success; any drift fails closed rather than repairing or replacing files.
+
+```sh
+python3 installer/stage-beta.py --verify-only \
+  --root /tmp/arby-beta-root \
+  --server https://patch.example.test \
+  --ca-cert /path/to/trusted-ca.crt
+```
+
+This is still offline verification, not a live TLS connection or enrollment.
+
+## Opt-in local smoke scan
+
+After verifying the staged beta, `--verify-only --smoke-scan` executes
+`python -B -m agent scan` from the staged release. This queries the **host's**
+local package manager in read-only mode; it does not enroll, send reports,
+start systemd, or contact PATCH COMMAND. The scan is explicitly optional
+because it invokes the host's package-query command, unlike a pure
+filesystem integrity check.
+
+```sh
+python3 installer/stage-beta.py --verify-only --smoke-scan \
+  --root /tmp/arby-beta-root \
+  --server https://patch.example.test \
+  --ca-cert /path/to/trusted-ca.crt
+```
+
+The JSON output includes `scan_status`; a scan error fails the command.
+This does **not** establish end-to-end server communication or authorize
+production deployment. The test container must provide the appropriate
+`checkupdates` or `apt` package scanner.
+
+## Disposable end-to-end server/agent contract (in-process)
+
+`tests/test_beta_agent_server_journey.py` now exercises the real v2
+agent enrollment client against the real FastAPI enrollment router through
+an in-process TestClient adapter, using a temporary SQLite database and
+private agent state. It covers pending registration, explicit approval,
+Ed25519 challenge signing, credential provisioning, authenticated heartbeat,
+package report persistence, revocation, disabled feature gates, and
+recovery after a lost enrollment completion response.
+
+This is a **functional protocol integration test**, not a live HTTPS test:
+the HTTP adapter does not open sockets, exercise certificate validation,
+start a systemd unit, or alter any homelab container. The v2 router remains
+isolated from the production application and gated off by default.
+
+To run only the disposable protocol integration tests locally:
+
+```sh
+python3 -m unittest tests.test_beta_agent_server_journey -v
+```
+
+To run the full checkpoint suite, use the existing GitHub Actions workflow
+at an intentional checkpoint or run locally:
+
+```sh
+python3 installer/build-agent-package.py
+python3 -m unittest discover -s tests -p 'test_*.py' -q
+```
+
+**Remaining deployment blockers:** verified HTTPS transport to a disposable
+test server, reviewed production installer and systemd lifecycle, explicit
+agent enrollment approval in the real dashboard, and a clean Arch/Debian
+container trial. None of these are authorized against CT104/CT102.
+
+## Real HTTPS loopback integration
+
+`tests/test_beta_tls_journey.py` runs a **real TLS server bound to
+127.0.0.1 on an ephemeral port**, with an isolated FastAPI enrollment
+router and disposable SQLite database. It generates a throwaway CA and
+server certificate for `localhost`, then uses the agent's production
+HTTPS transport to register, approve, and complete Ed25519 enrollment.
+Additional tests reject an untrusted CA and verify that disabled
+enrollment remains disabled even over a trusted HTTPS connection.
+
+Unlike the in-process TestClient integration suite, this test exercises
+real sockets, TLS certificate verification, and HTTP response handling.
+It does not bind a LAN address, use a production database, start systemd,
+or contact the homelab. Live TLS reporting and clean-container lifecycle
+validation remain separate deployment gates.
+
+## Real TLS reporting checkpoint
+
+The loopback TLS suite now also exercises an enrolled agent's authenticated
+heartbeat, update-report submission, SQLite persistence, credential revocation,
+and disabled reporting gate over actual HTTPS connections. The server remains
+isolated to a temporary directory and IPv4 loopback; these tests do **not**
+enable production agent endpoints or modify any Proxmox container. This is a
+test checkpoint, not authorization to deploy.
+
+## One-command disposable beta self-test
+
+Run from a checkout with Python and the test dependencies installed:
+
+```sh
+python3 installer/beta-selftest.py
+```
+
+This builds the agent archive into a temporary directory, generates a
+throwaway localhost CA, creates a private isolated root, stages the agent,
+repeats the installation, and performs a read-only integrity audit. The
+temporary files are deleted on exit. It does not connect to the server,
+start systemd, enroll an agent, or install anything on the host.
+
+An optional `--smoke-scan` invokes the **local host package scanner** in
+read-only mode after verification. This is off by default and requires the
+appropriate Arch/Debian scanner on the machine running the test.
+
+The JSON report includes `artifacts_retained: false` and
+`production_installed: false`. This does not replace a fresh-container
+beta trial or authorize deployment to CT104/CT102.
+
+## Optional real-TLS protocol acceptance
+
+The disposable self-test also supports:
+
+```sh
+python3 installer/beta-selftest.py --protocol-check
+```
+
+After staging and auditing, this runs the loopback-only real HTTPS
+integration suite in a separate Python process. It tests enrollment,
+approval, credentials, heartbeat, report persistence, revocation, and
+disabled gates using disposable TLS certificates and SQLite storage.
+No production server is contacted. The JSON distinguishes loopback
+network traffic (`network_requests_made: true`) from external network
+traffic (`external_network_requests_made: false`); the latter is a
+property of the test design, not a network sandbox guarantee. Failure
+of the TLS suite fails the entire self-test. This option requires the
+repository test dependencies (including FastAPI, Uvicorn, cryptography).

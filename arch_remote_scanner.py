@@ -1,5 +1,6 @@
 import re
 import subprocess
+from scanner_ssh_config import command_options, SSHConfigError
 from datetime import datetime, timezone
 
 SSH_KEY = "/opt/arby-patch-command/keys/scanner_ed25519"
@@ -13,17 +14,7 @@ def scan_arch_updates(node, host):
 
     try:
         result = subprocess.run(
-            [
-                "/usr/bin/ssh",
-                "-T",
-                "-i", SSH_KEY,
-                "-o", "StrictHostKeyChecking=yes",
-                "-o", f"UserKnownHostsFile={KNOWN_HOSTS}",
-                "-o", "BatchMode=yes",
-                "-o", "ConnectTimeout=5",
-                "-o", "IdentitiesOnly=yes",
-                f"arby-scanner@{host}",
-            ],
+            ["/usr/bin/ssh", *command_options(host)],
             capture_output=True,
             text=True,
             timeout=30,
@@ -60,7 +51,7 @@ def scan_arch_updates(node, host):
             "error": None,
         }
 
-    except (OSError, RuntimeError, subprocess.TimeoutExpired) as exc:
+    except (OSError, RuntimeError, SSHConfigError, subprocess.TimeoutExpired) as exc:
         return {
             "node": node,
             "status": "error",

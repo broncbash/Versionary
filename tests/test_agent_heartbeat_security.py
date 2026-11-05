@@ -1,4 +1,4 @@
-"""Security regression tests for ARBY PATCH AGENT heartbeat."""
+"""Security regression tests for VERSIONARY AGENT heartbeat."""
 
 
 import io
@@ -35,34 +35,34 @@ class TestHeartbeatSecurity(unittest.TestCase):
         self.addCleanup(self._config_patch.stop)
 
 
-    @patch("agent.heartbeat.urllib.request.urlopen")
-    def test_reject_empty_token(self, urlopen):
+    @patch("agent.heartbeat.urllib.request.build_opener")
+    def test_reject_empty_token(self, builder):
         with self.assertRaises(HeartbeatError):
             send_heartbeat(IDENTITY, "")
 
-        urlopen.assert_not_called()
+        builder.assert_not_called()
 
-    @patch("agent.heartbeat.urllib.request.urlopen")
-    def test_reject_token_with_newline(self, urlopen):
+    @patch("agent.heartbeat.urllib.request.build_opener")
+    def test_reject_token_with_newline(self, builder):
         with self.assertRaises(HeartbeatError):
             send_heartbeat(IDENTITY, "secret\ninjection")
 
-        urlopen.assert_not_called()
+        builder.assert_not_called()
 
-    @patch("agent.heartbeat.urllib.request.urlopen")
-    def test_reject_invalid_uuid(self, urlopen):
+    @patch("agent.heartbeat.urllib.request.build_opener")
+    def test_reject_invalid_uuid(self, builder):
         identity = dict(IDENTITY)
         identity["agent_id"] = "../invalid"
 
         with self.assertRaises(HeartbeatError):
             send_heartbeat(identity, "test-token")
 
-        urlopen.assert_not_called()
+        builder.assert_not_called()
 
     @patch("agent.heartbeat.ssl.create_default_context")
-    @patch("agent.heartbeat.urllib.request.urlopen")
-    def test_reject_unexpected_status(self, urlopen, _context):
-        urlopen.return_value = FakeResponse(
+    @patch("agent.heartbeat.urllib.request.build_opener")
+    def test_reject_unexpected_status(self, builder, _context):
+        builder.return_value.open.return_value = FakeResponse(
             b'{"status":"ok"}',
             status=202,
         )
@@ -73,9 +73,9 @@ class TestHeartbeatSecurity(unittest.TestCase):
             send_heartbeat(IDENTITY, "test-token")
 
     @patch("agent.heartbeat.ssl.create_default_context")
-    @patch("agent.heartbeat.urllib.request.urlopen")
-    def test_reject_oversized_response(self, urlopen, _context):
-        urlopen.return_value = FakeResponse(b"x" * 8193)
+    @patch("agent.heartbeat.urllib.request.build_opener")
+    def test_reject_oversized_response(self, builder, _context):
+        builder.return_value.open.return_value = FakeResponse(b"x" * 8193)
 
         with self.assertRaisesRegex(
             HeartbeatError, "too large"
@@ -83,9 +83,9 @@ class TestHeartbeatSecurity(unittest.TestCase):
             send_heartbeat(IDENTITY, "test-token")
 
     @patch("agent.heartbeat.ssl.create_default_context")
-    @patch("agent.heartbeat.urllib.request.urlopen")
-    def test_reject_invalid_json(self, urlopen, _context):
-        urlopen.return_value = FakeResponse(b"{invalid")
+    @patch("agent.heartbeat.urllib.request.build_opener")
+    def test_reject_invalid_json(self, builder, _context):
+        builder.return_value.open.return_value = FakeResponse(b"{invalid")
 
         with self.assertRaisesRegex(
             HeartbeatError, "Invalid heartbeat response"
@@ -93,9 +93,9 @@ class TestHeartbeatSecurity(unittest.TestCase):
             send_heartbeat(IDENTITY, "test-token")
 
     @patch("agent.heartbeat.ssl.create_default_context")
-    @patch("agent.heartbeat.urllib.request.urlopen")
-    def test_reject_non_object_response(self, urlopen, _context):
-        urlopen.return_value = FakeResponse(
+    @patch("agent.heartbeat.urllib.request.build_opener")
+    def test_reject_non_object_response(self, builder, _context):
+        builder.return_value.open.return_value = FakeResponse(
             json.dumps(["unexpected"]).encode()
         )
 

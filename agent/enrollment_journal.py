@@ -1,4 +1,4 @@
-"""Crash-recovery journal for ARBY PATCH AGENT enrollment v2."""
+"""Crash-recovery journal for VERSIONARY AGENT enrollment v2."""
 
 import json
 import os
@@ -18,7 +18,7 @@ from .enrollment_crypto import (
 
 
 DEFAULT_JOURNAL_PATH = Path(
-    "/var/lib/arby-patch-agent/enrollment-pending.json"
+    "/var/lib/versionary-agent/enrollment-pending.json"
 )
 
 

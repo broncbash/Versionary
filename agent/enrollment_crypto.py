@@ -1,4 +1,4 @@
-"""Agent-side cryptography for ARBY PATCH COMMAND enrollment v2."""
+"""Agent-side cryptography for Versionary enrollment v2."""
 
 import base64
 import hashlib

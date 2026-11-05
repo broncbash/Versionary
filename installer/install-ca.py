@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Safely install the public ARBY PATCH COMMAND CA certificate."""
+"""Safely install the public Versionary CA certificate."""
 
 import argparse
 import os
@@ -37,11 +37,17 @@ def validate_ca(data, expected_sha256=None):
 
     now = datetime.now(timezone.utc)
 
-    if not (
-        certificate.not_valid_before_utc
-        <= now
-        < certificate.not_valid_after_utc
-    ):
+    # cryptography versions bundled with Debian 12 predate the
+    # timezone-aware certificate validity properties.
+    not_before = getattr(certificate, "not_valid_before_utc", None)
+    not_after = getattr(certificate, "not_valid_after_utc", None)
+
+    if not_before is None:
+        not_before = certificate.not_valid_before.replace(tzinfo=timezone.utc)
+    if not_after is None:
+        not_after = certificate.not_valid_after.replace(tzinfo=timezone.utc)
+
+    if not (not_before <= now < not_after):
         raise ValueError("CA certificate is outside its validity period")
 
     fingerprint = certificate.fingerprint(
@@ -50,7 +56,7 @@ def validate_ca(data, expected_sha256=None):
 
     if expected_sha256 is not None and fingerprint != expected_sha256:
         raise ValueError(
-            "CA fingerprint does not match trusted PATCH COMMAND CA"
+            "CA fingerprint does not match trusted Versionary CA"
         )
 
     return fingerprint
@@ -113,12 +119,12 @@ def install_ca(source, root, expected_sha256=None):
     data = source.read_bytes()
     fingerprint = validate_ca(data, expected_sha256)
 
-    destination_dir = root / "etc/arby-patch-agent"
+    destination_dir = root / "etc/versionary-agent"
     destination = destination_dir / "ca.crt"
 
     current = root
 
-    for component in ("etc", "arby-patch-agent"):
+    for component in ("etc", "versionary-agent"):
         current = current / component
 
         if current.is_symlink():

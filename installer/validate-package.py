@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the ARBY PATCH AGENT distribution archive."""
+"""Validate the VERSIONARY AGENT distribution archive."""
 
 import sys
 import tarfile
@@ -8,7 +8,7 @@ from pathlib import Path, PurePosixPath
 EXPECTED = {
     "agent/__main__.py",
     "agent/config.py",
-    "agent/arby_patch_agent.py",
+    "agent/versionary_agent.py",
     "agent/credentials.py",
     "agent/enrollment_client.py",
     "agent/enrollment_crypto.py",

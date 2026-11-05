@@ -1,4 +1,4 @@
-"""Tests for authenticated ARBY PATCH AGENT reporting."""
+"""Tests for authenticated VERSIONARY AGENT reporting."""
 
 
 import io
@@ -51,9 +51,9 @@ class TestReportingClient(unittest.TestCase):
 
 
     @patch("agent.reporting.ssl.create_default_context")
-    @patch("agent.reporting.urllib.request.urlopen")
-    def test_success(self, urlopen, context):
-        urlopen.return_value = FakeResponse(
+    @patch("agent.reporting.urllib.request.build_opener")
+    def test_success(self, builder, context):
+        builder.return_value.open.return_value = FakeResponse(
             b'{"status":"recorded"}'
         )
 
@@ -63,7 +63,7 @@ class TestReportingClient(unittest.TestCase):
 
         self.assertEqual(result["status"], "recorded")
 
-        request = urlopen.call_args.args[0]
+        request = builder.return_value.open.call_args.args[0]
 
         self.assertEqual(
             request.get_header("Authorization"),
@@ -78,6 +78,29 @@ class TestReportingClient(unittest.TestCase):
         )
 
         context.assert_called_once()
+
+    @patch("agent.reporting.ssl.create_default_context")
+    @patch("agent.reporting.urllib.request.build_opener")
+    def test_redirect_handler_never_forwards_bearer_token(self, builder, _context):
+        import urllib.request
+        redirect = urllib.error.HTTPError(
+            "https://example.test", 307, "Temporary Redirect",
+            {"Location": "https://attacker.example/steal"}, None)
+        self.addCleanup(redirect.close)
+        builder.return_value.open.side_effect = redirect
+        with self.assertRaisesRegex(ReportingError, "HTTP 307"):
+            send_report(IDENTITY, "test-token", REPORT)
+        handlers = builder.call_args.args
+        redirect_handler = next(
+            handler for handler in handlers
+            if isinstance(handler, urllib.request.HTTPRedirectHandler))
+        request = urllib.request.Request(
+            "https://example.test/agent", data=b"{}",
+            headers={"Authorization": "Bearer secret"}, method="POST")
+        self.assertIsNone(redirect_handler.redirect_request(
+            request, None, 307, "redirect",
+            {"Location": "https://attacker.example/steal"},
+            "https://attacker.example/steal"))
 
     def test_reject_http(self):
         with self.assertRaisesRegex(
@@ -131,8 +154,8 @@ class TestReportingClient(unittest.TestCase):
             validate_report(REPORT)
 
     @patch("agent.reporting.ssl.create_default_context")
-    @patch("agent.reporting.urllib.request.urlopen")
-    def test_authentication_rejected(self, urlopen, _context):
+    @patch("agent.reporting.urllib.request.build_opener")
+    def test_authentication_rejected(self, builder, _context):
         error = urllib.error.HTTPError(
             "https://example.test",
             401,
@@ -141,7 +164,7 @@ class TestReportingClient(unittest.TestCase):
             None,
         )
         self.addCleanup(error.close)
-        urlopen.side_effect = error
+        builder.return_value.open.side_effect = error
 
         with self.assertRaisesRegex(
             ReportingError, "authentication rejected"
@@ -149,8 +172,8 @@ class TestReportingClient(unittest.TestCase):
             send_report(IDENTITY, "test-token", REPORT)
 
     @patch("agent.reporting.ssl.create_default_context")
-    @patch("agent.reporting.urllib.request.urlopen")
-    def test_reporting_disabled(self, urlopen, _context):
+    @patch("agent.reporting.urllib.request.build_opener")
+    def test_reporting_disabled(self, builder, _context):
         error = urllib.error.HTTPError(
             "https://example.test",
             503,
@@ -159,7 +182,7 @@ class TestReportingClient(unittest.TestCase):
             None,
         )
         self.addCleanup(error.close)
-        urlopen.side_effect = error
+        builder.return_value.open.side_effect = error
 
         with self.assertRaisesRegex(
             ReportingError, "reporting is disabled"
@@ -167,9 +190,9 @@ class TestReportingClient(unittest.TestCase):
             send_report(IDENTITY, "test-token", REPORT)
 
     @patch("agent.reporting.ssl.create_default_context")
-    @patch("agent.reporting.urllib.request.urlopen")
-    def test_invalid_acknowledgment(self, urlopen, _context):
-        urlopen.return_value = FakeResponse(
+    @patch("agent.reporting.urllib.request.build_opener")
+    def test_invalid_acknowledgment(self, builder, _context):
+        builder.return_value.open.return_value = FakeResponse(
             b'{"status":"unexpected"}'
         )
 
@@ -179,9 +202,9 @@ class TestReportingClient(unittest.TestCase):
             send_report(IDENTITY, "test-token", REPORT)
 
     @patch("agent.reporting.ssl.create_default_context")
-    @patch("agent.reporting.urllib.request.urlopen")
-    def test_oversized_response(self, urlopen, _context):
-        urlopen.return_value = FakeResponse(
+    @patch("agent.reporting.urllib.request.build_opener")
+    def test_oversized_response(self, builder, _context):
+        builder.return_value.open.return_value = FakeResponse(
             b"x" * 8193
         )
 
@@ -191,9 +214,9 @@ class TestReportingClient(unittest.TestCase):
             send_report(IDENTITY, "test-token", REPORT)
 
     @patch("agent.reporting.ssl.create_default_context")
-    @patch("agent.reporting.urllib.request.urlopen")
-    def test_unexpected_http_status(self, urlopen, _context):
-        urlopen.return_value = FakeResponse(
+    @patch("agent.reporting.urllib.request.build_opener")
+    def test_unexpected_http_status(self, builder, _context):
+        builder.return_value.open.return_value = FakeResponse(
             b'{"status":"recorded"}',
             status=200,
         )

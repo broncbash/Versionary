@@ -17,8 +17,8 @@ SPEC = importlib.util.spec_from_file_location(
 INSTALLER = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(INSTALLER)
 
-SERVICE = "arby-patch-agent.service"
-TIMER = "arby-patch-agent.timer"
+SERVICE = "versionary-agent.service"
+TIMER = "versionary-agent.timer"
 
 
 class SystemdInstallerTests(unittest.TestCase):

@@ -1,4 +1,4 @@
-"""Manual, recoverable enrollment for ARBY PATCH AGENT v2."""
+"""Manual, recoverable enrollment for VERSIONARY AGENT v2."""
 
 import secrets
 from pathlib import Path

@@ -1,0 +1,10 @@
+[Unit]
+Description=VERSIONARY AGENT - Optional update reporting timer
+
+[Timer]
+OnCalendar=*-*-* 06:00:00
+Persistent=false
+Unit=versionary-agent.service
+
+[Install]
+WantedBy=timers.target

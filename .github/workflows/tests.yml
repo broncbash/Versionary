@@ -1,0 +1,42 @@
+name: Python tests
+
+# Cost control: hosted tests are opt-in only. Routine pushes, merges,
+# and pull-request status changes must not start paid runner jobs.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# If a newer run supersedes an older one for the same ref, stop the older run.
+concurrency:
+  group: python-tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unittest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.13', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: requirements-baseline.txt
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-baseline.txt cryptography httpx
+      - name: Verify Python and installer syntax
+        run: |
+          python -m compileall -q .
+          bash -n installer/install-agent.sh
+      - name: Build agent test package
+        run: python installer/build-agent-package.py
+      - name: Run all unit tests
+        run: python -m unittest discover -s tests -p 'test_*.py' -q

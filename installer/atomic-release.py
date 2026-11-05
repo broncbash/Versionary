@@ -1,4 +1,4 @@
-"""Atomic release staging for ARBY PATCH AGENT.
+"""Atomic release staging for VERSIONARY AGENT.
 
 This module does not install services or activate agents.
 """
@@ -144,6 +144,21 @@ def release_id(modules):
     return digest.hexdigest()
 
 
+
+def require_safe_bytecode_cache(cache):
+    """Allow only ordinary, owner-controlled Python bytecode cache files."""
+    info = cache.lstat()
+    if (not stat.S_ISDIR(info.st_mode) or
+            info.st_uid != os.geteuid() or info.st_mode & 0o022):
+        raise RuntimeError("Unsafe release bytecode cache")
+    for entry in cache.iterdir():
+        info = entry.lstat()
+        if (not stat.S_ISREG(info.st_mode) or
+                info.st_uid != os.geteuid() or info.st_mode & 0o022 or
+                info.st_nlink != 1 or entry.suffix != ".pyc"):
+            raise RuntimeError("Unsafe release bytecode entry")
+
+
 def stage_release(app, modules):
     """Stage an immutable release without activating it."""
     app = Path(app)
@@ -156,7 +171,11 @@ def stage_release(app, modules):
     if releases.is_symlink():
         raise RuntimeError("Symlinked releases directory")
 
-    releases.mkdir(exist_ok=True)
+    # Create the release directory with safe permissions regardless
+    # of the invoking user's umask. Never relax an existing directory.
+    if not releases.exists() and not releases.is_symlink():
+        releases.mkdir(mode=0o700)
+
     require_safe_path(releases)
 
     if target.is_symlink():
@@ -174,6 +193,9 @@ def stage_release(app, modules):
         actual = {}
 
         for entry in existing.iterdir():
+            if entry.name == "__pycache__":
+                require_safe_bytecode_cache(entry)
+                continue
             info = entry.lstat()
 
             if not stat.S_ISREG(info.st_mode):
@@ -260,6 +282,9 @@ def activate_release(app, identifier):
     modules = {}
 
     for entry in target.iterdir():
+        if entry.name == "__pycache__":
+            require_safe_bytecode_cache(entry)
+            continue
         require_safe_path(entry, directory=False)
 
         if not entry.name.endswith(".py"):

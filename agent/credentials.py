@@ -1,4 +1,4 @@
-"""Secure credential storage for ARBY PATCH AGENT."""
+"""Secure credential storage for VERSIONARY AGENT."""
 
 import json
 import os
@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 DEFAULT_CREDENTIAL_PATH = Path(
-    "/var/lib/arby-patch-agent/credential.json"
+    "/var/lib/versionary-agent/credential.json"
 )
 
 

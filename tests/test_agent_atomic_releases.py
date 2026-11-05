@@ -1,4 +1,4 @@
-"""Regression tests for atomic ARBY PATCH AGENT releases."""
+"""Regression tests for atomic VERSIONARY AGENT releases."""
 
 import importlib.util
 import os
@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
-ARCHIVE = ROOT / "installer/dist/arby-patch-agent.tar.gz"
+ARCHIVE = ROOT / "installer/dist/versionary-agent.tar.gz"
 
 spec = importlib.util.spec_from_file_location(
     "arby_atomic_installer",
@@ -27,7 +27,7 @@ class TestAtomicReleases(unittest.TestCase):
         self.root = Path(self.temp.name)
 
     def app(self):
-        return self.root / "opt/arby-patch-agent"
+        return self.root / "opt/versionary-agent"
 
     def test_fresh_install_uses_release_symlink(self):
         installer.install(ARCHIVE, self.root)
@@ -74,7 +74,7 @@ class TestAtomicReleases(unittest.TestCase):
     def test_state_survives_reinstallation(self):
         installer.install(ARCHIVE, self.root)
 
-        state = self.root / "var/lib/arby-patch-agent"
+        state = self.root / "var/lib/versionary-agent"
         identity = state / "identity.json"
         credential = state / "credential.json"
 

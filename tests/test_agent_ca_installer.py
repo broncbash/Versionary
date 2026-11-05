@@ -91,7 +91,7 @@ class TestAgentCAInstaller(unittest.TestCase):
         )
 
         destination = (
-            self.root / "etc/arby-patch-agent/ca.crt"
+            self.root / "etc/versionary-agent/ca.crt"
         )
 
         self.assertEqual(
@@ -109,7 +109,7 @@ class TestAgentCAInstaller(unittest.TestCase):
         installer.install_ca(self.trusted_ca, self.root)
 
         destination = (
-            self.root / "etc/arby-patch-agent/ca.crt"
+            self.root / "etc/versionary-agent/ca.crt"
         )
 
         before = destination.read_bytes()
@@ -120,7 +120,7 @@ class TestAgentCAInstaller(unittest.TestCase):
 
     def test_symlink_destination_rejected(self):
         destination_dir = (
-            self.root / "etc/arby-patch-agent"
+            self.root / "etc/versionary-agent"
         )
         destination_dir.mkdir(parents=True)
 
@@ -138,6 +138,35 @@ class TestAgentCAInstaller(unittest.TestCase):
         self.assertEqual(
             outside.read_text(), "DO NOT TOUCH"
         )
+
+    def test_conflicting_valid_ca_preserves_existing_trust(self):
+        installer.install_ca(self.trusted_ca, self.root)
+        destination = self.root / "etc/versionary-agent/ca.crt"
+        before = destination.read_bytes()
+        replacement = self.root / "replacement-ca.crt"
+        replacement.write_bytes(create_untrusted_ca())
+        with self.assertRaises(ValueError):
+            installer.install_ca(replacement, self.root)
+        self.assertEqual(destination.read_bytes(), before)
+
+    def test_mismatched_expected_fingerprint_preserves_existing_trust(self):
+        installer.install_ca(self.trusted_ca, self.root)
+        destination = self.root / "etc/versionary-agent/ca.crt"
+        before = destination.read_bytes()
+        with self.assertRaises(ValueError):
+            installer.install_ca(self.trusted_ca, self.root,
+                                 expected_sha256="0" * 64)
+        self.assertEqual(destination.read_bytes(), before)
+
+    def test_hardlinked_ca_destination_rejected_without_mutation(self):
+        import os
+        installer.install_ca(self.trusted_ca, self.root)
+        destination = self.root / "etc/versionary-agent/ca.crt"
+        before = destination.read_bytes()
+        os.link(destination, self.root / "linked-ca.crt")
+        with self.assertRaises(ValueError):
+            installer.install_ca(self.trusted_ca, self.root)
+        self.assertEqual(destination.read_bytes(), before)
 
     def test_private_key_material_rejected(self):
         data = (

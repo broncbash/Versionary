@@ -12,7 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 INSTALLER = ROOT / "installer/install-files.py"
-PACKAGE = ROOT / "installer/dist/arby-patch-agent.tar.gz"
+PACKAGE = ROOT / "installer/dist/versionary-agent.tar.gz"
 
 
 class AgentReinstallationTests(unittest.TestCase):
@@ -44,7 +44,7 @@ class AgentReinstallationTests(unittest.TestCase):
 
             self.install(root)
 
-            state = root / "var/lib/arby-patch-agent"
+            state = root / "var/lib/versionary-agent"
             identity = state / "identity.json"
             credential = state / "credential.json"
 
@@ -68,7 +68,7 @@ class AgentReinstallationTests(unittest.TestCase):
                 for path in (identity, credential)
             }
 
-            agent = root / "opt/arby-patch-agent/agent"
+            agent = root / "opt/versionary-agent/agent"
             release_before = os.readlink(agent)
 
             self.install(root)

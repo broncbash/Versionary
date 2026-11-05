@@ -28,12 +28,12 @@ class TestSecureDirectoryTraversal(unittest.TestCase):
 
     def test_create_nested_directories(self):
         with secure.secure_directory(
-            self.root, "opt/arby-patch-agent", create=True
+            self.root, "opt/versionary-agent", create=True
         ) as fd:
             self.assertTrue(os.fstat(fd).st_mode)
 
         self.assertTrue(
-            (self.root / "opt/arby-patch-agent").is_dir()
+            (self.root / "opt/versionary-agent").is_dir()
         )
 
     def test_existing_directory_accepted(self):

@@ -42,6 +42,16 @@ class AgentShellInstallationTests(unittest.TestCase):
             result.stdout,
         )
 
+        self.assertIn(
+            "[OK] Identical reinstallation preserved release, CA, config and units",
+            result.stdout,
+        )
+
+    def test_isolated_smoke_test_does_not_depend_on_live_repositories(self):
+        source = INSTALLER.read_text(encoding="utf-8")
+        self.assertIn("python3 -m agent --help", source)
+        self.assertNotIn("python3 -m agent scan", source)
+
     def test_production_installation_remains_disabled(self):
         # Must not invoke --install: that could require root
         # and may become active in a future release.
