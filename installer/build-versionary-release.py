@@ -54,6 +54,10 @@ REQUIRED = {
     "installer/generate-certificates.py",
     "installer/versionary-server-install.py",
     "installer/build-versionary-release.py",
+    "installer/versionary-beta-agent-bootstrap.sh",
+    "installer/versionary-agent-guided-install.sh",
+    "installer/systemd/versionary-agent.service",
+    "installer/systemd/versionary-agent.timer",
 }
 
 EXCLUDED_DIRS = {
@@ -118,7 +122,18 @@ def eligible(path):
         if relative.as_posix() != "agent/credentials.py":
             return False
 
-    return path.suffix == ".py" or relative.as_posix() in ROOT_FILES
+    return (
+        relative.as_posix() in {
+            "installer/versionary-beta-agent-bootstrap.sh",
+            "installer/versionary-agent-guided-install.sh",
+        }
+        or path.suffix == ".py"
+        or relative.as_posix() in ROOT_FILES
+        or relative.as_posix() in {
+            "installer/systemd/versionary-agent.service",
+            "installer/systemd/versionary-agent.timer",
+        }
+    )
 
 
 def collect():
