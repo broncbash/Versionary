@@ -1,204 +1,119 @@
-# VERSIONARY — COMPLETE NEXT-SESSION HANDOFF
+# Versionary — Comprehensive Next-Session Prompt
+**Authoritative handoff: 2026-11-05, after GitHub v0.1.0-beta.1 publication.**
 
-Updated: 2026-11-01
-Repository: broncbash/arby-patch-command
-Local checkout: ~/Projects/arby-patch-command
-Branch: feature/versionary-agent-rename
-Last confirmed pushed commit: 62f9f5e
+> Resume development of Versionary from this handoff and the connected GitHub repository `broncbash/arby-patch-command`. Do not assume historical sections of other docs are current; read their newest checkpoint. Work in focused, meaningful batches, one short pasteable command at a time when local execution is required. Use GitHub integration directly for approved repository documentation changes. Do not restart from scratch, repeat already-accepted tests without reason, or make unauthorized changes.
 
-## FIRST ACTIONS
+## 1. Mission and product identity
+Versionary is a portable, professional Linux fleet update visibility and eventual patch-management application. It replaces the old ARBY PATCH COMMAND project name; GitHub repo and some internal identifiers still carry legacy names. **Do not rename the repo or break compatibility without approval.**
 
-Continue Versionary Beta 0.9 development.
+Architecture: Python FastAPI HTTPS server, SQLite agent registry and reporting, secure agent identities and enrollment, dashboard, Linux Python agents with Arch/pacman and Debian/apt scanning. Current beta is **observer-only**: discover/update inventories, show health, manually approve/revoke agents, heartbeat/report. **No automatic patch installs or reboots.**
 
-Before changing anything:
-1. Check git branch, status, and latest commits.
-2. Read all docs/versionary/*.md documentation.
-3. Inspect the current implementation and tests.
-4. Preserve all existing local state and credentials.
-5. Identify the next coherent development batch.
+Product vision: friendly interactive and unattended/scriptable server and agent installers; professional dashboard with Settings and GUI/CLI administrative parity; user-owned or generated certificates and CA trust; safe upgrades/rollback, backup/restore, optional secure discovery, eventual explicit manual patch application. Never hard-code homelab IPs, fingerprints, or developer paths.
 
-Do not assume this handoff is newer than the repository.
+## 2. Published milestone — do not re-publish
+- Repository: https://github.com/broncbash/arby-patch-command (PRIVATE).
+- Main branch after authorized PR #2 merge: `9a3587b5edfbbd0088ecb46d802117f62f01a551`.
+- Development branch: `feature/versionary-agent-rename`; confirmed source commit `cd12d1f95a2d52d005a3623045e0efcf9084b5b3`.
+- Published GitHub **prerelease**: https://github.com/broncbash/arby-patch-command/releases/tag/v0.1.0-beta.1
+- Tag `v0.1.0-beta.1`, target merged main, 2026-11-05.
+- Four uploaded assets:
+  1. `versionary-v0.1.0-beta.1.tar.gz` (main release; 160 files), SHA256 `4309194d3d993a0a7d1c238d0ac514963b53c80afd5263c304f36a11dc26542a`.
+  2. `versionary-v0.1.0-beta.1-manifest.json`, SHA256 `9608eed0bddd4d828da2f936f5ac67821e58c8575c5337d58d8998be09685d50`.
+  3. `versionary-v0.1.0-beta.1-agent.tar.gz`, SHA256 `936fc9c05e7b7f6d4b4c5aff4805d225da915311594af9e862797d024e76257b`.
+  4. `SHA256SUMS`, SHA256 `b8ddf34bda69674df71eb366ed34368d8d80e1dbfa819fd8465822e2110d7bfc`.
+- Checksums and GitHub asset digests verified. **Follow-up:** validate renamed release archive/manifest together with server installer's `--mode dry-run` before recommending general installation. The archive builder originally produced `versionary-rc2-20261105-152857-347494.tar.gz` and matching JSON; renamed files were checksum verified, but no recorded paired server-installer dry-run after rename.
+- Repository remains private, so only authorized collaborators can download. No approval to make public. No production approval.
+- Release notes explain limitations; do not expose private CA, tokens, keys or lab data.
 
-## PROJECT
+## 3. Source and local working environment
+- CachyOS/Arch desktop checkout: `~/Projects/arby-patch-command`.
+- Release candidates: `~/Projects/versionary-release-candidates`.
+- Local release staging: `~/Projects/versionary-release-candidates/v0.1.0-beta.1/`.
+- User uses Konsole, zsh, nvim, KDE Klipper (not wl-copy). Prefers complete copy-paste heredocs, minimal chatter, meaningful development batches, no hosted CI.
+- Preserve all local untracked work, backup files, certificates, keys, SQLite DBs and staging directories. Known examples: `.versionary-local-beta/`, `.versionary-timer-preview/`, `.versionary-https-beta/`, `return-prompt.md`, `dashboard_ui.py.pre-tab-login`, `installer/setup-config.py.pre-batch8`, dated `*.backup-*` and `*.pre-*` files. Never run `git clean -fd`, broad reset, or `git add -A`.
+- **No commit, push, merge, tag, release, repository visibility change or live deployment without explicit user approval.** Prior approval was for the documentation synchronization described below, not a blanket grant for future work.
+- Do not modify Proxmox CT 102 (monitoring), CT 104 (Versionary/Patch Command) or any live homelab machine without approval. Prefer disposable virt-manager VMs.
+- No hosted CI. Keep beta/production security gates explicit and disabled by default.
 
-Versionary is a standalone Linux patch-visibility platform,
-formerly ARBY PATCH COMMAND.
+## 4. Disposable VM beta lab (historical last-known state, verify before connecting)
+- Arch server VM `Arch-Ver-Server`, `192.168.122.75`; isolated HTTPS server `https://192.168.122.75:8766`, dashboard `/admin/dashboard`; service `versionary-server.service`; private CA typically `/var/lib/versionary/certs/ca.crt`.
+- Arch clone `Arch-Ver-Installer-Test`, `192.168.122.180`, used for guided installer acceptance. Original Arch agent `192.168.122.132` and Debian `192.168.122.69` were powered off at last checkpoint. Addresses are lab-only.
+- Server `VERSIONARY_BETA_ENROLLMENT=true`, `VERSIONARY_BETA_REPORTING=true`, `VERSIONARY_DISTRIBUTION_ENABLED=false` in tested beta setup; production flag false. Keep private server credentials private.
+- Guided agent installer was **executed** on Arch clone with offline distribution and CA; passed preflight, installed 13 modules, registered pending, waited for dashboard approval, enrolled, heartbeat and report recorded. No system package upgrades, reporting timer disabled. Follow-up patch changed repetitive enrollment errors to a waiting message; syntax checked but not VM re-tested.
+- Debian agent fleet acceptance was demonstrated earlier; do not imply the new guided installer was fully live-accepted on Debian.
+- Agent test identity example `9c94f1dc-3729-448f-9214-f3804a0e8a09` (lab-only; no need to reuse).
+- Avoid touching VMs unnecessarily. Ask approval before potentially destructive install/recovery experiments.
 
-The current product is observer-only.
+## 5. Current implementation
+Server: `versionary_https_beta.py`, `versionary_https_beta_admin.py`, `versionary_browser_sessions.py`, `dashboard_ui.py`, `agent_registry.py`, `agent_reporting_api.py`, `agent_enrollment_api.py`, `enrollment_v2_api.py`, admin agent APIs. FastAPI/SQLite, Ed25519 challenge/proof, approval/revocation, agent credential authentication, browser sessions and dashboard, private TLS state.
+Agent: `versionary_agent_cli.py`, `agent/` package (config, identity, enrollment, credentials, heartbeat, reporting, scanner). Manual CLI and optional systemd reporting timer. Arch and Debian-family scanner support.
+Installer/release: `installer/versionary-server-install.py`, `installer/versionary-agent-guided-install.sh`, `installer/versionary-beta-agent-bootstrap.sh`, `installer/install-agent-offline.py`, `installer/versionary-agent-system-preflight.py`, `installer/versionary-agent-setup.py`, `installer/build-versionary-release.py`, `installer/build-agent-distribution.py`, certificate and recovery modules.
+Historical full regression checkpoints include 1,577 tests with one skipped on Nov 4, and later test runs in preceding work. **Do not claim a fresh full-suite run for the published tag without running one.** Security and transaction hardening prototypes exist but production acceptance remains blocked.
 
-It supports agent registration, approval, revocation,
-authenticated heartbeat, update reporting, and fleet monitoring.
+## 6. Implemented command-line switches — authoritative at beta tag
+See `docs/versionary/COMMAND-REFERENCE.md` for exact syntax and defaults; verify source before modifying.
 
-Do not introduce automatic package installation, unattended
-upgrades, reboots, or production deployment without approval.
+**Guided agent installer:**
+```bash
+sudo bash installer/versionary-agent-guided-install.sh \
+ --distribution /path/versionary-v0.1.0-beta.1-agent.tar.gz \
+ --ca-cert /path/ca.crt --server https://HOST:8766 \
+ [--install-deps] [--enable-timer]
+```
+No args prompts interactively. `-h`/`--help` supported. Waits up to 10 minutes for approval. `--install-deps` may install missing system dependencies, **not** update managed packages; `--enable-timer` opts in to daily observer-only reporting. Neither is default.
 
-## VERIFIED BETA 0.9 MILESTONE
+**Two-stage bootstrap:**
+```bash
+sudo bash installer/versionary-beta-agent-bootstrap.sh install --distribution FILE --ca-cert FILE --server HTTPS_URL [--install-deps]
+sudo bash installer/versionary-beta-agent-bootstrap.sh complete
+```
+Install stages/deploys and registers pending; complete enrolls, heartbeats, reports after approval.
 
-A persistent local HTTPS server runs on the development desktop.
+**Agent CLI:** `python3 versionary_agent_cli.py [--state-dir DIR] setup --server HTTPS_URL --ca-cert FILE`, or `setup --interactive`; commands `status`, `register`, `enroll`, `heartbeat`, `report`. Global `--system` selects installed `/etc/versionary-agent/config.json` and `/var/lib/versionary-agent`, mutually exclusive with `--state-dir`; `setup` forbidden in system mode. Typical `sudo python3 /opt/versionary-agent/versionary_agent_cli.py --system report`.
 
-Dashboard:
-https://localhost:8769/admin/dashboard
+**Portable setup:** `python3 installer/versionary-agent-setup.py --server HTTPS_URL --ca-cert FILE [--state-dir DIR] [--interactive] [--dry-run]`.
 
-A real CachyOS desktop agent was successfully:
-- Registered
-- Approved
-- Activated
-- Authenticated
-- Heartbeated
-- Used to report actual available updates
+**Disposable server installer:**
+```bash
+sudo python3 installer/versionary-server-install.py \
+ --archive FILE --manifest FILE --mode dry-run \
+ [--confirm-disposable] [--app-dir /opt/versionary] \
+ [--state-dir /var/lib/versionary] [--tls-identity HOST_OR_IP] \
+ [--bind-address ADDRESS] [--port 8766]
+```
+`--mode` choices `dry-run` (default), `install`. Install requires disposable confirmation and changes system; no live host installation without approval.
 
-The dashboard displayed 24 real package updates.
+**HTTPS server runtime:** `python3 versionary_https_beta.py init|serve|status`; environment `VERSIONARY_STATE_DIR`, `VERSIONARY_TLS_IDENTITY`, `VERSIONARY_BIND_ADDRESS`, `VERSIONARY_HTTPS_PORT`, `VERSIONARY_BETA_ENROLLMENT`, `VERSIONARY_BETA_REPORTING`, `VERSIONARY_DISTRIBUTION_ENABLED`. `init` refuses overwriting existing certificates.
 
-On this system:
-- pacman -Qu returned zero updates.
-- checkupdates returned 24 updates.
+**Staged server settings CLI:** `python3 installer/settings-cli.py [--path FILE] show|runtime-status|set KEY VALUE`; keys `public_url`, `enrollment_enabled`, `reporting_enabled`, `scan_interval_minutes`, `appearance`, `tls_mode`. **Staged settings are not applied to running service.**
 
-The installed local scanner was corrected to use checkupdates.
-Scanner errors must never be silently reported as zero updates.
+**Future concepts, NOT current flags:** `--uninstall`, `--upgrade`, `--rollback`, `--auto-discover`, `--rotate-ca`, `--apply-updates`, `--reboot-policy`. Decide final names/semantics before implementing; never advertise as existing.
 
-The launcher works through:
-~/.local/bin/versionary-beta09
+## 7. Product roadmap / planned features
+**Immediate:** polish one-command/interactive first-run experience; stable release packaging and downloadable-asset verification; dependency detection, friendly errors, clean Arch/Debian installs, secure approval onboarding, diagnostics and reporting schedule UI. 
+**Near-term:** GUI Settings > Security > Certificates with user-provided TLS cert/key OR easy CA/server cert generation/renewal, hostname/IP SAN checks, safe trust installation/rotation; equivalent CLI options. Configurable network binding, service installation, admin sessions and credentials, certificate lifecycle. Agent inventory/search/filters, scan history, stale/failed agent status, package counts, scheduled observer-only reporting and manual scans. Optional secure agent discovery with explicit approval and no silent trust/enrollment.
+**Safety/operability:** transactional install/upgrade/rollback/recovery, backups, identity/credential preservation, safe uninstall, signed release provenance, filesystem race/durability hardening, cross-distro matrix, secure defaults, production acceptance gate.
+**Later:** explicit administrator-triggered package update execution and progress, per-agent policy, maintenance windows, reboot handling, with no unattended upgrades/reboots by default. GUI/CLI parity, user-friendly standalone packaging, branding, accessibility and responsive dashboard.
+**Deferred decisions:** final supported OS/version matrix, discovery protocol, backend migration policy, distribution channel, update/reboot authorization model, public repository timing, repo rename.
 
-The launcher invokes the project's Python virtual environment.
+## 8. GitHub documentation and ongoing handoffs
+- Authoritative docs: `docs/versionary/PROJECT-STATUS.md`, `ROADMAP.md`, `COMMAND-REFERENCE.md`, `USER-GUIDE.md`, `DEVELOPER-HANDOFF.md`, and **this file**.
+- On 2026-11-05 user explicitly approved syncing docs to GitHub. A docs branch `docs/versionary-beta-2026-11-05` was created and the five companion docs updated with a new authoritative checkpoint while retaining historical text. Verify whether this next-session prompt and a PR/merge are completed before claiming documentation is on `main`. **Do not merge automatically absent explicit approval for that action.**
+- User had repeated problems downloading generated ZIP; use GitHub integration for approved updates rather than relying on sandbox downloads.
+- After meaningful milestones, update status/roadmap/CLI reference/handoff in same authorized batch, preserving prior engineering history. Do not commit local state/secrets.
+- Do not confuse docs branch or development branch with published release tag. Do not mutate released tag or assets without explicit authorization.
 
-The dashboard supports:
-- Fleet overview
-- Agent approval and revocation
-- Update totals
-- Filtering and sorting
-- Tab-scoped administrator token persistence
-- Log out
+## 9. Recommended first actions next session
+1. Read this handoff, current GitHub branch/main, docs status and release metadata; check any open docs PR.
+2. If docs changes still awaiting review/merge, summarize and request authorization rather than silently merging.
+3. Ask user which immediate priority to tackle only if not already specified; suggest **real downloadable beta install/verification and simplified first-run experience**.
+4. Before changing code, inspect relevant source and existing tests; make a focused implementation plan and carry out a meaningful batch.
+5. Use approved disposable VMs for any real installation, not live Proxmox/LXC. Keep outputs short and actionable.
+6. Never re-run broad tests needlessly, and never invent a passing result.
+7. Preserve all untracked files; do not commit/push without authorization.
+8. Keep documentation current and report precise changed files, verified checks, commit/PR state, and next action.
 
-The user verified refresh persistence and logout.
+## 10. Working relationship
+User appreciates occasional Star Trek jokes (Captain / Lt. Uhura / Darth Helmet), but wants fast, grounded engineering, not endless ceremony. Avoid repetitive clarification when requirements are established. Prefer full pasteable heredocs for local code, nvim not nano, and direct GitHub operations where permitted. Keep all risky actions opt-in and be transparent about what has and has not been executed.
 
-IMPORTANT: Browser sessionStorage is not a secure replacement
-for server-side administrator sessions.
-
-## IMPORTANT FILES
-
-dashboard_ui.py
-installer/versionary-beta09-local.py
-installer/versionary-beta09-wrapper.sh
-installer/versionary-local-real-agent-trial.py
-
-docs/versionary/PROJECT-STATUS.md
-docs/versionary/DEVELOPER-HANDOFF.md
-docs/versionary/ROADMAP.md
-docs/versionary/USER-GUIDE.md
-docs/versionary/COMMAND-REFERENCE.md
-
-Review these files rather than relying only on this summary.
-
-## USER'S TERMINAL AND CODE DELIVERY PREFERENCES
-
-The user works primarily on an Arch/CachyOS desktop,
-using Konsole and a Klipper clipboard workflow.
-
-CRITICAL:
-- Prefer complete, directly pasteable shell heredocs.
-- Use cat > file <<'EOF' ... EOF for full-file delivery.
-- Use equivalent complete heredocs for Python scripts.
-- Make each batch easy to paste through Konsole/Klipper.
-- Avoid piecemeal edits and manual line-by-line changes.
-- Avoid ZIP downloads and files in ~/Downloads by default.
-- Do not create downloadable artifacts unless necessary
-  or explicitly requested.
-- Prefer one coherent batch over many tiny instructions.
-- Avoid excessive chatter and repeated confirmation questions.
-- Provide clear success/failure verification.
-- Avoid set -e in commands pasted directly into an
-  interactive shell; use it only inside standalone scripts
-  when appropriate.
-- The user prefers nvim over nano.
-- The user is not a programmer.
-
-Do not confuse the user's Klipper clipboard workflow with
-the Versionary launcher wrapper. Preserve both.
-
-## SAFETY AND LOCAL STATE
-
-Never delete, overwrite, reset, or commit:
-- ~/.local/state/versionary-beta09
-- Existing SQLite database
-- Agent credentials and tokens
-- HTTPS private keys or certificates
-- Existing approved agent identity
-
-Protect untracked local development artifacts, including:
-- .versionary-local-beta/
-- .versionary-timer-preview/
-- dashboard_ui.py.pre-tab-login
-- installer/setup-config.py.pre-batch8
-- return-prompt.md
-
-Check for additional untracked files before staging.
-
-Never modify live Proxmox containers or other homelab
-systems without explicit approval.
-
-No hosted CI.
-No surprise package updates.
-No automatic reboots.
-No unapproved deployment.
-
-## NEXT DEVELOPMENT PRIORITIES
-
-1. Inspect repository and verify current checkpoint.
-2. Replace the development-only, path-specific launcher
-   with a properly portable installer and runtime layout.
-3. Integrate accurate checkupdates-based Arch/CachyOS
-   detection into the distributable installation.
-4. Implement real server-side administrator authentication:
-   - HttpOnly cookies
-   - Secure and SameSite attributes
-   - Session expiration
-   - Logout and server-side invalidation
-   - CSRF protection
-   - Appropriate security regression tests
-5. Validate server and agent restart persistence.
-6. Validate installation, upgrades, rollback, and backups.
-7. Continue portable server/agent packaging and GUI/CLI
-   configuration parity.
-8. Update documentation after each major milestone.
-
-Support user-supplied and automatically managed TLS
-certificates, with correct hostname/IP SAN handling,
-without hard-coded homelab-specific addresses.
-
-## TESTING AND GIT WORKFLOW
-
-Use local tests only.
-
-Prefer targeted tests followed by broader verification
-when appropriate.
-
-Never claim tests passed unless they actually ran.
-
-Keep large development batches coherent and reviewable.
-
-Do not commit or push without the user's approval.
-
-Stage only intended files; exclude local secrets, state,
-backups, and temporary artifacts.
-
-After approved commits, update the documentation and
-next-session handoff with the new commit identifier.
-
-## COMMUNICATION STYLE
-
-Be concise, practical, and proactive.
-
-The user enjoys occasional Star Trek/Spaceballs humor,
-but working code takes priority over speeches.
-
-Avoid unnecessary back-and-forth.
-
-Deliver usable, complete solutions.
-
-## START HERE
-
-Check the current repository, read the Versionary
-documentation, verify the latest code, and proceed
-with the next safe local development batch.
-
-Do not repeat registration or enrollment unless required.
+**Resume at the actual GitHub checkpoint, not an imagined one. This document is a starting map; verify changing state before acting.**
