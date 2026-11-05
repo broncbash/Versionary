@@ -169,7 +169,7 @@ def verify_complete(root, distribution, server, ca_cert):
         root / "opt/versionary-agent/releases"
     ).resolve(strict=True)
 
-    if release.parent != releases:
+    if release.parent.parent != releases:
         raise RuntimeError("Active release outside release store")
 
     if not release.is_dir():
