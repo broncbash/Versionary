@@ -130,3 +130,28 @@ Batch 72: added fail-closed inventory prechecks and isolated-root journal-integr
 ## Batch 73 — Controlled beta acceptance
 
 Batch 73: release readiness is now evaluated against BETA-ACCEPTANCE-PLAN.md. No release authorization has been granted.
+
+<!-- VERSIONARY_BATCH_78_ACCEPTANCE -->
+## Batch 78 — Controlled beta acceptance evidence
+
+Development checkpoint: 2026-11-05.
+Verified feature-branch baseline: 357c5fa.
+
+Local full regression: 1,624 tests, one skipped,
+zero failures.
+
+The complete 13-module isolated fresh-install path
+is implemented and tested.
+
+The acceptance evidence matrix is maintained in
+BETA-ACCEPTANCE-EVIDENCE.md.
+
+Real-system installation remains disabled.
+No acceptance gate is declared complete solely from
+local unit or isolated integration tests.
+
+The next milestone is an explicitly authorized
+disposable-VM fresh-install acceptance trial.
+
+No live systems, existing beta VMs or homelab
+containers were modified by this documentation batch.
