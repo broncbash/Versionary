@@ -391,3 +391,7 @@ Production deployment remains blocked.
 ## Batch 72 — Journal integrity checkpoint
 
 Batch 72 checkpoint: journal inventory hardening is implemented; race-resistant recovery and durable finalization remain open.
+
+## Batch 73 — Controlled beta acceptance
+
+Batch 73 prioritizes beta acceptance gates: installation, enrollment/security, dashboard, upgrade/recovery, packaging, and final approval. Further speculative hardening is deferred unless a concrete release blocker is identified.

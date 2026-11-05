@@ -380,3 +380,7 @@ Status: PASSED — three disposable Linux VMs.
 ## Batch 72 — Journal integrity checkpoint
 
 Batch 72: isolated upgrade journal inventory prechecks reject unexpected or missing entries before manifest interpretation.
+
+## Batch 73 — Controlled beta acceptance
+
+Batch 73 establishes BETA-ACCEPTANCE-PLAN.md as the controlled-beta acceptance checklist. The latest verified regression is 1,590 tests with one skipped. End-to-end beta acceptance remains pending.

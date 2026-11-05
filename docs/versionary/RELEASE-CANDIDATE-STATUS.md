@@ -126,3 +126,7 @@ filesystem mutation safety, and crash recovery.
 ## Batch 72 — Journal integrity checkpoint
 
 Batch 72: added fail-closed inventory prechecks and isolated-root journal-integrity regression coverage. Production installation and journal cleanup remain disabled.
+
+## Batch 73 — Controlled beta acceptance
+
+Batch 73: release readiness is now evaluated against BETA-ACCEPTANCE-PLAN.md. No release authorization has been granted.

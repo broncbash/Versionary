@@ -533,3 +533,7 @@ No hosted CI. No commits, pushes, or merges without user approval.
 ## Batch 72 — Journal integrity checkpoint
 
 Batch 72: finalization_assessment now checks the exact journal filename inventory before reading manifest snapshots. It remains advisory and never authorizes cleanup.
+
+## Batch 73 — Controlled beta acceptance
+
+Batch 73 introduces BETA-ACCEPTANCE-PLAN.md. Use its seven evidence-based gates to prioritize development. Do not equate unit-test success with completed disposable-system acceptance.
