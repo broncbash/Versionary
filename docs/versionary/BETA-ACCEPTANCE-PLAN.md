@@ -220,3 +220,30 @@ Remaining Gate 2 work:
 - Perform an explicitly authorized disposable-VM acceptance test.
 - Verify Arch and Debian 13 agent behavior after installation.
 - Document manual recovery and clean-install limitations.
+
+<!-- VERSIONARY_BATCH_77_FULL_FRESH -->
+## Batch 77 — Complete isolated fresh agent installation
+
+A new full fresh-install coordinator integrates the existing
+verified offline installer with the fresh-only readiness checks.
+
+The complete isolated installation includes the 13-module
+agent release, administrative CLI, CA certificate, configuration,
+systemd service and timer definitions, and private state directory.
+
+Preview mode does not install. Execution requires the isolated
+authorization phrase and an explicit execution flag.
+
+Existing agent installations, nonempty application/state
+directories, and pending installation/upgrade journals are
+rejected. No in-place upgrades are supported.
+
+This is not a globally atomic installation: the underlying
+offline installer uses multiple stages, and interruption can
+leave partial state requiring manual review.
+
+Real-system installation, service activation, enrollment,
+automatic patching, and production deployment remain disabled.
+
+Disposable-VM acceptance on Arch and Debian 13 still requires
+separate explicit authorization.
