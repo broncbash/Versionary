@@ -38,7 +38,7 @@ def prepare_state():
             0o600,
         )
         with os.fdopen(fd, "w") as stream:
-            stream.write(secrets.token_urlsafe(36) + "\\n")
+            stream.write(secrets.token_urlsafe(36) + "\n")
     if AUTH.is_symlink() or AUTH.stat().st_mode & 0o077:
         raise RuntimeError("Admin token must be a private regular file")
     if not stat.S_ISREG(AUTH.stat().st_mode):
