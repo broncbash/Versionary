@@ -18,7 +18,42 @@ while (($#)); do
  esac
 done
 [[ $PORT =~ ^[0-9]+$ ]] && ((10#$PORT >= 1024 && 10#$PORT <= 65535)) || die 'Invalid HTTPS port'
-for cmd in curl sha256sum python3 sudo systemctl ip; do command -v "$cmd" >/dev/null || die "Missing $cmd"; done
+# On minimal Arch/Debian guests, offer to install missing bootstrap tools.
+bootstrap_dependencies() {
+ local missing=() cmd pkgmgr='' packages=()
+ for cmd in curl sha256sum python3 sudo; do
+  command -v "$cmd" >/dev/null 2>&1 || missing+=("$cmd")
+ done
+ (("${#missing[@]}" == 0)) && return 0
+ if command -v pacman >/dev/null 2>&1; then
+  pkgmgr=pacman
+  for cmd in "${missing[@]}"; do
+   case "$cmd" in curl) packages+=(curl);; sha256sum) packages+=(coreutils);; python3) packages+=(python);; sudo) packages+=(sudo);; esac
+  done
+ elif command -v apt-get >/dev/null 2>&1; then
+  pkgmgr=apt
+  for cmd in "${missing[@]}"; do
+   case "$cmd" in curl) packages+=(curl);; sha256sum) packages+=(coreutils);; python3) packages+=(python3);; sudo) packages+=(sudo);; esac
+  done
+ else die "Missing ${missing[*]}; install these prerequisites with your system package manager"; fi
+ printf 'Missing required tools: %s\n' "${missing[*]}"
+ [[ -t 0 ]] && ask 'Install missing prerequisites using the OS package manager?' || die 'Missing prerequisites in noninteractive mode'
+ if (( EUID == 0 )); then
+  if [[ $pkgmgr == pacman ]]; then pacman -Syu --needed -- "${packages[@]}"; else apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y -- "${packages[@]}"; fi
+ elif command -v sudo >/dev/null 2>&1; then
+  if [[ $pkgmgr == pacman ]]; then sudo pacman -Syu --needed -- "${packages[@]}"; else sudo apt-get update && sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -- "${packages[@]}"; fi
+ else
+  command -v su >/dev/null 2>&1 || die 'No sudo or su available. Install prerequisites as root.'
+  echo 'Root password required to install missing prerequisites.'
+  if [[ $pkgmgr == pacman ]]; then su -c "pacman -Syu --needed -- ${packages[*]}" || die 'Root package installation failed'
+  else su -c "apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y -- ${packages[*]}" || die 'Root package installation failed'; fi
+  # sudo may be installed but user might not be in sudoers.
+  echo 'If sudo reports that your account is not authorized, add it to sudoers using your distribution setup.'
+ fi
+ for cmd in "${missing[@]}"; do command -v "$cmd" >/dev/null 2>&1 || die "Still missing $cmd"; done
+}
+bootstrap_dependencies
+for cmd in systemctl ip; do command -v "$cmd" >/dev/null || die "Missing $cmd"; done
 [[ -d /run/systemd/system ]] || die 'Requires systemd'
 [[ ! -e /opt/versionary && ! -e /var/lib/versionary && ! -e /etc/systemd/system/versionary-server.service ]] || die 'Existing or partial installation detected; refusing overwrite'
 if [[ -z $IP ]]; then
@@ -35,6 +70,15 @@ try:
 except (ValueError,AssertionError): raise SystemExit('Invalid server IP')
 PY
 if [[ $FLEET == ask ]]; then
+ cat <<'EXPLAIN'
+Beta fleet options:
+  Enrollment ON: other machines can request to join this server.
+  You must explicitly approve each agent in the dashboard.
+  Reporting ON: approved agents can send heartbeats and lists of available
+  package updates. Reporting does NOT install updates, reboot hosts, or
+  grant remote shell access.
+  OFF: the server runs but cannot accept beta agent enrollment/reports.
+EXPLAIN
  if [[ $YES == true ]]; then FLEET=false
  elif ask 'Enable beta agent enrollment and observer-only reporting?'; then FLEET=true
  else FLEET=false; fi
@@ -87,6 +131,6 @@ if [[ $FLEET == true ]]; then
 fi
 sudo systemctl is-active --quiet versionary-server.service || die 'Service failed; check journalctl -u versionary-server.service'
 printf '\nINSTALL=PASS\nDashboard: https://%s:%s/admin/dashboard\n' "$IP" "$PORT"
-echo 'CA: /var/lib/versionary/certs/ca.crt'
+echo 'CA: /var/lib/versionary/certs/ca.crt (public certificate; copy securely to agents)'
 echo 'Admin token: sudo cat /var/lib/versionary/admin-token (keep private)'
 echo 'PRODUCTION_APPROVED=NO'
