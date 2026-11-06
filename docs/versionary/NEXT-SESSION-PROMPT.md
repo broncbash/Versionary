@@ -1,20 +1,24 @@
 # Versionary — Comprehensive Next-Session Prompt
+## 2026-11-06 repository identity update
+
+The user renamed the GitHub repository to `broncbash/Versionary` and explicitly changed its visibility to **public**. Both changes were verified with the GitHub repository API. The existing beta `v0.1.0-beta.1` remains available with four release assets and identical filenames/digests. Public HTTPS GitHub release downloads no longer require GitHub CLI authentication; use the download instructions in `docs/versionary/QUICK-START.md`. This visibility change **does not** approve production deployment or authorize publication of secrets. Keep existing local checkout path `~/Projects/arby-patch-command` as a factual historical/local path until the user actually moves it. Update `git remote origin` separately on the local checkout as desired; GitHub may redirect old remote URLs, but the canonical remote is `https://github.com/broncbash/Versionary.git`. Historical checkpoint entries below may describe the former private repository; the latest verified status supersedes them. Do not change the published tag or asset bytes.
+
 **Authoritative handoff: 2026-11-05, after GitHub v0.1.0-beta.1 publication.**
 
-> Resume development of Versionary from this handoff and the connected GitHub repository `broncbash/arby-patch-command`. Do not assume historical sections of other docs are current; read their newest checkpoint. Work in focused, meaningful batches, one short pasteable command at a time when local execution is required. Use GitHub integration directly for approved repository documentation changes. Do not restart from scratch, repeat already-accepted tests without reason, or make unauthorized changes.
+> Resume development of Versionary from this handoff and the connected GitHub repository `broncbash/Versionary`. Do not assume historical sections of other docs are current; read their newest checkpoint. Work in focused, meaningful batches, one short pasteable command at a time when local execution is required. Use GitHub integration directly for approved repository documentation changes. Do not restart from scratch, repeat already-accepted tests without reason, or make unauthorized changes.
 
 ## 1. Mission and product identity
-Versionary is a portable, professional Linux fleet update visibility and eventual patch-management application. It replaces the old ARBY PATCH COMMAND project name; GitHub repo and some internal identifiers still carry legacy names. **Do not rename the repo or break compatibility without approval.**
+Versionary is a portable, professional Linux fleet update visibility and eventual patch-management application. It replaces the old ARBY PATCH COMMAND project name; Some local checkout paths and internal identifiers still carry legacy names. **The GitHub repository was renamed with user authorization on 2026-11-06; do not rename local paths or break compatibility without checking first.**
 
 Architecture: Python FastAPI HTTPS server, SQLite agent registry and reporting, secure agent identities and enrollment, dashboard, Linux Python agents with Arch/pacman and Debian/apt scanning. Current beta is **observer-only**: discover/update inventories, show health, manually approve/revoke agents, heartbeat/report. **No automatic patch installs or reboots.**
 
 Product vision: friendly interactive and unattended/scriptable server and agent installers; professional dashboard with Settings and GUI/CLI administrative parity; user-owned or generated certificates and CA trust; safe upgrades/rollback, backup/restore, optional secure discovery, eventual explicit manual patch application. Never hard-code homelab IPs, fingerprints, or developer paths.
 
 ## 2. Published milestone — do not re-publish
-- Repository: https://github.com/broncbash/arby-patch-command (PRIVATE).
+- Repository: https://github.com/broncbash/Versionary (PUBLIC).
 - Main branch after authorized PR #2 merge: `9a3587b5edfbbd0088ecb46d802117f62f01a551`.
 - Development branch: `feature/versionary-agent-rename`; confirmed source commit `cd12d1f95a2d52d005a3623045e0efcf9084b5b3`.
-- Published GitHub **prerelease**: https://github.com/broncbash/arby-patch-command/releases/tag/v0.1.0-beta.1
+- Published GitHub **prerelease**: https://github.com/broncbash/Versionary/releases/tag/v0.1.0-beta.1
 - Tag `v0.1.0-beta.1`, target merged main, 2026-11-05.
 - Four uploaded assets:
   1. `versionary-v0.1.0-beta.1.tar.gz` (main release; 160 files), SHA256 `4309194d3d993a0a7d1c238d0ac514963b53c80afd5263c304f36a11dc26542a`.
@@ -22,7 +26,7 @@ Product vision: friendly interactive and unattended/scriptable server and agent 
   3. `versionary-v0.1.0-beta.1-agent.tar.gz`, SHA256 `936fc9c05e7b7f6d4b4c5aff4805d225da915311594af9e862797d024e76257b`.
   4. `SHA256SUMS`, SHA256 `b8ddf34bda69674df71eb366ed34368d8d80e1dbfa819fd8465822e2110d7bfc`.
 - Checksums and GitHub asset digests verified. **Follow-up:** validate renamed release archive/manifest together with server installer's `--mode dry-run` before recommending general installation. The archive builder originally produced `versionary-rc2-20261105-152857-347494.tar.gz` and matching JSON; renamed files were checksum verified, but no recorded paired server-installer dry-run after rename.
-- Repository remains private, so only authorized collaborators can download. No approval to make public. No production approval.
+- Repository became PUBLIC on 2026-11-06 by explicit user action, so beta assets can be downloaded without authentication. No production approval.
 - Release notes explain limitations; do not expose private CA, tokens, keys or lab data.
 
 ## 3. Source and local working environment
@@ -94,7 +98,7 @@ sudo python3 installer/versionary-server-install.py \
 **Near-term:** GUI Settings > Security > Certificates with user-provided TLS cert/key OR easy CA/server cert generation/renewal, hostname/IP SAN checks, safe trust installation/rotation; equivalent CLI options. Configurable network binding, service installation, admin sessions and credentials, certificate lifecycle. Agent inventory/search/filters, scan history, stale/failed agent status, package counts, scheduled observer-only reporting and manual scans. Optional secure agent discovery with explicit approval and no silent trust/enrollment.
 **Safety/operability:** transactional install/upgrade/rollback/recovery, backups, identity/credential preservation, safe uninstall, signed release provenance, filesystem race/durability hardening, cross-distro matrix, secure defaults, production acceptance gate.
 **Later:** explicit administrator-triggered package update execution and progress, per-agent policy, maintenance windows, reboot handling, with no unattended upgrades/reboots by default. GUI/CLI parity, user-friendly standalone packaging, branding, accessibility and responsive dashboard.
-**Deferred decisions:** final supported OS/version matrix, discovery protocol, backend migration policy, distribution channel, update/reboot authorization model, public repository timing, repo rename.
+**Deferred decisions:** final supported OS/version matrix, discovery protocol, backend migration policy, distribution channel, update/reboot authorization model, public release-distribution process (repository rename and public visibility completed 2026-11-06).
 
 ## 8. GitHub documentation and ongoing handoffs
 - Authoritative docs: `docs/versionary/PROJECT-STATUS.md`, `ROADMAP.md`, `COMMAND-REFERENCE.md`, `USER-GUIDE.md`, `DEVELOPER-HANDOFF.md`, and **this file**.

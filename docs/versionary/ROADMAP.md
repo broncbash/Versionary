@@ -1,4 +1,12 @@
 # Versionary — Development Roadmap
+## Repository distribution milestone — 2026-11-06
+
+- [x] Rename remote GitHub repository to `broncbash/Versionary`.
+- [x] Make the GitHub repository public as explicitly authorized by the user.
+- [x] Keep the `v0.1.0-beta.1` beta release available for direct unauthenticated HTTPS download.
+- [ ] Verify downloaded artifacts and the manifest together with server dry-run on a fresh disposable VM, then test server/agent guided installation on fresh Arch and Debian environments.
+- [ ] Decide on future release distribution signing, support matrix, install automation, update/rollback workflow, and production acceptance gates independently of public repository visibility.
+
 
 ## Current roadmap — after v0.1.0-beta.1 publication (2026-11-05)
 

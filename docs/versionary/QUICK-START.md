@@ -9,26 +9,28 @@
 - Two fresh systemd Linux VMs on a trusted, reachable private network: one **server** and one **agent**. Server installation has been exercised on disposable Arch; previous fleet tests covered Arch and Debian agents, but the guided agent installer has been live-tested on Arch only.
 - Root/sudo access to each VM, Python 3 and basic archive tools. Server needs working Python `venv`, `pip`, internet access for `requirements-baseline.txt`, `useradd`, `runuser`, and systemd. Agent needs Python cryptography, curl and the distro's scanner; `--install-deps` can authorize supported dependency installation.
 - A **fixed reachable server IP**, substituted for `SERVER_IP` below. Use a private IP on the server VM itself, **not** `0.0.0.0`. Port 8766 must be reachable from the agent VM.
-- Access to the **private** GitHub repository to download assets: https://github.com/broncbash/arby-patch-command/releases/tag/v0.1.0-beta.1 .
+- Public GitHub release (no sign-in required to download): https://github.com/broncbash/Versionary/releases/tag/v0.1.0-beta.1 .
 - Never copy server private keys, administrator token or agent credentials into chat, public files or release assets.
 
 ## 1. Download and verify release assets
 
-Download these four files into a single folder on the **server VM** (via GitHub Releases UI or authenticated GitHub CLI):
+Download these four files into a single folder on the **server VM** (directly over HTTPS, no GitHub account required):
 - `versionary-v0.1.0-beta.1.tar.gz`
 - `versionary-v0.1.0-beta.1-manifest.json`
 - `versionary-v0.1.0-beta.1-agent.tar.gz`
 - `SHA256SUMS`
 
-If `gh` is installed and authenticated with repository access, this is a convenient alternative:
+Using `curl` on the fresh VM:
 
 ```bash
 mkdir -p "$HOME/versionary-beta1"
 cd "$HOME/versionary-beta1" || exit 1
-gh release download v0.1.0-beta.1 \
-  --repo broncbash/arby-patch-command \
-  --pattern 'versionary-v0.1.0-beta.1*' \
-  --pattern 'SHA256SUMS'
+BASE='https://github.com/broncbash/Versionary/releases/download/v0.1.0-beta.1'
+for file in versionary-v0.1.0-beta.1.tar.gz \
+            versionary-v0.1.0-beta.1-manifest.json \
+            versionary-v0.1.0-beta.1-agent.tar.gz SHA256SUMS; do
+  curl --fail --location --show-error --output "$file" "$BASE/$file" || exit 1
+done
 sha256sum -c SHA256SUMS
 ```
 
@@ -193,7 +195,7 @@ This timer performs observer-only reporting; it does not apply updates.
 
 ## Security and current limitations
 
-- This is a **controlled beta**, not production-approved. Private repository access required.
+- This is a **controlled beta**, not production-approved. Public release downloads do not require GitHub authentication.
 - Enrollment and reporting require explicit administrator opt-in. Every new agent requires approval.
 - Versionary **does not automatically install package updates or reboot machines**.
 - Server installer uses a fresh-state model; recovery/upgrade workflows are not production-ready.
