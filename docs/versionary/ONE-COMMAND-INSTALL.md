@@ -22,3 +22,16 @@ bash install-versionary.sh --address 192.168.122.83 --beta-fleet --yes
 The wrapper refuses existing/partial installations rather than overwriting state. If installation fails, inspect service logs and preserved state; never blindly delete or reinstall. The CA must be securely transferred to agent hosts, and agent approval is still manual. The agent guided installer remains `installer/versionary-agent-guided-install.sh` inside the verified release tree; the agent experience still needs a similarly streamlined wrapper.
 
 This script is a **source-level installer improvement**, not a newly built or republished GitHub release. It has not yet completed a fresh-VM end-to-end acceptance run.
+
+## Guided agent installation
+
+On a fresh Arch/Debian agent VM, first obtain the **public** CA certificate from the installed server over a trusted channel and verify its fingerprint independently. Never transfer the CA private key, server private key, or administrator token. Then:
+
+```bash
+curl -fL -o install-versionary-agent.sh https://raw.githubusercontent.com/broncbash/Versionary/main/install-versionary-agent.sh
+bash install-versionary-agent.sh
+```
+
+The agent wizard asks for the HTTPS server URL and CA certificate path, downloads and verifies the public beta assets, then delegates to the existing guided agent installer. The administrator must approve the pending agent in the dashboard. For automation, use `--server https://IP:8766 --ca-cert /path/to/ca.crt --install-deps`; the optional `--enable-timer` is opt-in. **No package updates or reboots are performed by Versionary.**
+
+Both wrappers are new source files, not part of the previously published `v0.1.0-beta.1` archive. They need real clean-VM acceptance before a new packaged beta is declared ready.

@@ -1,10 +1,28 @@
-# Patch Command
+# Versionary
 
 > **This is a total AI slop project.** The application, tests, documentation, and much of the development process have been produced with AI assistance under human direction. This disclosure is intentional, not a quality certification. **Do not assume the code is secure, correct, maintained, or production-ready because it has tests.** Independently review and validate it before trusting it with infrastructure.
 
 **Status: experimental development / observer-only. Not approved for production rollout.**
 
-Patch Command is an experimental, self-hosted Linux patch-visibility platform. Its goal is to display update availability and agent health across a small fleet without automatically installing updates or rebooting machines.
+Versionary is an experimental, self-hosted Linux patch-visibility platform. Its goal is to display update availability and agent health across a small fleet without automatically installing updates or rebooting machines.
+
+## Guided beta installation (fresh disposable VMs only)
+
+**Server:** Download the public guided installer and run it; it handles release downloads, checksum verification, server IP selection, dry-run, installation, and optional observer-only beta enrollment/reporting.
+
+```bash
+curl -fL -o install-versionary.sh https://raw.githubusercontent.com/broncbash/Versionary/main/install-versionary.sh
+bash install-versionary.sh
+```
+
+**Agent:** Obtain and independently verify the server's CA certificate first, then run the guided agent installer. Dashboard approval is still required.
+
+```bash
+curl -fL -o install-versionary-agent.sh https://raw.githubusercontent.com/broncbash/Versionary/main/install-versionary-agent.sh
+bash install-versionary-agent.sh
+```
+
+See [one-command installation notes](docs/versionary/ONE-COMMAND-INSTALL.md). These source-level wrappers use the published `v0.1.0-beta.1` assets unchanged; they have not yet completed fresh-VM acceptance. Do not use for production.
 
 ## What exists today
 
