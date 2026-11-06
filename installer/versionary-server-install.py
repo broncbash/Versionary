@@ -256,6 +256,9 @@ def verify_https_health(state, identity, bind, port, timeout=30):
 def install(args, digest):
     if os.geteuid() != 0:
         raise RuntimeError("Installation requires root")
+    # Application files and the venv must be traversable by the unprivileged
+    # versionary service user. Keep the separate state directory mode 0700.
+    os.umask(0o022)
     if not args.confirm_disposable:
         raise RuntimeError("Use --confirm-disposable on a disposable VM")
     if not Path("/run/systemd/system").is_dir():
