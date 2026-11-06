@@ -1,5 +1,42 @@
 # Versionary — Development Roadmap
 
+## Current roadmap — after v0.1.0-beta.1 publication (2026-11-05)
+
+**This section is authoritative; older milestones below remain historical.**
+
+### Shipped in controlled beta
+- GitHub prerelease with four verified downloadable assets and checksums.
+- Isolated HTTPS server, authenticated administrative dashboard, agent approval/revocation, secure enrollment, heartbeat, and package-update reports.
+- Guided agent installer with interactive or scripted inputs, offline distribution, optional dependency installation, administrator approval wait, initial report, and opt-in daily timer.
+- Arch and Debian beta fleet acceptance in disposable VMs; guided installer live-accepted on disposable Arch VM.
+
+### Near-term priorities
+1. **First-run experience:** one-command or interactive server/agent installation, complete help, friendly error messages, clear dashboard onboarding and approval.
+2. **Distribution:** verify GitHub-downloaded release/manifest pairing and release identity, stable artifact names, safe release upgrades and uninstall planning.
+3. **Platform support:** clean install/reinstall/upgrade acceptance on disposable Arch/CachyOS and Debian/Ubuntu; test dependency detection and scanners.
+4. **Certificates:** GUI Settings > Security > Certificates; generate/renew own CA/server cert or upload user-supplied TLS cert/key; correct hostname/IP SAN; safe CA distribution and rotation; CLI parity.
+5. **Operations:** configurable scan schedules, agent health, last-seen, history, diagnostics, clear error reporting, secure backups and recovery.
+6. **Discovery:** optional, secure network agent discovery with explicit authorization and no silent enrollment.
+7. **Security:** review admin sessions/CSRF, enrollment, release provenance/signatures, transaction durability, concurrency, recovery and rollback; protect private state.
+8. **Product polish:** responsive cyberpunk-friendly dashboard theme, filters/search, user-friendly Settings, professional branding and documentation.
+9. **Later, separately authorized:** manual administrator-triggered package updates, progress/result visibility, safe controls and reboot policy. No unattended patching by default; no automatic reboot.
+10. **Release readiness:** supported-platform matrix, reproducible packaging, tests, upgrade migration, security review, explicit production approval, and separate authorization for public repository visibility.
+
+### Product constraints
+- Observer-only and non-destructive by default; no automatic upgrades or reboots.
+- GUI and CLI administrative feature parity where practical.
+- Portable; never hard-code VM/homelab IPs, trust fingerprints, or personal paths.
+- Preserve identities, credentials, CA trust, local state and recovery artifacts.
+- No changes to live Proxmox containers CT 102/104 without permission.
+- No commit/push/merge/tag/release/public visibility change without explicit approval.
+- Historical sections below may say release publication was prohibited: those statements applied **before** the explicitly authorized beta publication.
+
+---
+
+## Historical engineering documentation (preserved)
+
+# Versionary — Development Roadmap
+
 ## Current roadmap checkpoint — 2026-11-04
 
 This checkpoint supersedes earlier next-batch statements.

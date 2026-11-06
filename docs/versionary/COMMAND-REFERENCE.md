@@ -1,5 +1,118 @@
 # Versionary — Command Reference
 
+## Authoritative CLI reference — released v0.1.0-beta.1 (2026-11-05)
+
+The commands below were checked against source on the `v0.1.0-beta.1` tag. **Do not assume planned switches are implemented.** Run `--help` from the checked-out release for detailed diagnostics. Server/agent installation is for disposable beta systems only.
+
+### Guided agent installer — `installer/versionary-agent-guided-install.sh`
+```bash
+sudo bash installer/versionary-agent-guided-install.sh \
+  --distribution /absolute/path/versionary-v0.1.0-beta.1-agent.tar.gz \
+  --ca-cert /absolute/path/ca.crt \
+  --server https://SERVER_HOST:8766 \
+  [--install-deps] [--enable-timer]
+```
+- `--distribution PATH` (required, unless prompted): verified offline agent tarball.
+- `--ca-cert PATH` (required, unless prompted): trusted CA certificate from **your own** server.
+- `--server HTTPS_URL` (required, unless prompted): server HTTPS origin.
+- `--install-deps`: explicitly allow installation of missing **system dependencies** (not update/upgrade of managed packages).
+- `--enable-timer`: opt in to daily **observer-only** reporting timer.
+- `-h`, `--help`: help.
+- No arguments with terminal: interactive prompts. Installer waits up to approximately 10 minutes for administrator approval, then enrolls and reports; existing identity/configuration are preserved. Timer is off by default.
+
+### Two-stage agent bootstrap — `installer/versionary-beta-agent-bootstrap.sh`
+```bash
+sudo bash installer/versionary-beta-agent-bootstrap.sh install \
+  --distribution FILE --ca-cert FILE --server HTTPS_URL [--install-deps]
+sudo bash installer/versionary-beta-agent-bootstrap.sh complete
+```
+- `install`: stage/deploy new agent and register as pending; refuses unsafe/conflicting existing installation.
+- `complete`: after dashboard approval, enroll, heartbeat, report.
+- No automatic reporting timer.
+
+### Agent CLI — `versionary_agent_cli.py`
+```bash
+python3 versionary_agent_cli.py [--state-dir DIR] setup --server HTTPS_URL --ca-cert FILE
+python3 versionary_agent_cli.py [--state-dir DIR] setup --interactive
+python3 versionary_agent_cli.py [--state-dir DIR] status
+python3 versionary_agent_cli.py [--state-dir DIR] register
+python3 versionary_agent_cli.py [--state-dir DIR] enroll
+python3 versionary_agent_cli.py [--state-dir DIR] heartbeat
+python3 versionary_agent_cli.py [--state-dir DIR] report
+sudo python3 /opt/versionary-agent/versionary_agent_cli.py --system status
+sudo python3 /opt/versionary-agent/versionary_agent_cli.py --system register
+sudo python3 /opt/versionary-agent/versionary_agent_cli.py --system enroll
+sudo python3 /opt/versionary-agent/versionary_agent_cli.py --system heartbeat
+sudo python3 /opt/versionary-agent/versionary_agent_cli.py --system report
+```
+- Global `--state-dir DIR`: user-owned private state, default `~/.local/state/versionary-agent`.
+- Global `--system`: installed config `/etc/versionary-agent/config.json`, state `/var/lib/versionary-agent`; **incompatible with `--state-dir`**. `setup` prohibited in system mode.
+- `setup` options: `--server`, `--ca-cert`, `--interactive`; never silently overwrites existing config.
+- Commands: `setup`, `status`, `register`, `enroll`, `heartbeat`, `report`. Registration requires administrator approval before enrollment. Report scans available package updates, **does not install them**.
+
+### Portable agent setup — `installer/versionary-agent-setup.py`
+```bash
+python3 installer/versionary-agent-setup.py \
+  --server HTTPS_URL --ca-cert FILE [--state-dir DIR] [--dry-run]
+python3 installer/versionary-agent-setup.py --interactive [--state-dir DIR] [--dry-run]
+```
+Supported: `--server`, `--ca-cert`, `--state-dir`, `--interactive`, `--dry-run`. This is a config bootstrap, not a full agent installation.
+
+### Disposable server installer — `installer/versionary-server-install.py`
+```bash
+sudo python3 installer/versionary-server-install.py \
+  --archive /absolute/path/versionary-v0.1.0-beta.1.tar.gz \
+  --manifest /absolute/path/versionary-v0.1.0-beta.1-manifest.json \
+  --mode dry-run \
+  --tls-identity SERVER_HOST --bind-address SERVER_BIND --port 8766
+```
+- Required: `--archive PATH`, `--manifest PATH`.
+- `--mode dry-run|install`: default **dry-run**. `install` changes the target system; only approved disposable VM.
+- `--confirm-disposable`: explicit disposable-system confirmation for install mode.
+- `--app-dir PATH`: default `/opt/versionary`.
+- `--state-dir PATH`: default `/var/lib/versionary`.
+- `--tls-identity HOST_OR_IP`: default `127.0.0.1`; must match cert SAN and client URL.
+- `--bind-address ADDRESS`: default `127.0.0.1`.
+- `--port INTEGER`: default `8766`.
+- Archive verification checks manifest SHA256 and safe archive contents. Renamed release archive/manifest pairing should be tested with dry-run on a disposable target.
+
+### HTTPS beta server — `versionary_https_beta.py`
+```bash
+python3 versionary_https_beta.py init
+python3 versionary_https_beta.py status
+python3 versionary_https_beta.py serve
+```
+Positional commands: `init`, `status`, `serve`; no other CLI flags defined. Environment:
+- `VERSIONARY_STATE_DIR`: private server state root; installed default `/var/lib/versionary`.
+- `VERSIONARY_TLS_IDENTITY`: TLS hostname/IP identity.
+- `VERSIONARY_BIND_ADDRESS`: listen address.
+- `VERSIONARY_HTTPS_PORT`: HTTPS port, default `8766`.
+- `VERSIONARY_BETA_ENROLLMENT=true`: opt in to enrollment.
+- `VERSIONARY_BETA_REPORTING=true`: opt in to reporting.
+- `VERSIONARY_DISTRIBUTION_ENABLED=false`: server-side agent distribution intentionally disabled.
+- Service uses `versionary-server.service`; `/health` and `/admin/dashboard` are known routes.
+- `init` generates private CA/server credentials and refuses overwriting existing certificates.
+
+### Server settings CLI — `installer/settings-cli.py` (staged, not applied to live services)
+```bash
+python3 installer/settings-cli.py [--path FILE] show
+python3 installer/settings-cli.py [--path FILE] runtime-status
+python3 installer/settings-cli.py [--path FILE] set KEY VALUE
+```
+`KEY`: `public_url`, `enrollment_enabled`, `reporting_enabled`, `scan_interval_minutes`, `appearance`, `tls_mode`. This tool explicitly says settings are **staged, not applied**; do not treat `set` as enabling a live service.
+
+### Planned, NOT implemented release switches
+Future UX may include `--uninstall`, `--upgrade`, `--rollback`, `--auto-discover`, `--rotate-ca`, `--apply-updates`, `--reboot-policy`, and GUI equivalents. **These are design concepts, not accepted CLI flags.** Confirm actual spelling/behavior before implementation and update this reference when delivered.
+
+### Security and boundaries
+Verify `SHA256SUMS`, use only CA from the intended server, keep keys/tokens private, require dashboard approval, never silently enable timers, and never perform package upgrades or reboots in observer-only beta.
+
+---
+
+## Historical engineering documentation (preserved)
+
+# Versionary — Command Reference
+
 Status: Development CLI reference, 2026-10-31.
 
 All commands below run from the repository root.

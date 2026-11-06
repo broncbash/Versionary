@@ -1,5 +1,27 @@
 # Versionary — Agent User Guide
 
+## Current user guide — controlled GitHub beta v0.1.0-beta.1 (2026-11-05)
+
+Download from https://github.com/broncbash/arby-patch-command/releases/tag/v0.1.0-beta.1 (currently **private**, so GitHub access is required). Assets: `versionary-v0.1.0-beta.1.tar.gz`, `versionary-v0.1.0-beta.1-manifest.json`, `versionary-v0.1.0-beta.1-agent.tar.gz`, `SHA256SUMS`.
+
+1. Download all assets to the same directory and verify with `sha256sum -c SHA256SUMS`.
+2. Use an **approved disposable VM**, not a production server. Extract the main archive; review `installer/versionary-server-install.py --help`; first run server installer with `--mode dry-run`, the main archive and manifest, and intended TLS identity/bind/port.
+3. Only after explicit approval, install the isolated HTTPS server. Keep its private `/var/lib/versionary` state, certificates and admin token secure. Dashboard is `https://SERVER:8766/admin/dashboard`. Do not expose beta to public internet.
+4. Obtain **the server's CA certificate** securely (normally `/var/lib/versionary/certs/ca.crt`); it is not bundled in release. Verify its fingerprint through a trusted channel.
+5. On a disposable agent VM, from the extracted release directory run `sudo bash installer/versionary-agent-guided-install.sh --distribution /path/to/versionary-v0.1.0-beta.1-agent.tar.gz --ca-cert /path/to/ca.crt --server https://SERVER:8766`. Add `--install-deps` only if you authorize system dependency installation; `--enable-timer` only if you want daily observer-only reporting.
+6. Approve the pending agent in the dashboard. Guided installer waits for approval, enrolls, heartbeats and sends first scan report. It does **not** install package updates.
+7. Inspect installed agent with `sudo python3 /opt/versionary-agent/versionary_agent_cli.py --system status`; manually report with `--system report`.
+8. Keep reporting timer disabled unless explicitly opted in. No unattended updates or automatic reboots are included.
+9. See `COMMAND-REFERENCE.md` for exact implemented server/agent switches, defaults, and planned-but-not-implemented options.
+
+**Known limitations:** controlled beta, private repository, no production approval, limited real-VM guided installer acceptance (Arch), more clean-install and recovery testing needed. The installer waiting-message patch was not separately VM re-tested. Do not interpret a successful beta test as production readiness.
+
+---
+
+## Historical engineering documentation (preserved)
+
+# Versionary — Agent User Guide
+
 ## Current user-facing status — 2026-11-04
 
 This section supersedes older statements about what has

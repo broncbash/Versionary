@@ -1,5 +1,29 @@
 # Versionary — Project Status
 
+## Current authoritative checkpoint — 2026-11-05 (v0.1.0-beta.1)
+
+**This section supersedes historical status and publication restrictions below; older entries remain as dated engineering history.**
+
+- GitHub repository: `broncbash/arby-patch-command`, **private**. Default branch `main`.
+- PR #2 merged into `main` at `9a3587b5edfbbd0088ecb46d802117f62f01a551`; feature branch commit `cd12d1f95a2d52d005a3623045e0efcf9084b5b3`.
+- Published GitHub prerelease **v0.1.0-beta.1**: https://github.com/broncbash/arby-patch-command/releases/tag/v0.1.0-beta.1
+- Four assets uploaded: main archive, agent distribution, JSON manifest, and SHA256SUMS.
+- Main archive SHA256: `4309194d3d993a0a7d1c238d0ac514963b53c80afd5263c304f36a11dc26542a`.
+- Agent distribution SHA256: `936fc9c05e7b7f6d4b4c5aff4805d225da915311594af9e862797d024e76257b`.
+- Main archive and manifest contain 160 release files. Local archive verification and checksums passed.
+- Guided agent installation **executed successfully** on disposable Arch VM: install, registration, dashboard approval, enrollment, heartbeat, and report. No package upgrades; timer disabled by default. The later improved waiting-message text was syntax checked but not re-run on VM.
+- Server: isolated HTTPS beta, `/health`, dashboard `/admin/dashboard`, explicit enrollment/reporting feature gates. Server-hosted agent distribution disabled.
+- Production deployment **NOT approved**; unattended patching/reboots not implemented or authorized.
+- Next work: simplify clean installs and onboarding, validate real downloaded artifacts and manifest together, improve certificate UX, agent discovery, Arch/Debian compatibility, reporting diagnostics, recovery, and security.
+- Historical test totals below are dated checkpoints, **not** claims of current full-suite execution.
+- Do not expose private repository or publish secrets without explicit authorization.
+
+---
+
+## Historical engineering documentation (preserved)
+
+# Versionary — Project Status
+
 ## Current engineering checkpoint — 2026-11-04
 
 The historical milestones below are retained for traceability.

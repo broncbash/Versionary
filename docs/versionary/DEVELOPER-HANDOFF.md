@@ -1,5 +1,27 @@
 # Versionary — Developer Handoff
 
+## Current developer handoff — 2026-11-05, after beta publication
+
+This supersedes earlier "do not merge/publish" statements that applied before explicit authorization.
+
+- GitHub `broncbash/arby-patch-command` (private); `main` contains merged PR #2 at `9a3587b5edfbbd0088ecb46d802117f62f01a551`; development branch `feature/versionary-agent-rename` at `cd12d1f95a2d52d005a3623045e0efcf9084b5b3`.
+- GitHub prerelease `v0.1.0-beta.1`: https://github.com/broncbash/arby-patch-command/releases/tag/v0.1.0-beta.1 . Published four assets; 160-file main archive. SHA256 main `4309194d3d993a0a7d1c238d0ac514963b53c80afd5263c304f36a11dc26542a`; agent `936fc9c05e7b7f6d4b4c5aff4805d225da915311594af9e862797d024e76257b`.
+- Local desktop CachyOS checkout `~/Projects/arby-patch-command`; release candidates `~/Projects/versionary-release-candidates`. Prefer one concise, full heredoc/paste block per step, verify results, no endless test loops, no hosted CI.
+- Disposable VM lab: Arch server `192.168.122.75` HTTPS `:8766`, agent clone `192.168.122.180`; original Arch `192.168.122.132` and Debian `192.168.122.69` were powered off. VM addresses are **lab-only**, never product defaults.
+- Guided agent installer executed successfully on Arch clone with registration, dashboard approval, enrollment, heartbeat, report; no patch installs; timer disabled. Improved approval-waiting message syntax checked but not re-run in VM.
+- Source map: `versionary_https_beta.py`, `versionary_agent_cli.py`, `agent/`, `agent_registry.py`, `agent_reporting_api.py`, `installer/versionary-server-install.py`, `installer/versionary-agent-guided-install.sh`, `installer/versionary-beta-agent-bootstrap.sh`, `installer/build-versionary-release.py`.
+- Implemented CLI reference is `docs/versionary/COMMAND-REFERENCE.md`; do not invent switches. Planned roadmap is `docs/versionary/ROADMAP.md`.
+- Protect all untracked backups and local state: `.versionary-local-beta/`, `.versionary-timer-preview/`, `.versionary-https-beta/`, `return-prompt.md`, backups, certificates, credentials, SQLite databases and release archives. Never `git add -A` or clean/reset indiscriminately.
+- No live Proxmox CT 102 or CT 104 changes without approval; no production deployment, no automatic patch installation/reboot. No commit/push/merge/tag/release/public visibility change without explicit approval.
+- Next focus: improve friendly server/agent first-run installers, CA trust UX, real downloaded-asset verification, Arch/Debian clean-install coverage, dashboard admin ergonomics, reporting diagnostics, and secure upgrade/rollback planning. Avoid repeating passed tests without a relevant change.
+- Keep GitHub documentation authoritative and update handoff with each substantial milestone. GitHub can be managed directly with connected GitHub integration when authorized; never force user to paste huge code solely for repository edits.
+
+---
+
+## Historical engineering documentation (preserved)
+
+# Versionary — Developer Handoff
+
 ## Current developer handoff — 2026-11-04
 
 This is the authoritative current checkpoint. Earlier sections
