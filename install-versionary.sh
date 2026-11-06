@@ -23,8 +23,8 @@ for cmd in curl sha256sum python3 sudo systemctl ip; do command -v "$cmd" >/dev/
 [[ ! -e /opt/versionary && ! -e /var/lib/versionary && ! -e /etc/systemd/system/versionary-server.service ]] || die 'Existing or partial installation detected; refusing overwrite'
 if [[ -z $IP ]]; then
  mapfile -t IPS < <(ip -o -4 addr show scope global | awk '{print $4}' | cut -d/ -f1)
- if (( #{IPS[@]} == 1 )); then IP=IPS[0]
- elif [[ -t 0 ]]; then printf 'Detected IPs: %s\n' "IPS[*]"; read -r -p 'Server IP: ' IP
+ if (( ${#IPS[@]} == 1 )); then IP=${IPS[0]}
+ elif [[ -t 0 ]]; then printf 'Detected IPs: %s\n' "${IPS[*]}"; read -r -p 'Server IP: ' IP
  else die 'Specify --address IP'; fi
 fi
 python3 - "$IP" <<'PY'
@@ -76,9 +76,9 @@ with tarfile.open(a,'r:gz') as tf:
 PY
 installer=(python3 source/installer/versionary-server-install.py --archive "$DIR/versionary-$TAG.tar.gz" --manifest "$DIR/versionary-$TAG-manifest.json" --tls-identity "$IP" --bind-address "$IP" --port "$PORT")
 echo 'Checking installation...'
-"installer[@]" --mode dry-run
+"${installer[@]}" --mode dry-run
 echo 'Installing server...'
-sudo "installer[@]" --mode install --confirm-disposable
+sudo "${installer[@]}" --mode install --confirm-disposable
 if [[ $FLEET == true ]]; then
  sudo install -d -m 755 /etc/systemd/system/versionary-server.service.d
  printf '%s\n' '[Service]' 'Environment=VERSIONARY_BETA_ENROLLMENT=true' 'Environment=VERSIONARY_BETA_REPORTING=true' 'Environment=VERSIONARY_DISTRIBUTION_ENABLED=false' | sudo tee /etc/systemd/system/versionary-server.service.d/beta-fleet.conf >/dev/null
