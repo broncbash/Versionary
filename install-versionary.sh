@@ -78,7 +78,7 @@ installer=(python3 source/installer/versionary-server-install.py --archive "$DIR
 echo 'Checking installation...'
 "${installer[@]}" --mode dry-run
 echo 'Installing server...'
-sudo "${installer[@]}" --mode install --confirm-disposable
+sudo bash -c 'umask 022; exec "$@"' bash "${installer[@]}" --mode install --confirm-disposable
 if [[ $FLEET == true ]]; then
  sudo install -d -m 755 /etc/systemd/system/versionary-server.service.d
  printf '%s\n' '[Service]' 'Environment=VERSIONARY_BETA_ENROLLMENT=true' 'Environment=VERSIONARY_BETA_REPORTING=true' 'Environment=VERSIONARY_DISTRIBUTION_ENABLED=false' | sudo tee /etc/systemd/system/versionary-server.service.d/beta-fleet.conf >/dev/null
