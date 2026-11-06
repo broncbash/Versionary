@@ -1,4 +1,9 @@
 # Versionary — Project Status
+## 2026-11-06 installer usability remediation
+
+User abandoned the previous new server VM after a multi-command beta1 install, even though the server installer returned INSTALL=PASS. The workflow failed the promised one-command experience. New guided server and agent wrapper scripts were merged into main: `install-versionary.sh` and `install-versionary-agent.sh`. They fetch and verify existing public beta1 assets, safely unpack and invoke the verified installers, with server IP detection and optional beta fleet configuration. The README, quick-start, and `ONE-COMMAND-INSTALL.md` describe usage. **Not yet validated end-to-end on clean VMs, not packaged into a new release, not production-approved.** Next: clean Arch/Debian acceptance, refine error/dependency UX, package and publish a new beta only after checks pass. The abandoned VM should not be reused.
+
+
 ## Repository rename and public-release checkpoint — 2026-11-06
 
 The repository is now **public** at https://github.com/broncbash/Versionary (default branch `main`), verified using the connected GitHub integration. The `v0.1.0-beta.1` prerelease and its four release files remain present. Downloads may use unauthenticated HTTPS (`curl -fL`) from the new canonical release URLs. Public source/release access does not constitute production approval. No credentials, private keys or real enrollment material should ever be published. Dated historical sections that describe the former private name/visibility are retained as historical context.

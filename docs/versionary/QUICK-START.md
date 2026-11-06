@@ -4,6 +4,26 @@
 
 > **Beta caveat:** the published, renamed archive/manifest pair has not yet been independently re-tested together with the server installer in a new VM. Perform the dry-run below and stop on any verification error. The installer is not a general-purpose reinstall/upgrade tool.
 
+## Recommended guided installation (new source wrappers, 2026-11-06)
+
+For a fresh disposable server VM, **use this instead of the manual release extraction and multi-command setup documented below**:
+
+```bash
+curl -fL -o install-versionary.sh https://raw.githubusercontent.com/broncbash/Versionary/main/install-versionary.sh
+bash install-versionary.sh
+```
+
+It downloads and verifies the existing beta1 release, determines the server IP, performs dry-run and installation, and optionally enables observer-only beta enrollment/reporting. The old detailed steps below remain for manual recovery and troubleshooting.
+
+For a fresh agent VM, securely obtain the server CA certificate and verify its fingerprint independently, then:
+
+```bash
+curl -fL -o install-versionary-agent.sh https://raw.githubusercontent.com/broncbash/Versionary/main/install-versionary-agent.sh
+bash install-versionary-agent.sh
+```
+
+Both wrappers are source-level improvements not yet part of a repackaged release, and **fresh-VM acceptance remains outstanding**. Do not use on production machines or an existing/partial Versionary installation. See [guided installation details](ONE-COMMAND-INSTALL.md).
+
 ## What you need
 
 - Two fresh systemd Linux VMs on a trusted, reachable private network: one **server** and one **agent**. Server installation has been exercised on disposable Arch; previous fleet tests covered Arch and Debian agents, but the guided agent installer has been live-tested on Arch only.
