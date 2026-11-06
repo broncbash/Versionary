@@ -114,6 +114,11 @@ def create_app():
     for router in (inventory, administration, dashboard, reporting, enrollment):
         app.include_router(router)
 
+    @app.get("/", include_in_schema=False)
+    def dashboard_home():
+        from fastapi.responses import RedirectResponse
+        return RedirectResponse(url="/admin/dashboard", status_code=307)
+
     @app.get("/health")
     def health():
         return {
