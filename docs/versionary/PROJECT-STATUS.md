@@ -1,12 +1,16 @@
 # Versionary — Project Status
+## Repository rename and public-release checkpoint — 2026-11-06
+
+The repository is now **public** at https://github.com/broncbash/Versionary (default branch `main`), verified using the connected GitHub integration. The `v0.1.0-beta.1` prerelease and its four release files remain present. Downloads may use unauthenticated HTTPS (`curl -fL`) from the new canonical release URLs. Public source/release access does not constitute production approval. No credentials, private keys or real enrollment material should ever be published. Dated historical sections that describe the former private name/visibility are retained as historical context.
+
 
 ## Current authoritative checkpoint — 2026-11-05 (v0.1.0-beta.1)
 
 **This section supersedes historical status and publication restrictions below; older entries remain as dated engineering history.**
 
-- GitHub repository: `broncbash/arby-patch-command`, **private**. Default branch `main`.
+- GitHub repository: `broncbash/Versionary`, **public**. Default branch `main`.
 - PR #2 merged into `main` at `9a3587b5edfbbd0088ecb46d802117f62f01a551`; feature branch commit `cd12d1f95a2d52d005a3623045e0efcf9084b5b3`.
-- Published GitHub prerelease **v0.1.0-beta.1**: https://github.com/broncbash/arby-patch-command/releases/tag/v0.1.0-beta.1
+- Published GitHub prerelease **v0.1.0-beta.1**: https://github.com/broncbash/Versionary/releases/tag/v0.1.0-beta.1
 - Four assets uploaded: main archive, agent distribution, JSON manifest, and SHA256SUMS.
 - Main archive SHA256: `4309194d3d993a0a7d1c238d0ac514963b53c80afd5263c304f36a11dc26542a`.
 - Agent distribution SHA256: `936fc9c05e7b7f6d4b4c5aff4805d225da915311594af9e862797d024e76257b`.
@@ -16,7 +20,7 @@
 - Production deployment **NOT approved**; unattended patching/reboots not implemented or authorized.
 - Next work: simplify clean installs and onboarding, validate real downloaded artifacts and manifest together, improve certificate UX, agent discovery, Arch/Debian compatibility, reporting diagnostics, recovery, and security.
 - Historical test totals below are dated checkpoints, **not** claims of current full-suite execution.
-- Do not expose private repository or publish secrets without explicit authorization.
+- Repository was made public by the user on 2026-11-06; never publish secrets or private installation state.
 
 ---
 
@@ -32,7 +36,7 @@ implementation, test totals, and next engineering priorities.
 
 - Branch: `feature/versionary-agent-rename`.
 - Last confirmed pushed commit before Batch 70: `f290fb3`.
-- Draft GitHub PR: https://github.com/broncbash/arby-patch-command/pull/2
+- Draft GitHub PR: https://github.com/broncbash/Versionary/pull/2
 - Latest local regression: 1,577 tests, one skipped, zero failures.
 - Three disposable beta VMs demonstrated HTTPS server operation,
   approved Arch and Debian agents, reporting, and daily timers.
@@ -57,7 +61,7 @@ No hosted CI or live homelab changes are authorized.
 
 
 Updated: 2026-11-01
-Repository: broncbash/arby-patch-command
+Repository: broncbash/Versionary
 Development branch: feature/versionary-agent-rename
 Last confirmed commit: 80a8217
 
