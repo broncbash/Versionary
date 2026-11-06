@@ -15,6 +15,7 @@ Administrator must approve agent in dashboard; no unattended patching.
 HELP
 }
 die() { echo "ERROR: $*" >&2; exit 1; }
+ask() { local a; read -r -p "$1 [y/N] " a; [[ $a == y || $a == Y || $a == yes || $a == YES ]]; }
 while (($#)); do
  case "$1" in
  --server) (($#>=2)) || die 'Missing --server value'; SERVER=$2; shift 2;;
@@ -31,8 +32,41 @@ Agent setup:
   Observer reporting scans for available package updates and sends the
   results to the server; it never installs updates or reboots your machine.
   Optional daily timer: repeats observer-only reporting once per day.
-  The CA certificate is public, but must be verified before trusting it.
+  The CA certificate is public, but must be verified before trusting it.\n  Discovery results are UNTRUSTED hints until the CA is verified.
 EXPLAIN
+if [[ -z $SERVER && -t 0 ]]; then
+ echo 'Searching the local /24 network for Versionary beta servers (discovery only; not trusted)...'
+ if command -v python3 >/dev/null 2>&1 && command -v ip >/dev/null 2>&1; then
+  mapfile -t FOUND < <(python3 - <<'PY'
+import concurrent.futures,ipaddress,json,ssl,subprocess,urllib.request
+hosts=set()
+try:
+ for line in subprocess.check_output(['ip','-o','-4','addr','show','scope','global'],text=True,timeout=3).splitlines():
+  for word in line.split():
+   try: iface=ipaddress.ip_interface(word)
+   except ValueError: continue
+   if iface.ip.is_private and not iface.ip.is_loopback:
+    hosts.update(str(ip) for ip in ipaddress.ip_network(str(iface.ip)+'/24',strict=False).hosts())
+except (OSError,subprocess.SubprocessError): pass
+def probe(ip):
+ try:
+  with urllib.request.urlopen('https://'+ip+':8766/health',timeout=0.6,context=ssl._create_unverified_context()) as response:
+   payload=json.loads(response.read(2048))
+   if payload.get('status')=='online' and payload.get('mode')=='isolated-https-beta':
+    return 'https://'+ip+':8766'
+ except Exception: pass
+with concurrent.futures.ThreadPoolExecutor(max_workers=32) as pool:
+ for url in filter(None,pool.map(probe,sorted(hosts)[:512])): print(url)
+PY
+  )
+  if (( ${#FOUND[@]} )); then
+   printf 'Discovered candidate(s):\n'
+   for i in "${!FOUND[@]}"; do printf '  %d) %s\n' "$((i+1))" "${FOUND[i]}"; done
+   read -r -p 'Select number (Enter for manual URL): ' choice
+   if [[ $choice =~ ^[0-9]+$ ]] && ((choice>=1 && choice<=${#FOUND[@]})); then SERVER=${FOUND[choice-1]}; fi
+  else echo 'No Versionary server discovered; manual address required.'; fi
+ fi
+fi
 [[ -n $SERVER ]] || { [[ -t 0 ]] && read -r -p 'Versionary HTTPS server URL: ' SERVER || die 'Missing --server'; }
 # Users often paste the dashboard address instead of the API base URL.
 if [[ $SERVER == */admin/dashboard ]]; then
