@@ -563,3 +563,17 @@ Batch 72: finalization_assessment now checks the exact journal filename inventor
 ## Batch 73 — Controlled beta acceptance
 
 Batch 73 introduces BETA-ACCEPTANCE-PLAN.md. Use its seven evidence-based gates to prioritize development. Do not equate unit-test success with completed disposable-system acceptance.
+
+---
+
+## 2026-11-06 beta.2 publication handoff
+
+Repo: `broncbash/Versionary`, local checkout `~/Projects/arby-patch-command`. At candidate validation, `main` was `2a8db28`; check current remote and local refs before merging. Local uncommitted changes: `install-versionary.sh` and `install-versionary-agent.sh` (beta.2 pins, dependency bootstrap and root/sudo/su handling). Preserve all ~26 local untracked backup/state files; do not reset, clean, or stage them. Never touch Proxmox CT 102/104 or production hosts without explicit approval.
+
+Beta.2 candidate assets, stored **only on operator's desktop**: `~/Projects/versionary-beta2-candidate/release-assets/` with `versionary-v0.1.0-beta.2.tar.gz`, `versionary-v0.1.0-beta.2-manifest.json`, `versionary-v0.1.0-beta.2-agent.tar.gz`, `SHA256SUMS`. Server archive SHA256 `f7d73fa56dd0b064d9d09c35b415d6573947b5cd8c38161f5930d513ea768f7e`. All three checksum entries PASS; archive/manifest verifier PASS, 160 files. Audit whether untracked `installer/versionary-disposable-vm-install.py` was included unintentionally **before** final publication.
+
+Regression: `~/Projects/versionary-beta2-test-venv/bin/python -m unittest discover -s tests -p 'test_*.py' -q`: 1,700 tests OK (skipped=1), 31.582s. Test venv has pinned `requirements-baseline.txt` plus `httpx2` required by Starlette test client. Log: `~/Projects/versionary-beta2-candidate/regression.log`.
+
+Remaining: reconcile source/archive, review shell helper's `su -c` argument quoting and package-manager prompts; commit local wrappers and docs; publish the exact four release assets as GitHub prerelease; confirm `gh release view v0.1.0-beta.2 --repo broncbash/Versionary`; then clean VM server and Arch/Debian agent acceptance. The GitHub connector cannot upload the local binary archives. Production disabled, no unattended patching or reboot.
+
+Release documentation preparation branch: `release/beta2-documentation`. It is not merged into `main` and must not be mistaken for a published release. See [beta.2 notes](RELEASE-NOTES-v0.1.0-beta.2.md).
