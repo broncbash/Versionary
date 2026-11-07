@@ -119,6 +119,16 @@ def create_app():
         from fastapi.responses import RedirectResponse
         return RedirectResponse(url="/admin/dashboard", status_code=307)
 
+    @app.get("/api/v1/bootstrap/ca", include_in_schema=False)
+    def public_ca_certificate():
+        """Public CA only; no private keys or tokens. Trust requires out-of-band fingerprint."""
+        from fastapi.responses import Response
+        certificate = CERTS / "ca.crt"
+        if certificate.is_symlink() or not certificate.is_file():
+            from fastapi import HTTPException
+            raise HTTPException(status_code=503, detail="CA unavailable")
+        return Response(content=certificate.read_bytes(), media_type="application/x-pem-file")
+
     @app.get("/health")
     def health():
         return {
