@@ -2,12 +2,27 @@
 # Versionary beta guided server setup. Fresh disposable systemd VM only.
 set -Eeuo pipefail
 umask 077
-TAG=v0.1.0-beta.1
+TAG=v0.1.0-beta.2
 BASE=https://github.com/broncbash/Versionary/releases/download/$TAG
-PIN=4309194d3d993a0a7d1c238d0ac514963b53c80afd5263c304f36a11dc26542a
+PIN=3b42b8dfaddf58fa004e1e626314599bf10aa2f8b9c3932b046ded92ecc2fb3b
 IP='' PORT=8766 FLEET=ask YES=false
 usage() { echo 'Usage: bash install-versionary.sh [--address IP] [--port 8766] [--beta-fleet|--no-beta-fleet] [--yes]'; }
 die() { echo "ERROR: $*" >&2; exit 1; }
+
+# Run privileged commands without assuming sudo access.
+as_root() {
+ if (( EUID == 0 )); then
+  "$@"
+ elif command -v sudo >/dev/null 2>&1 && sudo -v; then
+  sudo "$@"
+ elif command -v su >/dev/null 2>&1; then
+  printf -v root_command '%q ' "$@"
+  echo 'Root password may be required.'
+  su -c "$root_command"
+ else
+  die 'Administrator privileges required; run as root or configure sudo.'
+ fi
+}
 ask() { local a; read -r -p "$1 [y/N] " a; [[ $a == y || $a == Y || $a == yes || $a == YES ]]; }
 while (($#)); do
  case "$1" in
@@ -21,34 +36,29 @@ done
 # On minimal Arch/Debian guests, offer to install missing bootstrap tools.
 bootstrap_dependencies() {
  local missing=() cmd pkgmgr='' packages=()
- for cmd in curl sha256sum python3 sudo; do
+ for cmd in curl sha256sum python3 openssl; do
   command -v "$cmd" >/dev/null 2>&1 || missing+=("$cmd")
  done
  (("${#missing[@]}" == 0)) && return 0
  if command -v pacman >/dev/null 2>&1; then
   pkgmgr=pacman
   for cmd in "${missing[@]}"; do
-   case "$cmd" in curl) packages+=(curl);; sha256sum) packages+=(coreutils);; python3) packages+=(python);; sudo) packages+=(sudo);; esac
+   case "$cmd" in curl) packages+=(curl);; sha256sum) packages+=(coreutils);; python3) packages+=(python);; openssl) packages+=(openssl);; esac
   done
  elif command -v apt-get >/dev/null 2>&1; then
   pkgmgr=apt
   for cmd in "${missing[@]}"; do
-   case "$cmd" in curl) packages+=(curl);; sha256sum) packages+=(coreutils);; python3) packages+=(python3);; sudo) packages+=(sudo);; esac
+   case "$cmd" in curl) packages+=(curl);; sha256sum) packages+=(coreutils);; python3) packages+=(python3);; openssl) packages+=(openssl);; esac
   done
  else die "Missing ${missing[*]}; install these prerequisites with your system package manager"; fi
  printf 'Missing required tools: %s\n' "${missing[*]}"
  [[ -t 0 ]] && ask 'Install missing prerequisites using the OS package manager?' || die 'Missing prerequisites in noninteractive mode'
- if (( EUID == 0 )); then
-  if [[ $pkgmgr == pacman ]]; then pacman -Syu --needed -- "${packages[@]}"; else apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y -- "${packages[@]}"; fi
- elif command -v sudo >/dev/null 2>&1; then
-  if [[ $pkgmgr == pacman ]]; then sudo pacman -Syu --needed -- "${packages[@]}"; else sudo apt-get update && sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -- "${packages[@]}"; fi
+ if [[ $pkgmgr == pacman ]]; then
+  echo 'Arch package installation may perform a system upgrade.'
+  as_root pacman -Syu --needed -- "${packages[@]}"
  else
-  command -v su >/dev/null 2>&1 || die 'No sudo or su available. Install prerequisites as root.'
-  echo 'Root password required to install missing prerequisites.'
-  if [[ $pkgmgr == pacman ]]; then su -c "pacman -Syu --needed -- ${packages[*]}" || die 'Root package installation failed'
-  else su -c "apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y -- ${packages[*]}" || die 'Root package installation failed'; fi
-  # sudo may be installed but user might not be in sudoers.
-  echo 'If sudo reports that your account is not authorized, add it to sudoers using your distribution setup.'
+  as_root apt-get update
+  as_root env DEBIAN_FRONTEND=noninteractive apt-get install -y -- "${packages[@]}"
  fi
  for cmd in "${missing[@]}"; do command -v "$cmd" >/dev/null 2>&1 || die "Still missing $cmd"; done
 }
@@ -122,17 +132,17 @@ installer=(python3 source/installer/versionary-server-install.py --archive "$DIR
 echo 'Checking installation...'
 "${installer[@]}" --mode dry-run
 echo 'Installing server...'
-sudo bash -c 'umask 022; exec "$@"' bash "${installer[@]}" --mode install --confirm-disposable
+as_root bash -c 'umask 022; exec "$@"' bash "${installer[@]}" --mode install --confirm-disposable
 if [[ $FLEET == true ]]; then
- sudo install -d -m 755 /etc/systemd/system/versionary-server.service.d
- printf '%s\n' '[Service]' 'Environment=VERSIONARY_BETA_ENROLLMENT=true' 'Environment=VERSIONARY_BETA_REPORTING=true' 'Environment=VERSIONARY_DISTRIBUTION_ENABLED=false' | sudo tee /etc/systemd/system/versionary-server.service.d/beta-fleet.conf >/dev/null
- sudo systemctl daemon-reload
- sudo systemctl restart versionary-server.service
+ as_root install -d -m 755 /etc/systemd/system/versionary-server.service.d
+ printf '%s\n' '[Service]' 'Environment=VERSIONARY_BETA_ENROLLMENT=true' 'Environment=VERSIONARY_BETA_REPORTING=true' 'Environment=VERSIONARY_DISTRIBUTION_ENABLED=false' | as_root tee /etc/systemd/system/versionary-server.service.d/beta-fleet.conf >/dev/null
+ as_root systemctl daemon-reload
+ as_root systemctl restart versionary-server.service
 fi
-sudo systemctl is-active --quiet versionary-server.service || die 'Service failed; check journalctl -u versionary-server.service'
+as_root systemctl is-active --quiet versionary-server.service || die 'Service failed; check journalctl -u versionary-server.service'
 printf '\nINSTALL=PASS\nDashboard: https://%s:%s/admin/dashboard\n' "$IP" "$PORT"
 echo 'CA: /var/lib/versionary/certs/ca.crt'
 echo 'For secure agent auto-download, copy this fingerprint from the SERVER console:'
-sudo openssl x509 -in /var/lib/versionary/certs/ca.crt -noout -fingerprint -sha256 || true
+as_root openssl x509 -in /var/lib/versionary/certs/ca.crt -noout -fingerprint -sha256 || true
 echo 'Admin token: sudo cat /var/lib/versionary/admin-token (keep private)'
 echo 'PRODUCTION_APPROVED=NO'

@@ -105,6 +105,10 @@ def eligible(path):
     if any(part in EXCLUDED_DIRS for part in parts):
         return False
 
+    # Local disposable-VM helper is not part of the public release.
+    if relative.as_posix() == "installer/versionary-disposable-vm-install.py":
+        return False
+
     if any(part.startswith(".") for part in parts):
         return False
 
