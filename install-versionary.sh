@@ -131,6 +131,8 @@ if [[ $FLEET == true ]]; then
 fi
 sudo systemctl is-active --quiet versionary-server.service || die 'Service failed; check journalctl -u versionary-server.service'
 printf '\nINSTALL=PASS\nDashboard: https://%s:%s/admin/dashboard\n' "$IP" "$PORT"
-echo 'CA: /var/lib/versionary/certs/ca.crt (public certificate; copy securely to agents)'
+echo 'CA: /var/lib/versionary/certs/ca.crt'
+echo 'For secure agent auto-download, copy this fingerprint from the SERVER console:'
+sudo openssl x509 -in /var/lib/versionary/certs/ca.crt -noout -fingerprint -sha256 || true
 echo 'Admin token: sudo cat /var/lib/versionary/admin-token (keep private)'
 echo 'PRODUCTION_APPROVED=NO'

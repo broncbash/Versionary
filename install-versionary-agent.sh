@@ -5,9 +5,9 @@ umask 077
 TAG=v0.1.0-beta.1
 BASE=https://github.com/broncbash/Versionary/releases/download/$TAG
 PIN=4309194d3d993a0a7d1c238d0ac514963b53c80afd5263c304f36a11dc26542a
-SERVER='' CA='' INSTALL_DEPS=false TIMER=false
+SERVER='' CA='' CA_FINGERPRINT='' INSTALL_DEPS=false TIMER=false
 usage() { cat <<'HELP'
-Usage: bash install-versionary-agent.sh [--server https://IP:8766] [--ca-cert /path/to/ca.crt] [--install-deps] [--enable-timer]
+Usage: bash install-versionary-agent.sh [--server https://IP:8766] [--ca-cert /path/to/ca.crt] [--ca-fingerprint SHA256_HEX] [--install-deps] [--enable-timer]
 CA certificate must be securely obtained from your Versionary server and
 its fingerprint independently verified. Never transfer server private keys.
 Interactive prompts are used for omitted server URL and CA path.
@@ -20,6 +20,7 @@ while (($#)); do
  case "$1" in
  --server) (($#>=2)) || die 'Missing --server value'; SERVER=$2; shift 2;;
  --ca-cert) (($#>=2)) || die 'Missing --ca-cert value'; CA=$2; shift 2;;
+ --ca-fingerprint) (($#>=2)) || die 'Missing --ca-fingerprint value'; CA_FINGERPRINT=$2; shift 2;;
  --install-deps) INSTALL_DEPS=true; shift;;
  --enable-timer) TIMER=true; shift;;
  --help|-h) usage; exit 0;;
@@ -73,10 +74,29 @@ if [[ $SERVER == */admin/dashboard ]]; then
  SERVER=${SERVER%/admin/dashboard}
  printf 'Using server base URL: %s\n' "$SERVER"
 fi
-[[ -n $CA ]] || { [[ -t 0 ]] && read -r -p 'Verified server CA certificate path: ' CA || die 'Missing --ca-cert'; }
 [[ $SERVER == https://* ]] || die 'HTTPS server URL required'
-[[ -f $CA && ! -L $CA ]] || die "CA file not found on THIS agent machine: $CA. The server's /var/lib/versionary/certs/ca.crt is not accessible locally. Copy the public CA to the agent and independently verify its SHA256 fingerprint."
+if [[ -z $CA ]]; then
+ echo 'Automatic CA download requires the SHA256 certificate fingerprint from the SERVER console.'
+ echo 'On the server run: sudo openssl x509 -in /var/lib/versionary/certs/ca.crt -noout -fingerprint -sha256'
+ [[ -n $CA_FINGERPRINT ]] || { [[ -t 0 ]] && read -r -p 'Server CA SHA256 fingerprint (hex): ' CA_FINGERPRINT || die 'Missing --ca-fingerprint'; }
+ [[ $CA_FINGERPRINT =~ ^([[:xdigit:]]{2}:){31}[[:xdigit:]]{2}$ || $CA_FINGERPRINT =~ ^[[:xdigit:]]{64}$ ]] || die 'Invalid SHA256 fingerprint'
+ command -v curl >/dev/null 2>&1 || die 'curl required for CA download; install curl first'
+ command -v openssl >/dev/null 2>&1 || die 'openssl required to verify CA; install openssl first'
+ CA_FINGERPRINT=${CA_FINGERPRINT//:/}
+ CA_FINGERPRINT=${CA_FINGERPRINT,,}
+ CA="$HOME/versionary-server-ca.crt"
+ [[ ! -e $CA && ! -L $CA ]] || die "CA destination exists: $CA; use --ca-cert to reuse a verified certificate"
+ echo 'Retrieving PUBLIC CA from selected server; TLS identity not trusted until fingerprint matches...'
+ curl --insecure --fail --silent --show-error --max-time 10 "$SERVER/api/v1/bootstrap/ca" -o "$CA.part" || die 'CA download unavailable; use --ca-cert with a verified local copy'
+ observed=$(openssl x509 -in "$CA.part" -noout -fingerprint -sha256 | sed 's/^.*=//' | tr -d ':' | tr '[:upper:]' '[:lower:]') || die 'Invalid downloaded CA'
+ if [[ $observed != "$CA_FINGERPRINT" ]]; then rm -f "$CA.part"; die 'CA fingerprint MISMATCH. Do not trust this server.'; fi
+ mv "$CA.part" "$CA"
+ chmod 600 "$CA"
+ echo 'CA fingerprint verified against server-console fingerprint.'
+fi
+[[ -f $CA && ! -L $CA ]] || die "CA file not found on THIS agent machine: $CA"
 CA=$(realpath -- "$CA")
+command -v curl >/dev/null 2>&1 && curl --fail --silent --show-error --cacert "$CA" --max-time 10 "$SERVER/health" >/dev/null || die 'Verified HTTPS health check failed; check server address and CA'
 # On minimal Arch/Debian guests, offer to install missing bootstrap tools.
 bootstrap_dependencies() {
  local missing=() cmd pkgmgr='' packages=()
