@@ -127,3 +127,21 @@ sudo python3 installer/versionary-server-install.py \
 User appreciates occasional Star Trek jokes (Captain / Lt. Uhura / Darth Helmet), but wants fast, grounded engineering, not endless ceremony. Avoid repetitive clarification when requirements are established. Prefer full pasteable heredocs for local code, nvim not nano, and direct GitHub operations where permitted. Keep all risky actions opt-in and be transparent about what has and has not been executed.
 
 **Resume at the actual GitHub checkpoint, not an imagined one. This document is a starting map; verify changing state before acting.**
+
+---
+
+## Comprehensive next-session checkpoint — 2026-11-06 (beta.2 publication)
+
+You are resuming **Versionary** in `broncbash/Versionary`. Local checkout `~/Projects/arby-patch-command`; remote `main` at `2a8db28` before beta.2 local changes. Documentation was prepared on remote branch `release/beta2-documentation`, **not merged or published**. Check remote and local status first.
+
+The user explicitly authorized documentation updates and beta.2 release publication, with fresh VM tests to follow later. The local desktop's release assets are NOT accessible to the GitHub connector, so a workstation-side upload is necessary. Do not claim release publication until verified on GitHub. Use `gh` CLI locally if authorized/available.
+
+Locally changed tracked files: `install-versionary.sh`, `install-versionary-agent.sh`, both pinned to `TAG=v0.1.0-beta.2` and `PIN=f7d73fa56dd0b064d9d09c35b415d6573947b5cd8c38161f5930d513ea768f7e`. They include improved dependency bootstrap, LAN discovery/CA verification for agent, and `as_root` helper. Both pass `bash -n` and `git diff --check`. Review `su -c` quoting and explicit Arch `pacman -Syu` consent.
+
+Verified local assets: `~/Projects/versionary-beta2-candidate/release-assets/versionary-v0.1.0-beta.2.tar.gz`, matching `-manifest.json`, `-agent.tar.gz`, and `SHA256SUMS`. All checksums passed; archive/manifest PASS, 160 files. **Check archive for accidental inclusion of untracked `installer/versionary-disposable-vm-install.py`** before publication. If archive changes, rebuild, reverify, and update wrapper PIN.
+
+Tests: 1,700 passed, one skipped, in `~/Projects/versionary-beta2-test-venv` (Python 3.14; `requirements-baseline.txt` + `httpx2`). Regression log `~/Projects/versionary-beta2-candidate/regression.log`. No need to rerun without code changes.
+
+Next sequence: review local git diff and release archive contents; synchronize/merge documentation branch, commit wrappers, ensure pinned hash matches archive; publish exact assets with `gh release create v0.1.0-beta.2 ... --prerelease`; verify release links and hashes; then test fresh Arch server and Arch/Debian agent VMs. Preserve ~26 untracked files and all local credentials. Do not change live Proxmox CT 102/104. Production remains disabled; no automatic package updates or reboots.
+
+Current documentation reference: [beta.2 release notes](RELEASE-NOTES-v0.1.0-beta.2.md). User prefers short copy/paste heredoc batches and minimal back-and-forth.
