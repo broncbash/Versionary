@@ -440,3 +440,11 @@ Batch 72 checkpoint: journal inventory hardening is implemented; race-resistant 
 ## Batch 73 — Controlled beta acceptance
 
 Batch 73 prioritizes beta acceptance gates: installation, enrollment/security, dashboard, upgrade/recovery, packaging, and final approval. Further speculative hardening is deferred unless a concrete release blocker is identified.
+
+---
+
+## Beta.2 checkpoint — 2026-11-06
+
+Completed in local candidate: 1,700 Python tests (one skipped), both root-wrapper shell syntax checks, release checksums and 160-file archive/manifest verification. Guided bootstrap improvements include LAN discovery, public CA fingerprint verification, and privilege handling.
+
+Next: audit release contents for unintended untracked installer files; synchronize root-wrapper beta.2 pins; publish exact verified four-asset prerelease; test clean server and Arch/Debian agent VMs; capture failures and update documentation. No production authorization, automatic patching, unattended reboot, or live homelab changes.
