@@ -1,6 +1,6 @@
-# Versionary v0.1.0-beta.2 — release notes (prepared, not yet published)
+# Versionary v0.1.0-beta.2 — published prerelease
 
-**Status:** Publication pending. Do not treat this document as confirmation that a GitHub release or tag exists. This is an experimental, observer-only release for **fresh disposable Arch/Debian virtual machines**, not production.
+**Status:** Published on GitHub: https://github.com/broncbash/Versionary/releases/tag/v0.1.0-beta.2. This is an experimental, observer-only release for **fresh disposable Arch/Debian virtual machines**, not production.
 
 ## Changes since beta.1
 
@@ -15,21 +15,21 @@
 - Python regression: **1,700 tests, OK (1 skipped)**, on an isolated Python 3.14 environment with baseline requirements plus `httpx2`.
 - Both root shell installers: `bash -n` PASS; `git diff --check` PASS.
 - SHA256SUMS: server archive, manifest and agent package PASS.
-- Archive/manifest verifier: PASS; **160 files**.
+- Archive/manifest verifier: PASS; **159 files**.
 - **Fresh-VM end-to-end installation for beta.2 has not yet been performed.** The operator plans to test after publication.
 
-## Planned release assets (upload all four)
+## Published release assets (all four uploaded)
 
 - `versionary-v0.1.0-beta.2.tar.gz`
 - `versionary-v0.1.0-beta.2-manifest.json`
 - `versionary-v0.1.0-beta.2-agent.tar.gz`
 - `SHA256SUMS`
 
-The pinned server archive SHA256 from the locally verified candidate is:
+The final published server archive SHA256 is:
 
-`f7d73fa56dd0b064d9d09c35b415d6573947b5cd8c38161f5930d513ea768f7e`
+`3b42b8dfaddf58fa004e1e626314599bf10aa2f8b9c3932b046ded92ecc2fb3b`
 
-**Critical:** Release publication must use the exact locally verified assets, and the two root-level installer wrappers must be committed on `main` with `TAG=v0.1.0-beta.2` and the matching `PIN` before users fetch the wrapper URLs. The release archives live on the operator's workstation and cannot be uploaded through the current GitHub connector.
+**Published confirmation:** The verified four release assets were uploaded successfully. Root wrappers on `main` were committed at `ae16714` and use `TAG=v0.1.0-beta.2` with the matching SHA256 pin. The original 160-file candidate was rebuilt to exclude an untracked disposable-VM helper; the final archive has 159 files.
 
 ## Disposable VM smoke test (after publication)
 
@@ -48,3 +48,13 @@ The pinned server archive SHA256 from the locally verified candidate is:
 - Generated CA trust requires independent verification; never use `curl -k` as a trust substitute.
 - Installer upgrade, uninstall, rollback, certificate rotation and full GUI/CLI configuration parity are **future work**, not guaranteed beta.2 commands.
 - Local untracked project files and VM credentials must not be bundled into release assets.
+
+## Published beta.2 — 2026-11-06 (authoritative release checkpoint)
+
+**Published prerelease:** https://github.com/broncbash/Versionary/releases/tag/v0.1.0-beta.2. Tag `v0.1.0-beta.2`, source commit `ae16714` on `main`, after documentation PR #15 was merged (`798648f`). The release is **published and downloadable**, but **fresh disposable-VM installation acceptance remains pending**; production deployment is **not approved**.
+
+Four uploaded GitHub release assets: `versionary-v0.1.0-beta.2.tar.gz`, `versionary-v0.1.0-beta.2-manifest.json`, `versionary-v0.1.0-beta.2-agent.tar.gz`, and `SHA256SUMS`. The final server archive contains **159 files**, with SHA256 `3b42b8dfaddf58fa004e1e626314599bf10aa2f8b9c3932b046ded92ecc2fb3b`. Archive/manifest verification and all three checksum entries passed. The local disposable-VM helper `installer/versionary-disposable-vm-install.py` was deliberately excluded from the shipped archive without deleting its untracked local copy. Release GitHub asset metadata confirms the server archive checksum and four uploaded assets.
+
+Local regression checkpoint before packaging: **1,700 tests OK (1 skipped)**. Both root installer scripts on `main` now target `TAG=v0.1.0-beta.2` and pin the final SHA256. The server script accepts `--address`, `--port`, `--beta-fleet`, `--no-beta-fleet`, and `--yes`; the agent script accepts `--server`, `--ca-cert`, `--ca-fingerprint`, `--install-deps`, and `--enable-timer`. Use `--help` for current usage; inspect scripts before running.
+
+**Next session:** fetch/pull remote `main` without disturbing local untracked files, then test the published root wrappers on **fresh disposable Arch server and Arch/Debian agent VMs**, independently verify the server CA fingerprint, approve agents via dashboard, and check HTTPS health, heartbeats, update reports, and optional observer-only timers. Do not deploy to Proxmox CT 102/104 or production hosts. Automatic patch installation and reboots remain disabled. The older beta.1 instructions and dated beta.2 publication-planning paragraphs in this repository are historical; this checkpoint overrides publication status and the old 160-file/old-checksum candidate.
