@@ -589,3 +589,32 @@ Regression: `~/Projects/versionary-beta2-test-venv/bin/python -m unittest discov
 Remaining: reconcile source/archive, review shell helper's `su -c` argument quoting and package-manager prompts; commit local wrappers and docs; publish the exact four release assets as GitHub prerelease; confirm `gh release view v0.1.0-beta.2 --repo broncbash/Versionary`; then clean VM server and Arch/Debian agent acceptance. The GitHub connector cannot upload the local binary archives. Production disabled, no unattended patching or reboot.
 
 Release documentation preparation branch: `release/beta2-documentation`. It is not merged into `main` and must not be mistaken for a published release. See [beta.2 notes](RELEASE-NOTES-v0.1.0-beta.2.md).
+
+## Versionary v0.1.0-beta.3 - Public beta installer update
+
+The public agent installer now constructs and verifies the
+complete agent distribution from verified release assets.
+
+Server installer options:
+- --address IP
+- --port PORT
+- --beta-fleet
+- --no-beta-fleet
+- --yes
+- --help
+
+Agent installer options:
+- --server URL
+- --ca-cert PATH
+- --ca-fingerprint SHA256_HEX
+- --install-deps
+- --enable-timer
+- --help
+
+Agent enrollment requires administrator approval.
+Agent reporting is observer-only: no automatic package
+installation or reboots.
+
+Production deployment remains disabled.
+
+Release notes: RELEASE-NOTES-v0.1.0-beta.3.md

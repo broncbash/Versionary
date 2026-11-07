@@ -438,3 +438,32 @@ Batch 73 establishes BETA-ACCEPTANCE-PLAN.md as the controlled-beta acceptance c
 **Not published; production disabled.** Local verification: 1,700 regression tests OK (one skipped) in an isolated Python 3.14 environment with `httpx2` test dependency; shell syntax and Git diff checks PASS; four release files assembled (three content assets plus `SHA256SUMS`); server archive/manifest integrity PASS, 160 files. Server archive SHA256: `f7d73fa56dd0b064d9d09c35b415d6573947b5cd8c38161f5930d513ea768f7e`.
 
 Root installers were locally modified to target beta.2 and use improved dependency/privilege handling; they are **not committed on `main`** at this checkpoint. Local release assets are in `~/Projects/versionary-beta2-candidate/release-assets/`, not available to the GitHub connector. Preserve local untracked files and credentials. Pending: exact asset publication, wrapper sync, clean VM acceptance, documentation finalization. See [beta.2 release notes](RELEASE-NOTES-v0.1.0-beta.2.md).
+
+## Versionary v0.1.0-beta.3 - Public beta installer update
+
+The public agent installer now constructs and verifies the
+complete agent distribution from verified release assets.
+
+Server installer options:
+- --address IP
+- --port PORT
+- --beta-fleet
+- --no-beta-fleet
+- --yes
+- --help
+
+Agent installer options:
+- --server URL
+- --ca-cert PATH
+- --ca-fingerprint SHA256_HEX
+- --install-deps
+- --enable-timer
+- --help
+
+Agent enrollment requires administrator approval.
+Agent reporting is observer-only: no automatic package
+installation or reboots.
+
+Production deployment remains disabled.
+
+Release notes: RELEASE-NOTES-v0.1.0-beta.3.md

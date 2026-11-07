@@ -460,3 +460,32 @@ Batch 73 prioritizes beta acceptance gates: installation, enrollment/security, d
 Completed in local candidate: 1,700 Python tests (one skipped), both root-wrapper shell syntax checks, release checksums and 160-file archive/manifest verification. Guided bootstrap improvements include LAN discovery, public CA fingerprint verification, and privilege handling.
 
 Next: audit release contents for unintended untracked installer files; synchronize root-wrapper beta.2 pins; publish exact verified four-asset prerelease; test clean server and Arch/Debian agent VMs; capture failures and update documentation. No production authorization, automatic patching, unattended reboot, or live homelab changes.
+
+## Versionary v0.1.0-beta.3 - Public beta installer update
+
+The public agent installer now constructs and verifies the
+complete agent distribution from verified release assets.
+
+Server installer options:
+- --address IP
+- --port PORT
+- --beta-fleet
+- --no-beta-fleet
+- --yes
+- --help
+
+Agent installer options:
+- --server URL
+- --ca-cert PATH
+- --ca-fingerprint SHA256_HEX
+- --install-deps
+- --enable-timer
+- --help
+
+Agent enrollment requires administrator approval.
+Agent reporting is observer-only: no automatic package
+installation or reboots.
+
+Production deployment remains disabled.
+
+Release notes: RELEASE-NOTES-v0.1.0-beta.3.md
