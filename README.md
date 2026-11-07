@@ -84,3 +84,9 @@ Development occurs on feature branches, with review toward `develop`; `main` rem
 **Versionary** is the selected future product name; legacy Patch Command identifiers remain for compatibility pending a planned migration. The user-reported **local desktop** checkpoint is **974 unittest cases, OK (1 skipped)**, with six real loopback-HTTPS tests passing and a passing disposable `installer/beta-selftest.py --protocol-check` run. **These local changes and counts are not guaranteed present in this remote branch**. Do not infer deployment readiness from them.
 
 **Start the next session with [the detailed Versionary handoff](docs/VERSIONARY-SESSION-HANDOFF-2026-10-30.md).** Before syncing, compare the local working tree and remote feature branch; preserve local uncommitted code, credentials and state. The older historical checkpoints elsewhere in this README refer to earlier remote development.
+
+---
+
+## Beta.2 release preparation — 2026-11-06
+
+The beta.2 candidate has passed 1,700 regression tests (1 skipped), shell syntax checks, and 160-file release archive verification. **The beta.2 GitHub release is not published yet.** The `main` root installer wrappers still point to beta.1 until the verified beta.2 wrappers are committed and the four matching assets uploaded. See [prepared beta.2 release notes](docs/versionary/RELEASE-NOTES-v0.1.0-beta.2.md). Fresh disposable-VM acceptance is pending; production remains disabled.
