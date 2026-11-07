@@ -280,3 +280,18 @@ These are roadmap items, not current CLI functionality.
 ```
 
 These commands operate on the local trial's persistent state, separate from the portable agent CLI documented above. Do not rerun `register` or `activate` for an already approved/activated agent without a specific reason. `server` binds the local HTTPS trial endpoint at `https://localhost:8769/admin/dashboard`. Stop the existing foreground server with Ctrl+C before launching another. The local launcher currently depends on the developer checkout and `.venv`.
+
+---
+
+## Beta.2 root-wrapper command notes — pending publication
+
+**The following describes locally validated root wrappers; it is not a claim that the beta.2 release is published.** The wrappers use `TAG=v0.1.0-beta.2` and `PIN=f7d73fa56dd0b064d9d09c35b415d6573947b5cd8c38161f5930d513ea768f7e` in the operator's local checkout.
+
+- `bash install-versionary.sh`: guided server install, interactive dependency handling, release checksum validation, HTTPS server IP selection, dry-run, then disposable installation with optional observer-only beta gates.
+- `bash install-versionary-agent.sh`: guided agent install, optional LAN discovery, CA fingerprint validation, release checksum validation, and delegated guided agent installer.
+- Agent wrapper switches documented in local source: `--server`, `--ca-cert`, `--ca-fingerprint`, `--install-deps`, `--enable-timer`. Confirm `--help` against the downloaded wrapper before use.
+- `--install-deps` authorizes package-manager changes on the VM. Arch bootstrap may use `pacman -Syu`, which can upgrade system packages. Do not use on production.
+- The agent's `--enable-timer` remains optional; no unattended patching or reboot is implemented.
+- The underlying `versionary_agent_cli.py` and server installer switches above remain the baseline reference unless a future release explicitly changes them.
+
+See [beta.2 release notes](RELEASE-NOTES-v0.1.0-beta.2.md). Fresh-VM acceptance and publication remain pending.
