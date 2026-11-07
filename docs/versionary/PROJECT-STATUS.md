@@ -418,3 +418,11 @@ Batch 72: isolated upgrade journal inventory prechecks reject unexpected or miss
 ## Batch 73 — Controlled beta acceptance
 
 Batch 73 establishes BETA-ACCEPTANCE-PLAN.md as the controlled-beta acceptance checklist. The latest verified regression is 1,590 tests with one skipped. End-to-end beta acceptance remains pending.
+
+---
+
+## 2026-11-06 beta.2 release candidate
+
+**Not published; production disabled.** Local verification: 1,700 regression tests OK (one skipped) in an isolated Python 3.14 environment with `httpx2` test dependency; shell syntax and Git diff checks PASS; four release files assembled (three content assets plus `SHA256SUMS`); server archive/manifest integrity PASS, 160 files. Server archive SHA256: `f7d73fa56dd0b064d9d09c35b415d6573947b5cd8c38161f5930d513ea768f7e`.
+
+Root installers were locally modified to target beta.2 and use improved dependency/privilege handling; they are **not committed on `main`** at this checkpoint. Local release assets are in `~/Projects/versionary-beta2-candidate/release-assets/`, not available to the GitHub connector. Preserve local untracked files and credentials. Pending: exact asset publication, wrapper sync, clean VM acceptance, documentation finalization. See [beta.2 release notes](RELEASE-NOTES-v0.1.0-beta.2.md).
