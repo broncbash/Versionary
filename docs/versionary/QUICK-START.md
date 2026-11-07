@@ -245,3 +245,32 @@ This timer performs observer-only reporting; it does not apply updates.
 The beta.2 candidate has passed 1,700 regression tests (1 skipped), archive verification (160 files), and shell syntax checks. The **beta.2 release has not been published** and the currently published root installer wrappers may still target beta.1. Do **not** substitute beta.2 URLs into the beta.1 manual commands above until all four matching assets are uploaded and verified.
 
 Once beta.2 is published and the `main` wrappers are updated, the preferred fresh disposable-VM workflow is to download and inspect the appropriate root wrapper (`install-versionary.sh` for the server or `install-versionary-agent.sh` for the agent) and run it interactively. For agent CA bootstrap, verify the CA SHA-256 fingerprint through a trusted independent channel. No production or existing-installation upgrades are authorized. See [beta.2 release notes](RELEASE-NOTES-v0.1.0-beta.2.md).
+
+## Versionary v0.1.0-beta.3 - Public beta installer update
+
+The public agent installer now constructs and verifies the
+complete agent distribution from verified release assets.
+
+Server installer options:
+- --address IP
+- --port PORT
+- --beta-fleet
+- --no-beta-fleet
+- --yes
+- --help
+
+Agent installer options:
+- --server URL
+- --ca-cert PATH
+- --ca-fingerprint SHA256_HEX
+- --install-deps
+- --enable-timer
+- --help
+
+Agent enrollment requires administrator approval.
+Agent reporting is observer-only: no automatic package
+installation or reboots.
+
+Production deployment remains disabled.
+
+Release notes: RELEASE-NOTES-v0.1.0-beta.3.md

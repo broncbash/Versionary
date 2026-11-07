@@ -2,9 +2,9 @@
 # Versionary controlled-beta guided agent setup. Fresh disposable VM only.
 set -Eeuo pipefail
 umask 077
-TAG=v0.1.0-beta.2
+TAG=v0.1.0-beta.3
 BASE=https://github.com/broncbash/Versionary/releases/download/$TAG
-PIN=3b42b8dfaddf58fa004e1e626314599bf10aa2f8b9c3932b046ded92ecc2fb3b
+PIN=381cef1761d9aea8990407dc70d4835e70eb196e602efb1ac1e5271ce53b73c9
 SERVER='' CA='' CA_FINGERPRINT='' INSTALL_DEPS=false TIMER=false
 usage() { cat <<'HELP'
 Usage: bash install-versionary-agent.sh [--server https://IP:8766] [--ca-cert /path/to/ca.crt] [--ca-fingerprint SHA256_HEX] [--install-deps] [--enable-timer]
@@ -179,7 +179,28 @@ with tarfile.open(a,'r:gz') as tf:
 PY
 printf 'Server: %s\nCA: %s\n' "$SERVER" "$CA"
 echo 'The guided installer will wait for your dashboard approval.'
-set -- --distribution "$DIR/versionary-$TAG-agent.tar.gz" --ca-cert "$CA" --server "$SERVER"
+# The published agent asset is a raw module archive, not the
+# complete distribution required by the guided installer.
+RAW="$DIR/versionary-$TAG-agent.tar.gz"
+STAGED="source/installer/dist/versionary-agent.tar.gz"
+DIST="$DIR/versionary-$TAG-agent-distribution.tar.gz"
+
+mkdir -p source/installer/dist
+cp -- "$RAW" "$STAGED" || die 'Cannot stage verified agent archive'
+
+# Build from the currently verified release assets every time.
+# Never trust a previously cached distribution.
+[[ ! -L $DIST ]] || die 'Distribution destination is a symlink'
+[[ ! -d $DIST ]] || die 'Distribution destination is a directory'
+rm -f -- "$DIST" || die 'Cannot clear cached distribution'
+
+python3 source/installer/build-agent-distribution.py \
+ --output "$DIST" || die 'Distribution build failed'
+
+python3 source/installer/build-agent-distribution.py \
+ --verify "$DIST" || die 'Distribution verification failed'
+
+set -- --distribution "$DIST" --ca-cert "$CA" --server "$SERVER"
 [[ $INSTALL_DEPS == true ]] && set -- "$@" --install-deps
 [[ $TIMER == true ]] && set -- "$@" --enable-timer
 echo 'The next step may offer to install scanner dependencies and enable a daily timer.'

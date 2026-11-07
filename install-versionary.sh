@@ -2,9 +2,9 @@
 # Versionary beta guided server setup. Fresh disposable systemd VM only.
 set -Eeuo pipefail
 umask 077
-TAG=v0.1.0-beta.2
+TAG=v0.1.0-beta.3
 BASE=https://github.com/broncbash/Versionary/releases/download/$TAG
-PIN=3b42b8dfaddf58fa004e1e626314599bf10aa2f8b9c3932b046ded92ecc2fb3b
+PIN=381cef1761d9aea8990407dc70d4835e70eb196e602efb1ac1e5271ce53b73c9
 IP='' PORT=8766 FLEET=ask YES=false
 usage() { echo 'Usage: bash install-versionary.sh [--address IP] [--port 8766] [--beta-fleet|--no-beta-fleet] [--yes]'; }
 die() { echo "ERROR: $*" >&2; exit 1; }

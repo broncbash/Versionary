@@ -307,3 +307,32 @@ These commands operate on the local trial's persistent state, separate from the 
 - The underlying `versionary_agent_cli.py` and server installer switches above remain the baseline reference unless a future release explicitly changes them.
 
 See [beta.2 release notes](RELEASE-NOTES-v0.1.0-beta.2.md). Fresh-VM acceptance and publication remain pending.
+
+## Versionary v0.1.0-beta.3 - Public beta installer update
+
+The public agent installer now constructs and verifies the
+complete agent distribution from verified release assets.
+
+Server installer options:
+- --address IP
+- --port PORT
+- --beta-fleet
+- --no-beta-fleet
+- --yes
+- --help
+
+Agent installer options:
+- --server URL
+- --ca-cert PATH
+- --ca-fingerprint SHA256_HEX
+- --install-deps
+- --enable-timer
+- --help
+
+Agent enrollment requires administrator approval.
+Agent reporting is observer-only: no automatic package
+installation or reboots.
+
+Production deployment remains disabled.
+
+Release notes: RELEASE-NOTES-v0.1.0-beta.3.md
