@@ -307,3 +307,9 @@ Batch 72: recovery journal anomalies require investigation. Do not manually dele
 ## Batch 73 — Controlled beta acceptance
 
 Controlled beta installation is not yet approved. The acceptance requirements and known limitations are tracked in BETA-ACCEPTANCE-PLAN.md.
+
+---
+
+## Beta.2 guided installer notes (pending publication)
+
+The beta.2 candidate has passed 1,700 local tests (one skipped) and 160-file archive verification; fresh-VM acceptance and publication are still pending. When released, download and inspect the root `install-versionary.sh` (server) or `install-versionary-agent.sh` (agent) from `main`, and use **fresh disposable VMs only**. The agent wrapper supports `--server`, `--ca-cert`, `--ca-fingerprint`, `--install-deps`, `--enable-timer`; confirm current `--help` output. Never accept an unverified CA fingerprint from the same untrusted server connection. Enrollment requires administrator approval; timers remain opt-in; Versionary does not install patches or reboot hosts. Package-manager dependency installation, especially `pacman -Syu` on Arch, can upgrade VM packages. See [beta.2 release notes](RELEASE-NOTES-v0.1.0-beta.2.md).
