@@ -1,3 +1,15 @@
+## Published beta.2 — 2026-11-06 (authoritative release checkpoint)
+
+**Published prerelease:** https://github.com/broncbash/Versionary/releases/tag/v0.1.0-beta.2. Tag `v0.1.0-beta.2`, source commit `ae16714` on `main`, after documentation PR #15 was merged (`798648f`). The release is **published and downloadable**, but **fresh disposable-VM installation acceptance remains pending**; production deployment is **not approved**.
+
+Four uploaded GitHub release assets: `versionary-v0.1.0-beta.2.tar.gz`, `versionary-v0.1.0-beta.2-manifest.json`, `versionary-v0.1.0-beta.2-agent.tar.gz`, and `SHA256SUMS`. The final server archive contains **159 files**, with SHA256 `3b42b8dfaddf58fa004e1e626314599bf10aa2f8b9c3932b046ded92ecc2fb3b`. Archive/manifest verification and all three checksum entries passed. The local disposable-VM helper `installer/versionary-disposable-vm-install.py` was deliberately excluded from the shipped archive without deleting its untracked local copy. Release GitHub asset metadata confirms the server archive checksum and four uploaded assets.
+
+Local regression checkpoint before packaging: **1,700 tests OK (1 skipped)**. Both root installer scripts on `main` now target `TAG=v0.1.0-beta.2` and pin the final SHA256. The server script accepts `--address`, `--port`, `--beta-fleet`, `--no-beta-fleet`, and `--yes`; the agent script accepts `--server`, `--ca-cert`, `--ca-fingerprint`, `--install-deps`, and `--enable-timer`. Use `--help` for current usage; inspect scripts before running.
+
+**Next session:** fetch/pull remote `main` without disturbing local untracked files, then test the published root wrappers on **fresh disposable Arch server and Arch/Debian agent VMs**, independently verify the server CA fingerprint, approve agents via dashboard, and check HTTPS health, heartbeats, update reports, and optional observer-only timers. Do not deploy to Proxmox CT 102/104 or production hosts. Automatic patch installation and reboots remain disabled. The older beta.1 instructions and dated beta.2 publication-planning paragraphs in this repository are historical; this checkpoint overrides publication status and the old 160-file/old-checksum candidate.
+
+---
+
 # Versionary — Development Roadmap
 ## Repository distribution milestone — 2026-11-06
 
